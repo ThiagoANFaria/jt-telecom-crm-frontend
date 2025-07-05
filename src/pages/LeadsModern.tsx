@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Users, Plus, Search, Filter, MoreHorizontal, Phone, Mail, 
   MessageSquare, Calendar, TrendingUp, Target, Award, Star,
-  Building, MapPin, Clock, Zap
+  Building, MapPin, Clock, Zap, Download, Upload, CheckSquare, Edit, Trash2
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import LeadModal from '@/components/LeadModal';
+import AdvancedFilters from '@/components/AdvancedFilters';
 
 const LeadsModern: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -30,6 +31,7 @@ const LeadsModern: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -161,6 +163,71 @@ const LeadsModern: React.FC = () => {
     setFilteredLeads(filtered);
   };
 
+  const handleAdvancedFilters = (filters: any) => {
+    let filtered = [...leads];
+
+    if (filters.status?.length) {
+      filtered = filtered.filter(lead => filters.status.includes(lead.status));
+    }
+
+    if (filters.source?.length) {
+      filtered = filtered.filter(lead => filters.source.includes(lead.source));
+    }
+
+    if (filters.responsible?.length) {
+      filtered = filtered.filter(lead => filters.responsible.includes(lead.responsible));
+    }
+
+    if (filters.scoreRange) {
+      filtered = filtered.filter(lead => 
+        (lead.score || 0) >= filters.scoreRange[0] && 
+        (lead.score || 0) <= filters.scoreRange[1]
+      );
+    }
+
+    if (filters.city) {
+      filtered = filtered.filter(lead => 
+        lead.city?.toLowerCase().includes(filters.city.toLowerCase())
+      );
+    }
+
+    if (filters.state) {
+      filtered = filtered.filter(lead => lead.state === filters.state);
+    }
+
+    if (filters.tags?.length) {
+      filtered = filtered.filter(lead => 
+        lead.tags?.some(tag => filters.tags.includes(tag.id))
+      );
+    }
+
+    setFilteredLeads(filtered);
+  };
+
+  const handleDelete = async (leadId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este lead?')) return;
+
+    try {
+      await apiService.deleteLead(leadId);
+      setLeads(leads.filter(lead => lead.id !== leadId));
+      toast({
+        title: 'Lead excluído',
+        description: 'Lead excluído com sucesso!',
+      });
+    } catch (error) {
+      console.error('Failed to delete lead:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir lead.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleTasks = (leadId: string) => {
+    navigate(`/tasks?lead=${leadId}`);
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
@@ -211,16 +278,26 @@ const LeadsModern: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
             <p className="text-gray-600">Gerencie e acompanhe seus leads</p>
           </div>
-          <Button 
-            onClick={() => {
-              setSelectedLead(null);
-              setIsModalOpen(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Lead
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Importar
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
+            <Button 
+              onClick={() => {
+                setSelectedLead(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Lead
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -302,6 +379,14 @@ const LeadsModern: React.FC = () => {
                 </Badge>
               </Button>
             ))}
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAdvancedFiltersOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="w-4 h-4" />
+              Filtros Avançados
+            </Button>
           </div>
         </div>
 
@@ -364,16 +449,30 @@ const LeadsModern: React.FC = () => {
                           setSelectedLead(lead);
                           setIsModalOpen(true);
                         }}>
+                          <Edit className="w-4 h-4 mr-2" />
                           Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate(`/leads/${lead.id}`)}>
                           Ver Detalhes
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleTasks(lead.id)}>
+                          <CheckSquare className="w-4 h-4 mr-2" />
+                          Tarefas
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => window.open(`tel:${lead.phone}`)}>
+                          <Phone className="w-4 h-4 mr-2" />
                           Ligar
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => window.open(`mailto:${lead.email}`)}>
+                          <Mail className="w-4 h-4 mr-2" />
                           Enviar Email
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDelete(lead.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -464,6 +563,13 @@ const LeadsModern: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Advanced Filters Modal */}
+      <AdvancedFilters
+        isOpen={isAdvancedFiltersOpen}
+        onClose={() => setIsAdvancedFiltersOpen(false)}
+        onApplyFilters={handleAdvancedFilters}
+      />
 
       {/* Modal de Lead */}
       <LeadModal

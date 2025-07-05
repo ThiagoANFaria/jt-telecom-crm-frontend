@@ -1,4 +1,3 @@
-
 import { User, Lead, Client, Proposal, Contract, Task, Pipeline, DashboardSummary } from '@/types';
 
 // Suporte para ambas as variáveis de ambiente (Vite e Next.js)
@@ -311,6 +310,26 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ trigger, data }),
     });
+  }
+
+  async getClient(id: string): Promise<Client> {
+    // Mock implementation - replace with actual API call
+    const clients = await this.getClients();
+    const client = clients.find(c => c.id === id);
+    if (!client) {
+      throw new Error('Client not found');
+    }
+    return client;
+  }
+
+  async getLead(id: string): Promise<Lead> {
+    // Mock implementation - replace with actual API call
+    const leads = await this.getLeads();
+    const lead = leads.find(l => l.id === id);
+    if (!lead) {
+      throw new Error('Lead not found');
+    }
+    return lead;
   }
 }
 

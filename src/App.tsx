@@ -10,9 +10,9 @@ import Login from "@/pages/LoginNew";
 import Dashboard from "@/pages/DashboardSimple";
 import MasterPanel from "@/pages/MasterPanelSimple";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
-import Clients from "@/pages/Clients";
+import ClientsModern from "@/pages/ClientsModern";
 import ClientDetail from "@/pages/ClientDetail";
-import Leads from "@/pages/Leads";
+import LeadsModern from "@/pages/LeadsModern";
 import LeadDetail from "@/pages/LeadDetail";
 import Contracts from "@/pages/Contracts";
 import Proposals from "@/pages/Proposals";
@@ -69,9 +69,7 @@ const App = () => (
             } />
             <Route path="/clients" element={
               <ProtectedRoute>
-                <Layout>
-                  <Clients />
-                </Layout>
+                <ClientsModern />
               </ProtectedRoute>
             } />
             <Route path="/clients/:id" element={
@@ -83,9 +81,7 @@ const App = () => (
             } />
             <Route path="/leads" element={
               <ProtectedRoute>
-                <Layout>
-                  <Leads />
-                </Layout>
+                <LeadsModern />
               </ProtectedRoute>
             } />
             <Route path="/leads/:id" element={
@@ -153,4 +149,3 @@ const App = () => (
 );
 
 export default App;
-

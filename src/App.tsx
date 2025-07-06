@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
-import Login from "@/pages/LoginNew";
+import LoginModern from "@/pages/LoginModern";
 import DashboardModern from "@/pages/DashboardModern";
 import MasterPanel from "@/pages/MasterPanelSimple";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
@@ -34,7 +34,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginModern />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Rota Master - Admin Master JT Telecom */}

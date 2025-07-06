@@ -334,3 +334,23 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+
+export const api = {
+  // ... keep existing code (all existing methods) the same ...
+  
+  getTenants: async () => {
+    // Simulação de dados para desenvolvimento
+    return [
+      { id: '1', name: 'Tenant 1', domain: 'tenant1.com', created_at: new Date().toISOString(), active: true },
+      { id: '2', name: 'Tenant 2', domain: 'tenant2.com', created_at: new Date().toISOString(), active: true },
+    ];
+  },
+
+  getUsers: async () => {
+    // Simulação de dados para desenvolvimento
+    return [
+      { id: '1', name: 'Usuário 1', email: 'user1@example.com' },
+      { id: '2', name: 'Usuário 2', email: 'user2@example.com' },
+    ];
+  },
+};

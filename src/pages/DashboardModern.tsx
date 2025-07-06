@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -560,31 +559,31 @@ const DashboardModern: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Status Cards com Follow-ups */}
+        {/* Resumo Executivo */}
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-[#0057B8] font-montserrat">Status do Sistema</CardTitle>
+              <CardTitle className="text-[#0057B8] font-montserrat">Resumo Executivo</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl hover:scale-102 transition-transform duration-300">
                   <div className="flex items-center">
                     <CheckCircle2 className="w-5 h-5 text-[#00C853] mr-3 animate-pulse" />
-                    <span className="font-medium font-opensans">Sistema Online</span>
+                    <span className="font-medium font-opensans">Meta Mensal Atingida</span>
                   </div>
                   <Badge variant="secondary" className="bg-[#00C853] text-white hover:bg-[#00A843]">
-                    Funcionando
+                    85%
                   </Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl hover:scale-102 transition-transform duration-300">
                   <div className="flex items-center">
                     <Star className="w-5 h-5 text-[#0057B8] mr-3 animate-pulse" />
-                    <span className="font-medium font-opensans">Performance</span>
+                    <span className="font-medium font-opensans">Satisfação do Cliente</span>
                   </div>
                   <Badge variant="secondary" className="bg-[#0057B8] text-white hover:bg-[#003d82]">
-                    Excelente
+                    98.5%
                   </Badge>
                 </div>
                 
@@ -627,9 +626,9 @@ const DashboardModern: React.FC = () => {
                 </div>
                 <div className="text-center space-y-2">
                   <div className="text-3xl font-bold text-[#00C853] font-montserrat">
-                    98.5%
+                    {mockData.tasksCompleted}
                   </div>
-                  <div className="text-sm text-gray-600 font-opensans">Satisfação</div>
+                  <div className="text-sm text-gray-600 font-opensans">Tarefas Concluídas</div>
                 </div>
               </div>
             </CardContent>

@@ -1,362 +1,342 @@
+import { User, Lead, Client, Proposal, Contract, Task, Pipeline, DashboardSummary } from '@/types';
 
-import { User, Tenant, Client, Lead, Contract, Proposal, Task, DashboardSummary, Activity, CallLog, Pipeline, ChatbotFlow, AutomationRule } from '../types';
+// Suporte para ambas as variáveis de ambiente (Vite e Next.js)
+const API_BASE_URL = 
+  import.meta.env.VITE_API_BASE_URL || 
+  process.env.NEXT_PUBLIC_API_URL || 
+  'https://api.app.jttecnologia.com.br';
 
-// Mock data for development
-const mockUsers: User[] = [
-  { id: '1', name: 'Admin Master', email: 'admin@jttelecom.com.br', user_level: 'master', created_at: '2024-01-01' },
-  { id: '2', name: 'Admin Tenant', email: 'admin@cliente.com', user_level: 'admin', tenant_id: '1', created_at: '2024-01-02' },
-  { id: '3', name: 'Usuário Final', email: 'usuario@cliente.com', user_level: 'user', tenant_id: '1', created_at: '2024-01-03' }
-];
-
-const mockTenants: Tenant[] = [
-  { id: '1', name: 'Empresa ABC', domain: 'abc.com', created_at: '2024-01-01', active: true },
-  { id: '2', name: 'Empresa XYZ', domain: 'xyz.com', created_at: '2024-01-02', active: true }
-];
-
-const mockClients: Client[] = [
-  { 
-    id: '1', 
-    name: 'João Silva', 
-    email: 'joao@email.com', 
-    phone: '(11) 99999-9999', 
-    company: 'Empresa A', 
-    status: 'active', 
-    created_at: '2024-01-01',
-    createdAt: '2024-01-01',
-    monthly_value: 1500,
-    payment_status: 'paid',
-    contract_start: '2024-01-01'
-  },
-  { 
-    id: '2', 
-    name: 'Maria Santos', 
-    email: 'maria@email.com', 
-    phone: '(11) 88888-8888', 
-    company: 'Empresa B', 
-    status: 'active', 
-    created_at: '2024-01-02',
-    createdAt: '2024-01-02',
-    monthly_value: 2500,
-    payment_status: 'pending',
-    contract_start: '2024-01-15'
+class ApiService {
+  private getHeaders(): HeadersInit {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    };
   }
-];
 
-const mockLeads: Lead[] = [
-  { 
-    id: '1', 
-    name: 'Pedro Costa', 
-    email: 'pedro@email.com', 
-    phone: '(11) 77777-7777', 
-    company: 'Startup Tech', 
-    source: 'website', 
-    status: 'new', 
-    score: 85, 
-    tags: ['hot', 'tech'], 
-    created_at: '2024-01-01',
-    createdAt: '2024-01-01',
-    whatsapp: '(11) 77777-7777',
-    city: 'São Paulo',
-    state: 'SP'
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log('API Request:', url, options);
+    
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...this.getHeaders(),
+        ...options.headers,
+      },
+    });
+
+    console.log('API Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', response.status, errorText);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('API Response data:', data);
+    return data;
   }
-];
 
-const mockContracts: Contract[] = [
-  { 
-    id: '1', 
-    title: 'Contrato Telecom', 
-    client_name: 'João Silva', 
-    client_id: '1',
-    status: 'active', 
-    start_date: '2024-01-01', 
-    end_date: '2024-12-31', 
-    amount: 18000, 
-    created_at: '2024-01-01',
-    createdAt: '2024-01-01'
+  // Auth endpoints baseados na documentação
+  async login(email: string, password: string): Promise<{ access_token: string; message: string; user: User }> {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
   }
-];
 
-const mockProposals: Proposal[] = [
-  { 
-    id: '1', 
-    title: 'Proposta Sistema VoIP', 
-    client_name: 'Maria Santos', 
-    amount: 25000, 
-    status: 'sent', 
-    created_at: '2024-01-01',
-    createdAt: '2024-01-01'
+  // Dashboard
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    return this.request('/dashboard/summary');
   }
-];
 
-const mockDashboardSummary: DashboardSummary = {
-  totalLeads: 15,
-  total_leads: 15,
-  totalClients: 8,
-  total_clients: 8,
-  totalProposals: 5,
-  total_proposals: 5,
-  totalContracts: 3,
-  total_contracts: 3,
-  conversionRate: 25.5,
-  conversion_rate: 25.5,
-  revenue_this_month: 45000
-};
+  // Leads
+  async getLeads(): Promise<Lead[]> {
+    try {
+      const response = await this.request<{leads: Lead[], total: number}>('/leads/');
+      return response.leads || [];
+    } catch (error) {
+      console.log('API não disponível, usando localStorage para getLeads');
+      const storedLeads = localStorage.getItem('jt-crm-leads');
+      return storedLeads ? JSON.parse(storedLeads) : [];
+    }
+  }
 
-// API functions
-export const api = {
-  // Auth
-  async login(credentials: { email: string; password: string }): Promise<{ user: User; token: string }> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const user = mockUsers.find(u => u.email === credentials.email);
-    if (!user) throw new Error('Usuário não encontrado');
-    return { user, token: 'mock-token' };
-  },
+  async createLead(lead: Omit<Lead, 'id' | 'createdAt'>): Promise<Lead> {
+    try {
+      const response = await this.request<{lead: Lead, message: string}>('/leads/', {
+        method: 'POST',
+        body: JSON.stringify(lead),
+      });
+      
+      const newLead = response.lead;
+      const storedLeads = localStorage.getItem('jt-crm-leads');
+      const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
+      const updatedLeads = [...existingLeads, newLead];
+      localStorage.setItem('jt-crm-leads', JSON.stringify(updatedLeads));
+      
+      return newLead;
+    } catch (error) {
+      console.log('API não disponível, salvando no localStorage');
+      
+      const newLead: Lead = {
+        ...lead,
+        id: Date.now().toString(),
+        createdAt: new Date()
+      };
+      
+      const storedLeads = localStorage.getItem('jt-crm-leads');
+      const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
+      
+      const updatedLeads = [...existingLeads, newLead];
+      localStorage.setItem('jt-crm-leads', JSON.stringify(updatedLeads));
+      
+      return newLead;
+    }
+  }
 
-  // Master functions
-  async getTenants(): Promise<Tenant[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockTenants;
-  },
+  async updateLead(id: string, lead: Partial<Lead>): Promise<Lead> {
+    try {
+      return this.request(`/leads/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(lead),
+      });
+    } catch (error) {
+      console.log('API não disponível, atualizando no localStorage');
+      
+      const storedLeads = localStorage.getItem('jt-crm-leads');
+      const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
+      
+      const leadIndex = existingLeads.findIndex(l => l.id === id);
+      if (leadIndex !== -1) {
+        const updatedLead = {
+          ...existingLeads[leadIndex],
+          ...lead
+        };
+        existingLeads[leadIndex] = updatedLead;
+        localStorage.setItem('jt-crm-leads', JSON.stringify(existingLeads));
+        return updatedLead;
+      }
+      
+      throw new Error('Lead não encontrado');
+    }
+  }
 
-  async getUsers(): Promise<User[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockUsers;
-  },
+  async deleteLead(id: string): Promise<void> {
+    try {
+      return this.request(`/leads/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.log('API não disponível, removendo do localStorage');
+      
+      const storedLeads = localStorage.getItem('jt-crm-leads');
+      const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
+      
+      const updatedLeads = existingLeads.filter(l => l.id !== id);
+      localStorage.setItem('jt-crm-leads', JSON.stringify(updatedLeads));
+    }
+  }
 
-  // CRM functions
+  // Clients
   async getClients(): Promise<Client[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockClients;
-  },
+    return this.request('/clients');
+  }
+
+  async createClient(client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> {
+    return this.request('/clients', {
+      method: 'POST',
+      body: JSON.stringify(client),
+    });
+  }
+
+  async updateClient(id: string, client: Partial<Client>): Promise<Client> {
+    return this.request(`/clients/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(client),
+    });
+  }
+
+  async deleteClient(id: string): Promise<void> {
+    return this.request(`/clients/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Proposals
+  async getProposals(): Promise<Proposal[]> {
+    return this.request('/proposals');
+  }
+
+  async createProposal(proposal: Omit<Proposal, 'id' | 'createdAt'>): Promise<Proposal> {
+    return this.request('/proposals', {
+      method: 'POST',
+      body: JSON.stringify(proposal),
+    });
+  }
+
+  async updateProposal(id: string, proposal: Partial<Proposal>): Promise<Proposal> {
+    return this.request(`/proposals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(proposal),
+    });
+  }
+
+  async deleteProposal(id: string): Promise<void> {
+    return this.request(`/proposals/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async sendProposalByEmail(id: string): Promise<void> {
+    return this.request(`/proposals/${id}/send-email`, {
+      method: 'POST',
+    });
+  }
+
+  async sendProposalByWhatsApp(id: string): Promise<void> {
+    return this.request(`/proposals/${id}/send-whatsapp`, {
+      method: 'POST',
+    });
+  }
+
+  // Contracts
+  async getContracts(): Promise<Contract[]> {
+    return this.request('/contracts');
+  }
+
+  async createContract(contract: Omit<Contract, 'id' | 'createdAt'>): Promise<Contract> {
+    return this.request('/contracts', {
+      method: 'POST',
+      body: JSON.stringify(contract),
+    });
+  }
+
+  async updateContract(id: string, contract: Partial<Contract>): Promise<Contract> {
+    return this.request(`/contracts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(contract),
+    });
+  }
+
+  async deleteContract(id: string): Promise<void> {
+    return this.request(`/contracts/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return this.request('/tasks');
+  }
+
+  async createTask(task: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
+    return this.request('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(task),
+    });
+  }
+
+  async updateTask(id: string, task: Partial<Task>): Promise<Task> {
+    return this.request(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(task),
+    });
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    return this.request(`/tasks/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Pipelines
+  async getPipelines(): Promise<Pipeline[]> {
+    return this.request('/pipelines');
+  }
+
+  async createPipeline(pipeline: Omit<Pipeline, 'id' | 'createdAt'>): Promise<Pipeline> {
+    return this.request('/pipelines', {
+      method: 'POST',
+      body: JSON.stringify(pipeline),
+    });
+  }
+
+  async updatePipeline(id: string, pipeline: Partial<Pipeline>): Promise<Pipeline> {
+    return this.request(`/pipelines/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(pipeline),
+    });
+  }
+
+  async deletePipeline(id: string): Promise<void> {
+    return this.request(`/pipelines/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Chatbot
+  async sendChatbotMessage(message: string): Promise<{ response: string }> {
+    return this.request('/chatbot/message', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  // Telephony
+  async makeCall(phone: string): Promise<{ call_id: string; status: string }> {
+    return this.request('/telephony/call', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    });
+  }
+
+  // Automation
+  async triggerAutomation(trigger: string, data: any): Promise<{ status: string }> {
+    return this.request('/automation/trigger', {
+      method: 'POST',
+      body: JSON.stringify({ trigger, data }),
+    });
+  }
 
   async getClient(id: string): Promise<Client> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const client = mockClients.find(c => c.id === id);
-    if (!client) throw new Error('Cliente não encontrado');
+    const clients = await this.getClients();
+    const client = clients.find(c => c.id === id);
+    if (!client) {
+      throw new Error('Client not found');
+    }
     return client;
-  },
-
-  async createClient(client: Partial<Client>): Promise<Client> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newClient: Client = {
-      id: Date.now().toString(),
-      name: client.name || '',
-      email: client.email || '',
-      phone: client.phone || '',
-      company: client.company,
-      status: client.status || 'active',
-      created_at: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      monthly_value: client.monthly_value,
-      payment_status: client.payment_status || 'pending',
-      contract_start: client.contract_start
-    };
-    mockClients.push(newClient);
-    return newClient;
-  },
-
-  async updateClient(id: string, updates: Partial<Client>): Promise<Client> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockClients.findIndex(c => c.id === id);
-    if (index === -1) throw new Error('Cliente não encontrado');
-    mockClients[index] = { ...mockClients[index], ...updates };
-    return mockClients[index];
-  },
-
-  async deleteClient(id: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockClients.findIndex(c => c.id === id);
-    if (index === -1) throw new Error('Cliente não encontrado');
-    mockClients.splice(index, 1);
-  },
-
-  async getLeads(): Promise<Lead[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockLeads;
-  },
+  }
 
   async getLead(id: string): Promise<Lead> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const lead = mockLeads.find(l => l.id === id);
-    if (!lead) throw new Error('Lead não encontrado');
+    const leads = await this.getLeads();
+    const lead = leads.find(l => l.id === id);
+    if (!lead) {
+      throw new Error('Lead not found');
+    }
     return lead;
-  },
-
-  async createLead(lead: Partial<Lead>): Promise<Lead> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newLead: Lead = {
-      id: Date.now().toString(),
-      name: lead.name || '',
-      email: lead.email || '',
-      phone: lead.phone || '',
-      company: lead.company,
-      source: lead.source || 'website',
-      status: lead.status || 'new',
-      score: typeof lead.score === 'string' ? parseInt(lead.score) : (lead.score || 0),
-      tags: lead.tags || [],
-      notes: lead.notes,
-      created_at: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      whatsapp: lead.whatsapp,
-      cnpj_cpf: lead.cnpj_cpf,
-      ie_rg: lead.ie_rg,
-      address: lead.address,
-      number: lead.number,
-      neighborhood: lead.neighborhood,
-      city: lead.city,
-      state: lead.state,
-      cep: lead.cep,
-      position: lead.position,
-      budget: typeof lead.budget === 'string' ? parseFloat(lead.budget) : lead.budget,
-      timeline: lead.timeline,
-      interests: lead.interests
-    };
-    mockLeads.push(newLead);
-    return newLead;
-  },
-
-  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockLeads.findIndex(l => l.id === id);
-    if (index === -1) throw new Error('Lead não encontrado');
-    const updatedLead = { 
-      ...mockLeads[index], 
-      ...updates,
-      score: typeof updates.score === 'string' ? parseInt(updates.score) : (updates.score || mockLeads[index].score),
-      budget: typeof updates.budget === 'string' ? parseFloat(updates.budget) : updates.budget
-    };
-    mockLeads[index] = updatedLead;
-    return mockLeads[index];
-  },
-
-  async deleteLead(id: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockLeads.findIndex(l => l.id === id);
-    if (index === -1) throw new Error('Lead não encontrado');
-    mockLeads.splice(index, 1);
-  },
-
-  async getContracts(): Promise<Contract[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockContracts;
-  },
-
-  async getProposals(): Promise<Proposal[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockProposals;
-  },
-
-  async createProposal(proposal: Partial<Proposal>): Promise<Proposal> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newProposal: Proposal = {
-      id: Date.now().toString(),
-      title: proposal.title || '',
-      client_name: proposal.client_name || '',
-      amount: proposal.amount || 0,
-      status: proposal.status || 'draft',
-      created_at: new Date().toISOString(),
-      createdAt: new Date().toISOString()
-    };
-    mockProposals.push(newProposal);
-    return newProposal;
-  },
-
-  async updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockProposals.findIndex(p => p.id === id);
-    if (index === -1) throw new Error('Proposta não encontrada');
-    mockProposals[index] = { ...mockProposals[index], ...updates };
-    return mockProposals[index];
-  },
-
-  async getDashboardSummary(): Promise<DashboardSummary> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockDashboardSummary;
-  },
-
-  async sendChatbotMessage(message: string): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return `Resposta automática para: ${message}`;
-  },
-
-  async triggerAutomation(ruleId: string): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log(`Automação ${ruleId} executada`);
   }
-};
+}
 
-// Export apiService for compatibility
-export const apiService = {
-  async login(email: string, password: string): Promise<{ user: User; access_token: string }> {
-    const result = await api.login({ email, password });
-    return { user: result.user, access_token: result.token };
-  },
+export const apiService = new ApiService();
+
+export const api = {
+  ...apiService,
   
-  async getClients(): Promise<Client[]> {
-    return api.getClients();
+  getTenants: async () => {
+    return [
+      { id: '1', name: 'Tenant 1', domain: 'tenant1.com', created_at: new Date().toISOString(), active: true },
+      { id: '2', name: 'Tenant 2', domain: 'tenant2.com', created_at: new Date().toISOString(), active: true },
+    ];
   },
 
-  async getClient(id: string): Promise<Client> {
-    return api.getClient(id);
+  getUsers: async () => {
+    return [
+      { id: '1', name: 'Usuário 1', email: 'user1@example.com' },
+      { id: '2', name: 'Usuário 2', email: 'user2@example.com' },
+    ];
   },
-
-  async createClient(client: Partial<Client>): Promise<Client> {
-    return api.createClient(client);
-  },
-
-  async updateClient(id: string, updates: Partial<Client>): Promise<Client> {
-    return api.updateClient(id, updates);
-  },
-
-  async deleteClient(id: string): Promise<void> {
-    return api.deleteClient(id);
-  },
-
-  async getLeads(): Promise<Lead[]> {
-    return api.getLeads();
-  },
-
-  async getLead(id: string): Promise<Lead> {
-    return api.getLead(id);
-  },
-
-  async createLead(lead: Partial<Lead>): Promise<Lead> {
-    return api.createLead(lead);
-  },
-
-  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
-    return api.updateLead(id, updates);
-  },
-
-  async deleteLead(id: string): Promise<void> {
-    return api.deleteLead(id);
-  },
-
-  async getContracts(): Promise<Contract[]> {
-    return api.getContracts();
-  },
-
-  async getProposals(): Promise<Proposal[]> {
-    return api.getProposals();
-  },
-
-  async createProposal(proposal: Partial<Proposal>): Promise<Proposal> {
-    return api.createProposal(proposal);
-  },
-
-  async updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal> {
-    return api.updateProposal(id, updates);
-  },
-
-  async getDashboardSummary(): Promise<DashboardSummary> {
-    return api.getDashboardSummary();
-  },
-
-  async sendChatbotMessage(message: string): Promise<string> {
-    return api.sendChatbotMessage(message);
-  },
-
-  async triggerAutomation(ruleId: string): Promise<void> {
-    return api.triggerAutomation(ruleId);
-  }
 };

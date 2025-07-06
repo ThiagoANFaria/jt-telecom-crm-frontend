@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
-import LoginModern from "@/pages/LoginModern";
+import Login from "@/pages/LoginNew";
 import DashboardModern from "@/pages/DashboardModern";
 import MasterPanel from "@/pages/MasterPanelSimple";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
@@ -19,7 +19,6 @@ import Contracts from "@/pages/Contracts";
 import Proposals from "@/pages/Proposals";
 import Tasks from "@/pages/Tasks";
 import Pipelines from "@/pages/Pipelines";
-import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
@@ -35,7 +34,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginModern />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Rota Master - Admin Master JT Telecom */}
@@ -67,11 +66,6 @@ const App = () => (
                 <Layout>
                   <DashboardModern />
                 </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <JTVoxAnalytics />
               </ProtectedRoute>
             } />
             <Route path="/clients" element={

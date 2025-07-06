@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
-import { api } from '@/services/api';
+import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -51,11 +51,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       console.log('Attempting login for:', credentials.email);
       
-      const response = await api.login(credentials);
+      const response = await apiService.login(credentials.email, credentials.password);
       
       console.log('Login successful:', response);
       
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.access_token);
       localStorage.setItem('user', JSON.stringify(response.user));
       setUser(response.user);
       

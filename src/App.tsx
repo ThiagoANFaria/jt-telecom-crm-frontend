@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Login from "@/pages/LoginNew";
-import Dashboard from "@/pages/DashboardSimple";
+import DashboardModern from "@/pages/DashboardModern";
 import MasterPanel from "@/pages/MasterPanelSimple";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
 import ClientsModern from "@/pages/ClientsModern";
@@ -54,7 +55,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={
               <ProtectedRoute requiredLevel="admin">
                 <Layout>
-                  <Dashboard />
+                  <DashboardModern />
                 </Layout>
               </ProtectedRoute>
             } />
@@ -63,7 +64,7 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
-                  <Dashboard />
+                  <DashboardModern />
                 </Layout>
               </ProtectedRoute>
             } />

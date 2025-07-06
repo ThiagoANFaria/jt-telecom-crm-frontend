@@ -28,6 +28,17 @@ export interface Client {
   monthly_value?: number;
   payment_status?: 'paid' | 'pending' | 'overdue';
   contract_start?: string;
+  whatsapp?: string;
+  cnpj_cpf?: string;
+  ie_rg?: string;
+  address?: string;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cep?: string;
+  products?: string[];
+  notes?: string;
 }
 
 export interface Lead {
@@ -36,9 +47,9 @@ export interface Lead {
   email: string;
   phone: string;
   company?: string;
-  source: 'website' | 'social' | 'referral' | 'advertising' | 'other';
-  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost';
-  score: string;
+  source: 'website' | 'social' | 'referral' | 'advertising' | 'other' | 'phone' | 'email' | 'event' | 'ad';
+  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost' | 'negotiation';
+  score: string | number;
   tags: string[];
   notes?: string;
   created_at: string;
@@ -52,6 +63,10 @@ export interface Lead {
   city?: string;
   state?: string;
   cep?: string;
+  position?: string;
+  budget?: number;
+  timeline?: string;
+  interests?: string[];
 }
 
 export interface Contract {
@@ -72,9 +87,18 @@ export interface Proposal {
   title: string;
   client_name: string;
   amount: number;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'viewed' | 'expired';
   created_at: string;
   createdAt: string;
+  client_id?: string;
+  description?: string;
+  discount?: number;
+  total_amount?: number;
+  valid_until?: string;
+  template_id?: string;
+  notes?: string;
+  number?: string;
+  content?: string;
 }
 
 export interface Task {

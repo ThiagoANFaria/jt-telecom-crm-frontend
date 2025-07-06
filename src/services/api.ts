@@ -1,4 +1,3 @@
-
 import { User, Tenant, Client, Lead, Contract, Proposal, Task, DashboardSummary, Activity, CallLog, Pipeline, ChatbotFlow, AutomationRule } from '../types';
 
 // Mock data for development
@@ -208,4 +207,14 @@ export const api = {
     mockProposals[index] = { ...mockProposals[index], ...updates };
     return mockProposals[index];
   }
+};
+
+// Export apiService for compatibility
+export const apiService = {
+  async login(email: string, password: string): Promise<{ user: User; access_token: string }> {
+    const result = await api.login({ email, password });
+    return { user: result.user, access_token: result.token };
+  },
+  
+  // ... keep existing code (other methods can be added as needed)
 };

@@ -1,3 +1,4 @@
+
 import { User, Tenant, Client, Lead, Contract, Proposal, Task, DashboardSummary, Activity, CallLog, Pipeline, ChatbotFlow, AutomationRule } from '../types';
 
 // Mock data for development
@@ -128,24 +129,57 @@ export const api = {
     return mockClients;
   },
 
+  async getClient(id: string): Promise<Client> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const client = mockClients.find(c => c.id === id);
+    if (!client) throw new Error('Cliente não encontrado');
+    return client;
+  },
+
+  async createClient(client: Partial<Client>): Promise<Client> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const newClient: Client = {
+      id: Date.now().toString(),
+      name: client.name || '',
+      email: client.email || '',
+      phone: client.phone || '',
+      company: client.company,
+      status: client.status || 'active',
+      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      monthly_value: client.monthly_value,
+      payment_status: client.payment_status || 'pending',
+      contract_start: client.contract_start
+    };
+    mockClients.push(newClient);
+    return newClient;
+  },
+
+  async updateClient(id: string, updates: Partial<Client>): Promise<Client> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = mockClients.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Cliente não encontrado');
+    mockClients[index] = { ...mockClients[index], ...updates };
+    return mockClients[index];
+  },
+
+  async deleteClient(id: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = mockClients.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Cliente não encontrado');
+    mockClients.splice(index, 1);
+  },
+
   async getLeads(): Promise<Lead[]> {
     await new Promise(resolve => setTimeout(resolve, 500));
     return mockLeads;
   },
 
-  async getContracts(): Promise<Contract[]> {
+  async getLead(id: string): Promise<Lead> {
     await new Promise(resolve => setTimeout(resolve, 500));
-    return mockContracts;
-  },
-
-  async getProposals(): Promise<Proposal[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockProposals;
-  },
-
-  async getDashboardSummary(): Promise<DashboardSummary> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockDashboardSummary;
+    const lead = mockLeads.find(l => l.id === id);
+    if (!lead) throw new Error('Lead não encontrado');
+    return lead;
   },
 
   async createLead(lead: Partial<Lead>): Promise<Lead> {
@@ -185,6 +219,23 @@ export const api = {
     return mockLeads[index];
   },
 
+  async deleteLead(id: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = mockLeads.findIndex(l => l.id === id);
+    if (index === -1) throw new Error('Lead não encontrado');
+    mockLeads.splice(index, 1);
+  },
+
+  async getContracts(): Promise<Contract[]> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockContracts;
+  },
+
+  async getProposals(): Promise<Proposal[]> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockProposals;
+  },
+
   async createProposal(proposal: Partial<Proposal>): Promise<Proposal> {
     await new Promise(resolve => setTimeout(resolve, 500));
     const newProposal: Proposal = {
@@ -206,6 +257,21 @@ export const api = {
     if (index === -1) throw new Error('Proposta não encontrada');
     mockProposals[index] = { ...mockProposals[index], ...updates };
     return mockProposals[index];
+  },
+
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockDashboardSummary;
+  },
+
+  async sendChatbotMessage(message: string): Promise<string> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return `Resposta automática para: ${message}`;
+  },
+
+  async triggerAutomation(ruleId: string): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log(`Automação ${ruleId} executada`);
   }
 };
 

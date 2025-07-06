@@ -19,6 +19,7 @@ import Contracts from "@/pages/Contracts";
 import Proposals from "@/pages/Proposals";
 import Tasks from "@/pages/Tasks";
 import Pipelines from "@/pages/Pipelines";
+import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
@@ -66,6 +67,11 @@ const App = () => (
                 <Layout>
                   <DashboardModern />
                 </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <JTVoxAnalytics />
               </ProtectedRoute>
             } />
             <Route path="/clients" element={

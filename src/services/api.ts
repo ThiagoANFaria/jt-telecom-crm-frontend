@@ -282,5 +282,71 @@ export const apiService = {
     return { user: result.user, access_token: result.token };
   },
   
-  // ... keep existing code (other methods can be added as needed)
+  async getClients(): Promise<Client[]> {
+    return api.getClients();
+  },
+
+  async getClient(id: string): Promise<Client> {
+    return api.getClient(id);
+  },
+
+  async createClient(client: Partial<Client>): Promise<Client> {
+    return api.createClient(client);
+  },
+
+  async updateClient(id: string, updates: Partial<Client>): Promise<Client> {
+    return api.updateClient(id, updates);
+  },
+
+  async deleteClient(id: string): Promise<void> {
+    return api.deleteClient(id);
+  },
+
+  async getLeads(): Promise<Lead[]> {
+    return api.getLeads();
+  },
+
+  async getLead(id: string): Promise<Lead> {
+    return api.getLead(id);
+  },
+
+  async createLead(lead: Partial<Lead>): Promise<Lead> {
+    return api.createLead(lead);
+  },
+
+  async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
+    return api.updateLead(id, updates);
+  },
+
+  async deleteLead(id: string): Promise<void> {
+    return api.deleteLead(id);
+  },
+
+  async getContracts(): Promise<Contract[]> {
+    return api.getContracts();
+  },
+
+  async getProposals(): Promise<Proposal[]> {
+    return api.getProposals();
+  },
+
+  async createProposal(proposal: Partial<Proposal>): Promise<Proposal> {
+    return api.createProposal(proposal);
+  },
+
+  async updateProposal(id: string, updates: Partial<Proposal>): Promise<Proposal> {
+    return api.updateProposal(id, updates);
+  },
+
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    return api.getDashboardSummary();
+  },
+
+  async sendChatbotMessage(message: string): Promise<string> {
+    return api.sendChatbotMessage(message);
+  },
+
+  async triggerAutomation(ruleId: string): Promise<void> {
+    return api.triggerAutomation(ruleId);
+  }
 };

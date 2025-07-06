@@ -84,14 +84,40 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white shadow-lg">
+    <Sidebar className="border-r border-gray-200 bg-white shadow-xl">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[#0057B8] font-bold font-montserrat text-lg px-4 py-4">
-            JT VOX
+          <SidebarGroupLabel className="text-[#0057B8] font-bold font-montserrat text-lg px-4 py-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-[#0057B8] to-[#003d82] text-white px-3 py-2 rounded-xl font-montserrat font-black text-sm shadow-lg">
+                JT
+              </div>
+              {!isCollapsed && (
+                <>
+                  <div className="flex gap-1 items-center">
+                    {[8, 12, 10, 14, 7].map((height, index) => (
+                      <div
+                        key={index}
+                        className="w-1 bg-[#00C853] rounded-full animate-pulse"
+                        style={{
+                          height: `${height}px`,
+                          animationDelay: `${index * 0.2}s`,
+                          animationDuration: '1.5s',
+                          boxShadow: '0 0 8px rgba(0,200,83,0.4)'
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                  <span className="text-[#0057B8] font-montserrat font-bold text-xl tracking-wide">
+                    VOX
+                  </span>
+                </>
+              )}
+            </div>
           </SidebarGroupLabel>
+          
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1 px-3">
+            <SidebarMenu className="space-y-2 px-3 mt-4">
               {menuItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
@@ -99,21 +125,38 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                        className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 font-medium group relative overflow-hidden ${
                           isActive
-                            ? 'bg-[#0057B8] text-white shadow-lg shadow-[#0057B8]/25 scale-105'
-                            : 'text-gray-700 hover:bg-[#0057B8]/10 hover:text-[#0057B8] hover:scale-102'
+                            ? 'bg-[#0057B8] text-white shadow-2xl shadow-[#0057B8]/30 scale-105 border-l-4 border-[#00C853]'
+                            : 'text-gray-700 hover:bg-[#0057B8] hover:text-white hover:scale-102 hover:shadow-lg'
                         }`}
                       >
-                        <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                        {/* Efeito de brilho ao passar o mouse */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        
+                        <item.icon className={`w-6 h-6 transition-all duration-300 ${
+                          isActive ? 'text-white scale-110' : 'group-hover:text-white group-hover:scale-110'
+                        }`} />
+                        
                         {!isCollapsed && (
-                          <span className={`font-opensans ${isActive ? 'font-semibold' : ''}`}>
+                          <span className={`font-opensans text-base transition-all duration-300 ${
+                            isActive ? 'font-semibold text-white' : 'group-hover:font-semibold group-hover:text-white'
+                          }`}>
                             {item.title}
                           </span>
                         )}
+                        
+                        {/* Indicador pulsante para item ativo */}
                         {isActive && !isCollapsed && (
-                          <div className="ml-auto w-2 h-2 bg-[#00C853] rounded-full animate-pulse"></div>
+                          <div className="ml-auto flex items-center">
+                            <div className="w-3 h-3 bg-[#00C853] rounded-full animate-pulse shadow-lg shadow-[#00C853]/50"></div>
+                          </div>
                         )}
+                        
+                        {/* Micro-feedback visual no clique */}
+                        <div className={`absolute inset-0 bg-white/20 rounded-2xl scale-0 transition-transform duration-200 ${
+                          isActive ? 'group-active:scale-100' : ''
+                        }`}></div>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

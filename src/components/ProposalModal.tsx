@@ -1,326 +1,226 @@
+
 import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Proposal, Client } from '@/types';
-import { apiService } from '@/services/api';
+import { Proposal } from '@/types';
+import { api } from '@/services/api';
 
 interface ProposalModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  proposal?: Proposal | null;
+  trigger: React.ReactNode;
+  proposal?: Proposal;
+  onSave?: (proposal: Proposal) => void;
 }
 
-const ProposalModal: React.FC<ProposalModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  proposal,
-}) => {
+const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave }) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
     client_id: '',
     description: '',
-    amount: '',
-    discount: '',
-    status: 'Rascunho',
+    amount: 0,
+    discount: 0,
+    total_amount: 0,
+    status: 'draft' as const,
     valid_until: '',
     template_id: '',
     notes: '',
+    number: '',
+    content: ''
   });
 
   useEffect(() => {
-    if (proposal) {
+    if (proposal && open) {
       setFormData({
         title: proposal.title || '',
         client_id: proposal.client_id || '',
         description: proposal.description || '',
-        amount: proposal.amount?.toString() || '',
-        discount: proposal.discount?.toString() || '',
-        status: proposal.status || 'Rascunho',
-        valid_until: proposal.valid_until ? proposal.valid_until.split('T')[0] : '',
+        amount: proposal.amount || 0,
+        discount: proposal.discount || 0,
+        total_amount: proposal.total_amount || 0,
+        status: proposal.status || 'draft',
+        valid_until: proposal.valid_until || '',
         template_id: proposal.template_id || '',
         notes: proposal.notes || '',
-      });
-    } else {
-      setFormData({
-        title: '',
-        client_id: '',
-        description: '',
-        amount: '',
-        discount: '',
-        status: 'Rascunho',
-        valid_until: '',
-        template_id: '',
-        notes: '',
+        number: proposal.number || '',
+        content: proposal.content || ''
       });
     }
-  }, [proposal]);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchClients();
-    }
-  }, [isOpen]);
-
-  const fetchClients = async () => {
-    try {
-      const response = await apiService.getClients();
-      setClients(response);
-    } catch (error) {
-      console.error('Failed to fetch clients:', error);
-      // Usar dados mock em caso de erro
-      setClients([
-        { id: '1', name: 'Cliente Teste 1', email: 'cliente1@teste.com', phone: '11999999999', company: 'Empresa 1', status: 'Ativo', created_at: new Date().toISOString() },
-        { id: '2', name: 'Cliente Teste 2', email: 'cliente2@teste.com', phone: '11888888888', company: 'Empresa 2', status: 'Ativo', created_at: new Date().toISOString() }
-      ]);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  }, [proposal, open]);
 
   const calculateTotal = () => {
-    const amount = parseFloat(formData.amount) || 0;
-    const discount = parseFloat(formData.discount) || 0;
-    return amount - discount;
+    const total = formData.amount - (formData.amount * formData.discount / 100);
+    setFormData(prev => ({ ...prev, total_amount: total }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title || !formData.client_id || !formData.amount) {
-      toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha todos os campos obrigatórios.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  useEffect(() => {
+    calculateTotal();
+  }, [formData.amount, formData.discount]);
 
-    setIsLoading(true);
-
+  const handleSave = async () => {
     try {
+      setLoading(true);
+      
       const proposalData = {
         ...formData,
-        amount: parseFloat(formData.amount),
-        discount: parseFloat(formData.discount) || 0,
-        total_amount: calculateTotal(),
+        status: formData.status as 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
       };
 
-      if (proposal) {
-        await apiService.updateProposal(proposal.id, proposalData);
-        toast({
-          title: 'Proposta atualizada',
-          description: 'Proposta atualizada com sucesso.',
-        });
+      let savedProposal;
+      if (proposal?.id) {
+        savedProposal = await api.updateProposal(proposal.id, proposalData);
       } else {
-        await apiService.createProposal(proposalData);
-        toast({
-          title: 'Proposta criada',
-          description: 'Proposta criada com sucesso.',
-        });
+        savedProposal = await api.createProposal(proposalData);
       }
 
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error('Failed to save proposal:', error);
+      onSave?.(savedProposal);
+      setOpen(false);
+      
       toast({
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar a proposta.',
+        title: proposal?.id ? 'Proposta atualizada' : 'Proposta criada',
+        description: `${proposalData.title} foi ${proposal?.id ? 'atualizada' : 'criada'} com sucesso.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao salvar a proposta.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const statusOptions = [
-    'Rascunho',
-    'Enviada',
-    'Em Análise',
-    'Aprovada',
-    'Rejeitada',
-    'Expirada',
-  ];
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {proposal ? 'Editar Proposta' : 'Nova Proposta'}
+          <DialogTitle className="text-[#0057B8] font-montserrat">
+            {proposal?.id ? 'Editar Proposta' : 'Nova Proposta'}
           </DialogTitle>
-          <DialogDescription>
-            Preencha as informações para {proposal ? 'atualizar' : 'criar'} uma proposta.
-          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Título */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Título *</Label>
-              <Input
-                id="title"
-                placeholder="Título da proposta"
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Cliente */}
-          <div>
-            <Label htmlFor="client_id">Cliente *</Label>
-            <Select value={formData.client_id} onValueChange={(value) => handleInputChange('client_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name} - {client.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Descrição */}
-          <div>
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              placeholder="Descrição da proposta..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="title">Título</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Título da proposta"
             />
           </div>
 
-          {/* Template */}
-          <div>
-            <Label htmlFor="template_id">Template</Label>
-            <Select value={formData.template_id} onValueChange={(value) => handleInputChange('template_id', value)}>
+          <div className="grid gap-2">
+            <Label htmlFor="client_id">Cliente</Label>
+            <Input
+              id="client_id"
+              value={formData.client_id}
+              onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
+              placeholder="ID do cliente"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Descrição da proposta"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="amount">Valor</Label>
+              <Input
+                id="amount"
+                type="number"
+                value={formData.amount}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="discount">Desconto (%)</Label>
+              <Input
+                id="discount"
+                type="number"
+                value={formData.discount}
+                onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Valor Total</Label>
+            <div className="text-2xl font-bold text-[#0057B8]">
+              R$ {formData.total_amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as typeof formData.status }))}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um template (opcional)" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem template</SelectItem>
-                <SelectItem value="default">Template Padrão</SelectItem>
-                <SelectItem value="pabx">Template PABX</SelectItem>
-                <SelectItem value="chatbot">Template Chatbot</SelectItem>
+                <SelectItem value="draft">Rascunho</SelectItem>
+                <SelectItem value="sent">Enviada</SelectItem>
+                <SelectItem value="viewed">Visualizada</SelectItem>
+                <SelectItem value="accepted">Aceita</SelectItem>
+                <SelectItem value="rejected">Rejeitada</SelectItem>
+                <SelectItem value="expired">Expirada</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Valores */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="amount">Valor *</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                value={formData.amount}
-                onChange={(e) => handleInputChange('amount', e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="discount">Desconto</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                placeholder="0,00"
-                value={formData.discount}
-                onChange={(e) => handleInputChange('discount', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="total">Total</Label>
-              <Input
-                id="total"
-                value={`R$ ${calculateTotal().toFixed(2).replace('.', ',')}`}
-                disabled
-                className="bg-gray-50"
-              />
-            </div>
-          </div>
-
-          {/* Data de Validade */}
-          <div>
+          <div className="grid gap-2">
             <Label htmlFor="valid_until">Válida até</Label>
             <Input
               id="valid_until"
               type="date"
               value={formData.valid_until}
-              onChange={(e) => handleInputChange('valid_until', e.target.value)}
+              onChange={(e) => setFormData(prev => ({ ...prev, valid_until: e.target.value }))}
             />
           </div>
 
-          {/* Observações */}
-          <div>
+          <div className="grid gap-2">
             <Label htmlFor="notes">Observações</Label>
             <Textarea
               id="notes"
-              placeholder="Observações adicionais..."
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              rows={2}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              placeholder="Observações sobre a proposta"
             />
           </div>
-        </form>
+        </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
-          <Button type="submit" onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? 'Salvando...' : proposal ? 'Atualizar Proposta' : 'Criar Proposta'}
+          <Button 
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-[#0057B8] hover:bg-[#003d82]"
+          >
+            {loading ? 'Salvando...' : 'Salvar'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -329,4 +229,3 @@ const ProposalModal: React.FC<ProposalModalProps> = ({
 };
 
 export default ProposalModal;
-

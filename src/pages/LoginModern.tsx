@@ -61,8 +61,9 @@ export default function LoginModern() {
           {/* Headline Principal */}
           <div className="space-y-6">
             <h1 className="text-4xl lg:text-5xl font-bold text-[#2C2C2C] leading-tight">
-              Transforme sua
-              <span className="block text-[#0057B8]">Comunicação</span>
+              Sua comunicação.
+              <span className="block text-[#0057B8]">Mais simples.</span>
+              <span className="block text-[#00C853]">Mais inteligente.</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-lg">
               Plataforma completa de telefonia, CRM e atendimento inteligente. 

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,7 @@ import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
 import NotFound from "@/pages/NotFound";
+import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +57,13 @@ const App = () => (
                 <Layout>
                   <DashboardModern />
                 </Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* JT VOX Analytics - Nova rota */}
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <JTVoxAnalytics />
               </ProtectedRoute>
             } />
             

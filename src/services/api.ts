@@ -51,7 +51,7 @@ const mockLeads: Lead[] = [
     company: 'Startup Tech', 
     source: 'website', 
     status: 'new', 
-    score: '85', 
+    score: 85, 
     tags: ['hot', 'tech'], 
     created_at: '2024-01-01',
     createdAt: '2024-01-01',
@@ -192,7 +192,7 @@ export const api = {
       company: lead.company,
       source: lead.source || 'website',
       status: lead.status || 'new',
-      score: lead.score || '0',
+      score: typeof lead.score === 'string' ? parseInt(lead.score) : (lead.score || 0),
       tags: lead.tags || [],
       notes: lead.notes,
       created_at: new Date().toISOString(),
@@ -205,7 +205,11 @@ export const api = {
       neighborhood: lead.neighborhood,
       city: lead.city,
       state: lead.state,
-      cep: lead.cep
+      cep: lead.cep,
+      position: lead.position,
+      budget: typeof lead.budget === 'string' ? parseFloat(lead.budget) : lead.budget,
+      timeline: lead.timeline,
+      interests: lead.interests
     };
     mockLeads.push(newLead);
     return newLead;
@@ -215,7 +219,13 @@ export const api = {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockLeads.findIndex(l => l.id === id);
     if (index === -1) throw new Error('Lead não encontrado');
-    mockLeads[index] = { ...mockLeads[index], ...updates };
+    const updatedLead = { 
+      ...mockLeads[index], 
+      ...updates,
+      score: typeof updates.score === 'string' ? parseInt(updates.score) : (updates.score || mockLeads[index].score),
+      budget: typeof updates.budget === 'string' ? parseFloat(updates.budget) : updates.budget
+    };
+    mockLeads[index] = updatedLead;
     return mockLeads[index];
   },
 

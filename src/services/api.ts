@@ -65,14 +65,13 @@ class ApiService {
     }
   }
 
-  async createLead(lead: Omit<Lead, 'id' | 'created_at'>): Promise<Lead> {
+  async createLead(lead: Omit<Lead, 'id' | 'createdAt'>): Promise<Lead> {
     try {
       const response = await this.request<{lead: Lead, message: string}>('/leads/', {
         method: 'POST',
         body: JSON.stringify(lead),
       });
       
-      // Sempre salvar no localStorage mesmo quando API funciona
       const newLead = response.lead;
       const storedLeads = localStorage.getItem('jt-crm-leads');
       const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
@@ -83,19 +82,15 @@ class ApiService {
     } catch (error) {
       console.log('API não disponível, salvando no localStorage');
       
-      // Criar lead localmente
       const newLead: Lead = {
         ...lead,
         id: Date.now().toString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date()
       };
       
-      // Buscar leads existentes
       const storedLeads = localStorage.getItem('jt-crm-leads');
       const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
       
-      // Adicionar novo lead
       const updatedLeads = [...existingLeads, newLead];
       localStorage.setItem('jt-crm-leads', JSON.stringify(updatedLeads));
       
@@ -112,17 +107,14 @@ class ApiService {
     } catch (error) {
       console.log('API não disponível, atualizando no localStorage');
       
-      // Buscar leads existentes
       const storedLeads = localStorage.getItem('jt-crm-leads');
       const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
       
-      // Encontrar e atualizar lead
       const leadIndex = existingLeads.findIndex(l => l.id === id);
       if (leadIndex !== -1) {
         const updatedLead = {
           ...existingLeads[leadIndex],
-          ...lead,
-          updated_at: new Date().toISOString()
+          ...lead
         };
         existingLeads[leadIndex] = updatedLead;
         localStorage.setItem('jt-crm-leads', JSON.stringify(existingLeads));
@@ -141,11 +133,9 @@ class ApiService {
     } catch (error) {
       console.log('API não disponível, removendo do localStorage');
       
-      // Buscar leads existentes
       const storedLeads = localStorage.getItem('jt-crm-leads');
       const existingLeads: Lead[] = storedLeads ? JSON.parse(storedLeads) : [];
       
-      // Remover lead
       const updatedLeads = existingLeads.filter(l => l.id !== id);
       localStorage.setItem('jt-crm-leads', JSON.stringify(updatedLeads));
     }
@@ -156,7 +146,7 @@ class ApiService {
     return this.request('/clients');
   }
 
-  async createClient(client: Omit<Client, 'id' | 'created_at'>): Promise<Client> {
+  async createClient(client: Omit<Client, 'id' | 'createdAt'>): Promise<Client> {
     return this.request('/clients', {
       method: 'POST',
       body: JSON.stringify(client),
@@ -181,7 +171,7 @@ class ApiService {
     return this.request('/proposals');
   }
 
-  async createProposal(proposal: Omit<Proposal, 'id' | 'created_at' | 'updated_at'>): Promise<Proposal> {
+  async createProposal(proposal: Omit<Proposal, 'id' | 'createdAt'>): Promise<Proposal> {
     return this.request('/proposals', {
       method: 'POST',
       body: JSON.stringify(proposal),
@@ -218,7 +208,7 @@ class ApiService {
     return this.request('/contracts');
   }
 
-  async createContract(contract: Omit<Contract, 'id' | 'created_at'>): Promise<Contract> {
+  async createContract(contract: Omit<Contract, 'id' | 'createdAt'>): Promise<Contract> {
     return this.request('/contracts', {
       method: 'POST',
       body: JSON.stringify(contract),
@@ -243,7 +233,7 @@ class ApiService {
     return this.request('/tasks');
   }
 
-  async createTask(task: Omit<Task, 'id' | 'created_at'>): Promise<Task> {
+  async createTask(task: Omit<Task, 'id' | 'createdAt'>): Promise<Task> {
     return this.request('/tasks', {
       method: 'POST',
       body: JSON.stringify(task),
@@ -268,7 +258,7 @@ class ApiService {
     return this.request('/pipelines');
   }
 
-  async createPipeline(pipeline: Omit<Pipeline, 'id' | 'created_at' | 'updated_at'>): Promise<Pipeline> {
+  async createPipeline(pipeline: Omit<Pipeline, 'id' | 'createdAt'>): Promise<Pipeline> {
     return this.request('/pipelines', {
       method: 'POST',
       body: JSON.stringify(pipeline),
@@ -313,7 +303,6 @@ class ApiService {
   }
 
   async getClient(id: string): Promise<Client> {
-    // Mock implementation - replace with actual API call
     const clients = await this.getClients();
     const client = clients.find(c => c.id === id);
     if (!client) {
@@ -323,7 +312,6 @@ class ApiService {
   }
 
   async getLead(id: string): Promise<Lead> {
-    // Mock implementation - replace with actual API call
     const leads = await this.getLeads();
     const lead = leads.find(l => l.id === id);
     if (!lead) {
@@ -336,10 +324,9 @@ class ApiService {
 export const apiService = new ApiService();
 
 export const api = {
-  // ... keep existing code (all existing methods) the same ...
+  ...apiService,
   
   getTenants: async () => {
-    // Simulação de dados para desenvolvimento
     return [
       { id: '1', name: 'Tenant 1', domain: 'tenant1.com', created_at: new Date().toISOString(), active: true },
       { id: '2', name: 'Tenant 2', domain: 'tenant2.com', created_at: new Date().toISOString(), active: true },
@@ -347,7 +334,6 @@ export const api = {
   },
 
   getUsers: async () => {
-    // Simulação de dados para desenvolvimento
     return [
       { id: '1', name: 'Usuário 1', email: 'user1@example.com' },
       { id: '2', name: 'Usuário 2', email: 'user2@example.com' },

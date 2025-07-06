@@ -1,3 +1,4 @@
+
 export interface Lead {
   id: string;
   name: string;
@@ -6,6 +7,14 @@ export interface Lead {
   status: string;
   source: string;
   createdAt: Date;
+  company?: string;
+  position?: string;
+  score?: number;
+  tags?: string[];
+  notes?: string;
+  budget?: number;
+  timeline?: string;
+  interests?: string[];
 }
 
 export interface Client {
@@ -14,6 +23,19 @@ export interface Client {
   email: string;
   phone: string;
   createdAt: Date;
+  whatsapp?: string;
+  company?: string;
+  cnpj_cpf?: string;
+  ie_rg?: string;
+  address?: string;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cep?: string;
+  status?: string;
+  products?: string[];
+  notes?: string;
 }
 
 export interface Proposal {
@@ -22,6 +44,15 @@ export interface Proposal {
   description: string;
   status: string;
   createdAt: Date;
+  client_id?: string;
+  amount?: number;
+  discount?: number;
+  total_amount?: number;
+  valid_until?: string;
+  template_id?: string;
+  notes?: string;
+  number?: string;
+  content?: string;
 }
 
 export interface Contract {
@@ -52,6 +83,7 @@ export interface User {
   name: string;
   email: string;
   createdAt: Date;
+  user_level?: 'master' | 'admin' | 'user';
 }
 
 export interface Tenant {
@@ -81,4 +113,19 @@ export interface ProposalModalProps {
   onClose: () => void;
   onSuccess: () => void;
   proposal?: Proposal;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface DashboardSummary {
+  totalLeads: number;
+  totalClients: number;
+  totalProposals: number;
+  totalContracts: number;
+  monthlyRevenue: number;
+  conversionRate: number;
 }

@@ -87,7 +87,10 @@ const DashboardModern: React.FC = () => {
         emailsSent: 289,
         meetingsScheduled: 34,
         tasksCompleted: 127,
-        pendingFollowUps: 18
+        pendingFollowUps: 18,
+        avgResponseTime: '2.5h',
+        customerSatisfaction: 98.5,
+        automationSuccess: 94.2
       };
     } else if (user?.user_level === 'admin') {
       return {
@@ -106,7 +109,10 @@ const DashboardModern: React.FC = () => {
         emailsSent: 89,
         meetingsScheduled: 8,
         tasksCompleted: 34,
-        pendingFollowUps: 6
+        pendingFollowUps: 6,
+        avgResponseTime: '1.8h',
+        customerSatisfaction: 96.3,
+        automationSuccess: 91.7
       };
     } else {
       return {
@@ -125,7 +131,10 @@ const DashboardModern: React.FC = () => {
         emailsSent: 45,
         meetingsScheduled: 3,
         tasksCompleted: 15,
-        pendingFollowUps: 3
+        pendingFollowUps: 3,
+        avgResponseTime: '1.2h',
+        customerSatisfaction: 94.8,
+        automationSuccess: 87.3
       };
     }
   };
@@ -583,17 +592,27 @@ const DashboardModern: React.FC = () => {
                     <span className="font-medium font-opensans">Satisfação do Cliente</span>
                   </div>
                   <Badge variant="secondary" className="bg-[#0057B8] text-white hover:bg-[#003d82]">
-                    98.5%
+                    {mockData.customerSatisfaction}%
                   </Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl hover:scale-102 transition-transform duration-300">
                   <div className="flex items-center">
                     <Clock className="w-5 h-5 text-orange-500 mr-3 animate-pulse" />
-                    <span className="font-medium font-opensans">Follow-ups Pendentes</span>
+                    <span className="font-medium font-opensans">Tempo Médio de Resposta</span>
                   </div>
                   <Badge variant="secondary" className="bg-orange-500 text-white hover:bg-orange-600">
-                    {mockData.pendingFollowUps}
+                    {mockData.avgResponseTime}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl hover:scale-102 transition-transform duration-300">
+                  <div className="flex items-center">
+                    <Zap className="w-5 h-5 text-purple-500 mr-3 animate-pulse" />
+                    <span className="font-medium font-opensans">Automação Efetiva</span>
+                  </div>
+                  <Badge variant="secondary" className="bg-purple-500 text-white hover:bg-purple-600">
+                    {mockData.automationSuccess}%
                   </Badge>
                 </div>
               </div>

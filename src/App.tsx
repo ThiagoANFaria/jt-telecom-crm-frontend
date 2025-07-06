@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
-import Login from "@/pages/LoginNew";
+import LoginJTVox from "@/pages/LoginJTVox";
 import DashboardModern from "@/pages/DashboardModern";
 import MasterPanel from "@/pages/MasterPanelSimple";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
@@ -34,7 +35,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginJTVox />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Rota Master - Admin Master JT Telecom */}

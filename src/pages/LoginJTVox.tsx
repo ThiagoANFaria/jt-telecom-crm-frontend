@@ -60,7 +60,7 @@ const LoginJTVox: React.FC = () => {
               <h1 className="text-2xl font-bold text-[#2C2C2C] font-montserrat">
                 Sua <span className="highlight-text">comunicação</span>. Mais <span className="highlight-text">simples</span>. Mais <span className="highlight-text">inteligente</span>.
               </h1>
-              <p className="text-sm font-opensans leading-relaxed" style={{color: '#F3F4F6'}}>
+              <p className="text-sm font-opensans leading-relaxed" style={{color: '#2C2C2C'}}>
                 Transforme a forma como você se conecta com seus clientes através de tecnologia avançada de comunicação.
               </p>
             </div>

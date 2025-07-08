@@ -3,9 +3,8 @@ import React from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Bell, Sun, Moon } from 'lucide-react';
+import { LogOut, User, Bell } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,7 +12,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   return (
     <SidebarProvider>
@@ -39,14 +37,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </span>
               </Button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="hover:bg-[#0057B8]/10 text-muted-foreground hover:text-[#0057B8]"
-              >
-                {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              </Button>
               
               <div className="flex items-center gap-3 px-3 py-2 bg-card/60 rounded-lg border border-border/50">
                 <div className="w-8 h-8 bg-gradient-to-r from-[#0057B8] to-[#003d82] rounded-full flex items-center justify-center">

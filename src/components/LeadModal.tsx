@@ -46,12 +46,12 @@ const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
         phone: lead.phone || '',
         company: lead.company || '',
         position: lead.position || '',
-        source: lead.source || 'website',
-        status: lead.status || 'new',
+        source: (lead.source || 'website') as Lead['source'],
+        status: (lead.status || 'new') as Lead['status'],
         score: lead.score || 0,
         tags: lead.tags || [],
         notes: lead.notes || '',
-        budget: lead.budget || '',
+        budget: lead.budget?.toString() || '',
         timeline: lead.timeline || '',
         interests: lead.interests || []
       });

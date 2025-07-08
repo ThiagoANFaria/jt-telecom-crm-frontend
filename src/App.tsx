@@ -24,6 +24,8 @@ import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
 import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
+import Reports from "@/pages/Reports";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -152,6 +154,20 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Automation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Reports />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Settings />
                   </Layout>
                 </ProtectedRoute>
               } />

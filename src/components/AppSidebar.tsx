@@ -23,6 +23,9 @@ import {
   MessageCircle,
   Phone,
   Zap,
+  BarChart,
+  Settings,
+  Shield,
 } from 'lucide-react';
 
 const menuItems = [
@@ -75,6 +78,26 @@ const menuItems = [
     title: 'Automação',
     url: '/automation',
     icon: Zap,
+  },
+  {
+    title: 'Analytics',
+    url: '/analytics',
+    icon: BarChart,
+  },
+  {
+    title: 'Relatórios',
+    url: '/reports',
+    icon: FileText,
+  },
+  {
+    title: 'Configurações',
+    url: '/settings',
+    icon: Settings,
+  },
+  {
+    title: 'Master Panel',
+    url: '/master',
+    icon: Shield,
   },
 ];
 

@@ -13,7 +13,8 @@ export const apiService = {
         name: 'Admin User',
         email: email,
         user_level: 'admin' as const,
-        tenant_id: '1'
+        tenant_id: '1',
+        createdAt: new Date().toISOString()
       }
     };
   },
@@ -26,7 +27,96 @@ export const apiService = {
 
   async getUsers() {
     return [
-      { id: '1', name: 'Admin User', email: 'admin@jttelecom.com.br' }
+      { id: '1', name: 'Admin User', email: 'admin@jttelecom.com.br', createdAt: new Date().toISOString() }
     ];
+  },
+
+  async getClients() {
+    return [
+      { 
+        id: '1', 
+        name: 'Cliente Exemplo', 
+        email: 'cliente@exemplo.com', 
+        phone: '(11) 99999-9999',
+        company: 'Empresa Exemplo',
+        status: 'active' as const,
+        createdAt: new Date().toISOString(),
+        monthly_value: 1500,
+        payment_status: 'paid' as const,
+        contract_start: '2024-01-01'
+      }
+    ];
+  },
+
+  async getClient(id: string) {
+    return { 
+      id, 
+      name: 'Cliente Exemplo', 
+      email: 'cliente@exemplo.com', 
+      phone: '(11) 99999-9999',
+      company: 'Empresa Exemplo',
+      status: 'active' as const,
+      createdAt: new Date().toISOString(),
+      monthly_value: 1500,
+      payment_status: 'paid' as const,
+      contract_start: '2024-01-01'
+    };
+  },
+
+  async createClient(data: any) {
+    return { 
+      id: Date.now().toString(), 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async updateClient(id: string, data: any) {
+    return { 
+      id, 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async deleteClient(id: string) {
+    return { success: true };
+  },
+
+  async getContracts() {
+    return [
+      {
+        id: '1',
+        title: 'Contrato Exemplo',
+        client_id: '1',
+        amount: 15000,
+        status: 'active' as const,
+        start_date: '2024-01-01',
+        end_date: '2024-12-31',
+        createdAt: new Date().toISOString()
+      }
+    ];
+  },
+
+  async getDashboardSummary() {
+    return {
+      totalLeads: 150,
+      totalClients: 85,
+      totalProposals: 45,
+      totalContracts: 30,
+      revenue_this_month: 125000,
+      conversion_rate: 65.5
+    };
+  },
+
+  async triggerAutomation(data: any) {
+    return { success: true, message: 'Automação iniciada' };
+  },
+
+  async sendChatbotMessage(message: string) {
+    return { response: 'Resposta do chatbot', timestamp: new Date().toISOString() };
   }
 };
+
+// Export as named export for compatibility
+export const api = apiService;

@@ -84,31 +84,31 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white shadow-xl">
+    <Sidebar className="border-r-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[#0057B8] font-bold font-montserrat text-lg px-4 py-6">
+          <SidebarGroupLabel className="px-6 py-8">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-r from-[#0057B8] to-[#003d82] text-white px-3 py-2 rounded-xl font-montserrat font-black text-sm shadow-lg">
+              <div className="bg-gradient-to-br from-[#0057B8] via-[#0066CC] to-[#003d82] text-white px-4 py-3 rounded-2xl font-montserrat font-black text-base shadow-lg ring-2 ring-white/20">
                 JT
               </div>
               {!isCollapsed && (
                 <>
                   <div className="flex gap-1 items-center">
-                    {[8, 12, 10, 14, 7].map((height, index) => (
+                    {[10, 16, 12, 18, 8].map((height, index) => (
                       <div
                         key={index}
-                        className="w-1 bg-[#00C853] rounded-full animate-pulse"
+                        className="w-1 bg-gradient-to-t from-[#00C853] to-[#00E676] rounded-full animate-pulse shadow-sm"
                         style={{
                           height: `${height}px`,
                           animationDelay: `${index * 0.2}s`,
-                          animationDuration: '1.5s',
+                          animationDuration: '2s',
                           boxShadow: '0 0 8px rgba(0,200,83,0.4)'
                         }}
                       ></div>
                     ))}
                   </div>
-                  <span className="text-[#0057B8] font-montserrat font-bold text-xl tracking-wide">
+                  <span className="text-white font-montserrat font-bold text-2xl tracking-wide drop-shadow-sm">
                     VOX
                   </span>
                 </>
@@ -117,7 +117,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2 px-3 mt-4">
+            <SidebarMenu className="space-y-3 px-4 mt-6">
               {menuItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
@@ -125,38 +125,33 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
-                        className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 font-medium group relative overflow-hidden ${
+                        className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden ${
                           isActive
-                            ? 'bg-[#0057B8] text-white shadow-2xl shadow-[#0057B8]/30 scale-105 border-l-4 border-[#00C853]'
-                            : 'text-gray-700 hover:bg-[#0057B8] hover:text-white hover:scale-102 hover:shadow-lg'
+                            ? 'bg-gradient-to-r from-[#0057B8] via-[#0066CC] to-[#0057B8] text-white shadow-xl shadow-[#0057B8]/40 ring-2 ring-white/20'
+                            : 'text-gray-300 hover:bg-gradient-to-r hover:from-slate-700 hover:to-slate-600 hover:text-white hover:shadow-lg hover:ring-1 hover:ring-white/10'
                         }`}
                       >
-                        {/* Efeito de brilho ao passar o mouse */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        {/* Efeito de brilho sutil */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                         
-                        <item.icon className={`w-6 h-6 transition-all duration-300 ${
-                          isActive ? 'text-white scale-110' : 'group-hover:text-white group-hover:scale-110'
+                        <item.icon className={`w-5 h-5 transition-all duration-300 relative z-10 ${
+                          isActive ? 'text-white drop-shadow-sm' : 'group-hover:text-white'
                         }`} />
                         
                         {!isCollapsed && (
-                          <span className={`font-opensans text-base transition-all duration-300 ${
-                            isActive ? 'font-semibold text-white' : 'group-hover:font-semibold group-hover:text-white'
+                          <span className={`font-opensans text-sm transition-all duration-300 relative z-10 ${
+                            isActive ? 'font-semibold text-white drop-shadow-sm' : 'group-hover:font-medium group-hover:text-white'
                           }`}>
                             {item.title}
                           </span>
                         )}
                         
-                        {/* Indicador pulsante para item ativo */}
-                        {isActive && !isCollapsed && (
-                          <div className="ml-auto flex items-center">
-                            <div className="w-3 h-3 bg-[#00C853] rounded-full animate-pulse shadow-lg shadow-[#00C853]/50"></div>
+                        {/* Indicador ativo discreto */}
+                        {isActive && (
+                          <div className="ml-auto relative z-10">
+                            <div className="w-2 h-2 bg-gradient-to-r from-[#00C853] to-[#00E676] rounded-full shadow-sm"></div>
                           </div>
                         )}
-                        
-                        {/* Micro-feedback visual no clique */}
-                        <div className={`absolute inset-0 bg-white/20 rounded-2xl scale-0 transition-transform duration-200 ${
-                          isActive ? 'group-active:scale-100' : ''
-                        }`}></div>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

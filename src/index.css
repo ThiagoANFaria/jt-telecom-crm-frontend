@@ -50,10 +50,11 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* JT Vox Colors */
-    --azul-royal: #0057B8;
-    --verde-jt: #00C853;
+    /* JT Vox Colors - Nova Paleta */
+    --azul-royal: #0033A0;
+    --verde-jt: #00A651;
     --branco: #FFFFFF;
+    --cinza-claro: #F3F4F6;
     --cinza-chumbo: #2C2C2C;
   }
 
@@ -182,12 +183,73 @@ All colors MUST be HSL.
     letter-spacing: 3px;
   }
 
-  /* Logo JT Vox - Versão Institucional */
+  /* Logo JT Vox CRM - Nova Versão */
   .jt-vox-logo {
-    background: linear-gradient(135deg, var(--azul-royal) 0%, #003d82 100%);
+    background: linear-gradient(135deg, var(--azul-royal) 0%, #002875 100%);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 15px 35px rgba(0,87,184,0.3);
+    box-shadow: 0 15px 35px rgba(0,51,160,0.3);
+  }
+
+  /* Partículas flutuantes */
+  @keyframes float-particles {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+      opacity: 0.4;
+    }
+    33% {
+      transform: translateY(-10px) translateX(5px);
+      opacity: 0.7;
+    }
+    66% {
+      transform: translateY(5px) translateX(-5px);
+      opacity: 0.5;
+    }
+  }
+
+  .floating-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float-particles 8s ease-in-out infinite;
+  }
+
+  .particle-blue {
+    background: rgba(0, 51, 160, 0.1);
+  }
+
+  .particle-green {
+    background: rgba(0, 166, 81, 0.1);
+  }
+
+  /* Borda pulsante do card */
+  @keyframes pulse-border {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(0, 51, 160, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(0, 51, 160, 0.05);
+    }
+  }
+
+  .pulse-border {
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+  /* Texto animado no slogan */
+  .highlight-text {
+    background: linear-gradient(45deg, var(--azul-royal), var(--verde-jt));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
   }
 
   .jt-vox-logo::before {

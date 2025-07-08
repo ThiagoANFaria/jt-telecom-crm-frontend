@@ -2,7 +2,7 @@ import React from 'react';
 
 const JTVoxLogo: React.FC = () => {
   const logoStyles: React.CSSProperties = {
-    background: 'linear-gradient(135deg, #0057B8 0%, #003d82 100%)',
+    background: 'linear-gradient(135deg, #0033A0 0%, #002875 100%)',
     width: '320px',
     height: '220px',
     borderRadius: '20px',
@@ -13,7 +13,7 @@ const JTVoxLogo: React.FC = () => {
     color: '#FFFFFF',
     position: 'relative',
     overflow: 'hidden',
-    boxShadow: '0 15px 35px rgba(0,87,184,0.3)',
+    boxShadow: '0 15px 35px rgba(0,51,160,0.3)',
     margin: '20px auto',
   };
 
@@ -28,7 +28,7 @@ const JTVoxLogo: React.FC = () => {
 
   const jtBubbleStyles: React.CSSProperties = {
     background: '#FFFFFF',
-    color: '#0057B8',
+    color: '#0033A0',
     padding: '14px 20px',
     borderRadius: '18px',
     fontFamily: 'Montserrat, sans-serif',
@@ -46,9 +46,9 @@ const JTVoxLogo: React.FC = () => {
 
   const waveBaseStyles: React.CSSProperties = {
     width: '5px',
-    background: '#00C853',
+    background: '#00A651',
     borderRadius: '3px',
-    boxShadow: '0 2px 8px rgba(0,200,83,0.3)',
+    boxShadow: '0 2px 8px rgba(0,166,81,0.3)',
   };
 
   const voxTextStyles: React.CSSProperties = {
@@ -154,7 +154,7 @@ const JTVoxLogo: React.FC = () => {
             <div style={{...waveBaseStyles}} className="wave-5 wave-responsive"></div>
           </div>
         </div>
-        <div style={voxTextStyles} className="vox-text-responsive">VOX</div>
+        <div style={voxTextStyles} className="vox-text-responsive">VOX CRM</div>
         <div style={byTextStyles}>by JT Telecom</div>
       </div>
     </>

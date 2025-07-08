@@ -32,9 +32,19 @@ const LoginJTVox: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      {/* Floating Particles */}
+      <div className="floating-particles">
+        <div className="particle particle-blue w-4 h-4" style={{top: '10%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="particle particle-green w-3 h-3" style={{top: '20%', right: '20%', animationDelay: '2s'}}></div>
+        <div className="particle particle-blue w-2 h-2" style={{bottom: '30%', left: '10%', animationDelay: '4s'}}></div>
+        <div className="particle particle-green w-5 h-5" style={{bottom: '15%', right: '15%', animationDelay: '6s'}}></div>
+        <div className="particle particle-blue w-3 h-3" style={{top: '50%', left: '5%', animationDelay: '1s'}}></div>
+        <div className="particle particle-green w-2 h-2" style={{top: '70%', right: '8%', animationDelay: '3s'}}></div>
+      </div>
       
       <div className="w-full max-w-md relative z-10">
         {/* Logo Container */}
@@ -43,14 +53,14 @@ const LoginJTVox: React.FC = () => {
         </div>
 
         {/* Main Login Card */}
-        <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-0 rounded-3xl overflow-hidden pulse-border">
           <CardHeader className="text-center pb-6 pt-8 px-8">
             {/* Slogan */}
             <div className="space-y-3">
               <h1 className="text-2xl font-bold text-[#2C2C2C] font-montserrat">
-                Sua comunicação. Mais simples. Mais inteligente.
+                Sua <span className="highlight-text">comunicação</span>. Mais <span className="highlight-text">simples</span>. Mais <span className="highlight-text">inteligente</span>.
               </h1>
-              <p className="text-sm text-gray-600 font-opensans leading-relaxed">
+              <p className="text-sm font-opensans leading-relaxed" style={{color: '#F3F4F6'}}>
                 Transforme a forma como você se conecta com seus clientes através de tecnologia avançada de comunicação.
               </p>
             </div>
@@ -70,7 +80,7 @@ const LoginJTVox: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-12 rounded-2xl border-gray-200 focus:border-[#0057B8] focus:ring-[#0057B8] transition-all duration-200 font-opensans"
+                    className="pl-10 h-12 rounded-2xl border-gray-200 focus:border-[#0033A0] focus:ring-[#0033A0] transition-all duration-200 font-opensans"
                     placeholder="Digite seu e-mail"
                     required
                   />
@@ -89,14 +99,14 @@ const LoginJTVox: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-12 rounded-2xl border-gray-200 focus:border-[#0057B8] focus:ring-[#0057B8] transition-all duration-200 font-opensans"
+                    className="pl-10 pr-10 h-12 rounded-2xl border-gray-200 focus:border-[#0033A0] focus:ring-[#0033A0] transition-all duration-200 font-opensans"
                     placeholder="Digite sua senha"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#0057B8] transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#0033A0] transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -107,7 +117,7 @@ const LoginJTVox: React.FC = () => {
               <div className="text-right">
                 <button
                   type="button"
-                  className="text-sm text-[#0057B8] hover:text-[#003d82] font-opensans transition-colors"
+                  className="text-sm text-[#0033A0] hover:text-[#002875] font-opensans transition-colors"
                 >
                   Esqueci minha senha
                 </button>
@@ -117,7 +127,7 @@ const LoginJTVox: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-[#0057B8] hover:bg-[#003d82] text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] font-montserrat text-base"
+                className="w-full h-12 bg-[#0033A0] hover:bg-[#002875] text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] font-montserrat text-base"
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -138,16 +148,16 @@ const LoginJTVox: React.FC = () => {
             Desenvolvido pela JT Telecom
           </p>
           <div className="flex items-center justify-center gap-2 mt-2">
-            <div className="w-2 h-2 bg-[#00C853] rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-[#00A651] rounded-full animate-pulse"></div>
             <span className="text-xs text-gray-400 font-opensans">Sistema Online</span>
           </div>
         </div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-10 left-10 w-20 h-20 bg-[#0057B8]/10 rounded-full blur-xl"></div>
-      <div className="absolute bottom-10 right-10 w-32 h-32 bg-[#00C853]/10 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-5 w-16 h-16 bg-[#0057B8]/5 rounded-full blur-lg"></div>
+      <div className="absolute top-10 left-10 w-20 h-20 bg-[#0033A0]/10 rounded-full blur-xl"></div>
+      <div className="absolute bottom-10 right-10 w-32 h-32 bg-[#00A651]/10 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-5 w-16 h-16 bg-[#0033A0]/5 rounded-full blur-lg"></div>
     </div>
   );
 };

@@ -4,8 +4,8 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  status: string;
-  source: string;
+  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'closed' | 'lost';
+  source: 'website' | 'referral' | 'social' | 'email' | 'phone' | 'other';
   createdAt: Date;
   company?: string;
   position?: string;
@@ -15,6 +15,16 @@ export interface Lead {
   budget?: number;
   timeline?: string;
   interests?: string[];
+  whatsapp?: string;
+  cnpj_cpf?: string;
+  ie_rg?: string;
+  address?: string;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cep?: string;
+  responsible?: string;
 }
 
 export interface Client {
@@ -115,6 +125,13 @@ export interface LeadModalProps {
   onClose: () => void;
   onSuccess: () => Promise<void>;
   lead?: Lead;
+}
+
+export interface AdvancedFiltersProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onApplyFilters: (filters: any) => void;
+  type: string;
 }
 
 export interface ProposalModalProps {

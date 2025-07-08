@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -103,8 +104,17 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { isMaster } = useAuth();
   const location = useLocation();
   const isCollapsed = state === 'collapsed';
+
+  // Filtrar itens do menu baseado no nível do usuário
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.title === 'Master Panel') {
+      return isMaster();
+    }
+    return true;
+  });
 
   return (
     <Sidebar className="border-r-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl">
@@ -141,7 +151,7 @@ export function AppSidebar() {
           
           <SidebarGroupContent>
             <SidebarMenu className="space-y-3 px-4 mt-6">
-              {menuItems.map((item) => {
+              {filteredMenuItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>

@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import LoginJTVox from "@/pages/LoginJTVox";
@@ -29,131 +30,139 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginJTVox />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            
-            {/* Rota Master - Admin Master JT Telecom */}
-            <Route path="/master" element={
-              <ProtectedRoute requiredLevel="master">
-                <MasterPanel />
-              </ProtectedRoute>
-            } />
-            
-            {/* Rota Admin - Admin da Tenant */}
-            <Route path="/admin" element={
-              <ProtectedRoute requiredLevel="admin">
-                <TenantAdminPanel />
-              </ProtectedRoute>
-            } />
-            
-            {/* Rota Admin Dashboard - Admin da Tenant com acesso ao CRM */}
-            <Route path="/admin/dashboard" element={
-              <ProtectedRoute requiredLevel="admin">
-                <Layout>
-                  <DashboardModern />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            
-            {/* JT VOX Analytics - Nova rota */}
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <JTVoxAnalytics />
-              </ProtectedRoute>
-            } />
-            
-            {/* Rotas do CRM - Usuários finais */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Layout>
-                  <DashboardModern />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/clients" element={
-              <ProtectedRoute>
-                <ClientsModern />
-              </ProtectedRoute>
-            } />
-            <Route path="/clients/:id" element={
-              <ProtectedRoute>
-                <Layout>
-                  <ClientDetail />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/leads" element={
-              <ProtectedRoute>
-                <LeadsModern />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads/:id" element={
-              <ProtectedRoute>
-                <Layout>
-                  <LeadDetail />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/contracts" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Contracts />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/proposals" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Proposals />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/tasks" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Tasks />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/pipelines" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Pipelines />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/telephony" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Telephony />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/chatbot" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Chatbot />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/automation" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Automation />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginJTVox />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              
+              {/* Rota Master - Admin Master JT Telecom */}
+              <Route path="/master" element={
+                <ProtectedRoute requiredLevel="master">
+                  <MasterPanel />
+                </ProtectedRoute>
+              } />
+              
+              {/* Rota Admin - Admin da Tenant */}
+              <Route path="/admin" element={
+                <ProtectedRoute requiredLevel="admin">
+                  <TenantAdminPanel />
+                </ProtectedRoute>
+              } />
+              
+              {/* Rota Admin Dashboard - Admin da Tenant com acesso ao CRM */}
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute requiredLevel="admin">
+                  <Layout>
+                    <DashboardModern />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              
+              {/* JT VOX Analytics - Nova rota */}
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <JTVoxAnalytics />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Rotas do CRM - Usuários finais */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <DashboardModern />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/clients" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ClientsModern />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/clients/:id" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ClientDetail />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/leads" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <LeadsModern />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/leads/:id" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <LeadDetail />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/contracts" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Contracts />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/proposals" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Proposals />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/tasks" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Tasks />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/pipelines" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Pipelines />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/telephony" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Telephony />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/chatbot" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Chatbot />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/automation" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Automation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

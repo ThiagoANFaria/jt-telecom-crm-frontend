@@ -59,7 +59,8 @@ export const apiService = {
       createdAt: new Date().toISOString(),
       monthly_value: 1500,
       payment_status: 'paid' as const,
-      contract_start: '2024-01-01'
+      contract_start: '2024-01-01',
+      notes: 'Notas do cliente'
     };
   },
 
@@ -80,6 +81,91 @@ export const apiService = {
   },
 
   async deleteClient(id: string) {
+    return { success: true };
+  },
+
+  async getLeads() {
+    return [
+      {
+        id: '1',
+        name: 'Lead Exemplo',
+        email: 'lead@exemplo.com',
+        phone: '(11) 99999-9999',
+        company: 'Empresa Exemplo',
+        source: 'website' as const,
+        status: 'new' as const,
+        score: 85,
+        createdAt: new Date().toISOString()
+      }
+    ];
+  },
+
+  async getLead(id: string) {
+    return {
+      id,
+      name: 'Lead Exemplo',
+      email: 'lead@exemplo.com',
+      phone: '(11) 99999-9999',
+      company: 'Empresa Exemplo',
+      source: 'website' as const,
+      status: 'new' as const,
+      score: 85,
+      createdAt: new Date().toISOString()
+    };
+  },
+
+  async createLead(data: any) {
+    return { 
+      id: Date.now().toString(), 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async updateLead(id: string, data: any) {
+    return { 
+      id, 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async deleteLead(id: string) {
+    return { success: true };
+  },
+
+  async getProposals() {
+    return [
+      {
+        id: '1',
+        title: 'Proposta Exemplo',
+        client_id: '1',
+        amount: 15000,
+        status: 'draft' as const,
+        created_date: '2024-01-01',
+        expiry_date: '2024-02-01',
+        createdAt: new Date().toISOString()
+      }
+    ];
+  },
+
+  async createProposal(data: any) {
+    return { 
+      id: Date.now().toString(), 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async updateProposal(id: string, data: any) {
+    return { 
+      id, 
+      ...data, 
+      createdAt: new Date().toISOString() 
+    };
+  },
+
+  async deleteProposal(id: string) {
     return { success: true };
   },
 
@@ -110,7 +196,7 @@ export const apiService = {
   },
 
   async triggerAutomation(data: any) {
-    return { success: true, message: 'Automação iniciada' };
+    return { success: true, message: 'Automação iniciada', status: 'running' };
   },
 
   async sendChatbotMessage(message: string) {

@@ -3,8 +3,9 @@ import React from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Bell } from 'lucide-react';
+import { LogOut, User, Bell, Sun, Moon } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,62 +13,48 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-16 bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 flex items-center justify-between px-6">
+          <header className="h-16 bg-card/80 backdrop-blur-sm shadow-sm border-b border-border/50 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="text-[#0057B8] hover:bg-[#0057B8]/10 p-2 rounded-lg transition-all" />
-              
-              {/* JT Vox Logo Compacto */}
-              <div className="flex items-center gap-3">
-                <div className="bg-gradient-to-r from-[#0057B8] to-[#003d82] text-white px-3 py-2 rounded-xl font-montserrat font-black text-sm shadow-lg">
-                  JT
-                </div>
-                <div className="flex gap-1 items-center">
-                  {[8, 12, 10, 14, 7].map((height, index) => (
-                    <div
-                      key={index}
-                      className="w-1 bg-[#00C853] rounded-full animate-pulse"
-                      style={{
-                        height: `${height}px`,
-                        animationDelay: `${index * 0.2}s`,
-                        animationDuration: '1.5s',
-                        boxShadow: '0 0 8px rgba(0,200,83,0.4)'
-                      }}
-                    ></div>
-                  ))}
-                </div>
-                <span className="text-[#0057B8] font-montserrat font-bold text-xl tracking-wide">
-                  VOX
-                </span>
-              </div>
             </div>
             
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative hover:bg-[#0057B8]/10 text-gray-600 hover:text-[#0057B8]"
+                className="relative hover:bg-[#0057B8]/10 text-muted-foreground hover:text-[#0057B8]"
               >
                 <Bell className="w-4 h-4" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#00C853] rounded-full text-xs flex items-center justify-center text-white">
                   3
                 </span>
               </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="hover:bg-[#0057B8]/10 text-muted-foreground hover:text-[#0057B8]"
+              >
+                {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              </Button>
               
-              <div className="flex items-center gap-3 px-3 py-2 bg-white/60 rounded-lg border border-gray-200/50">
+              <div className="flex items-center gap-3 px-3 py-2 bg-card/60 rounded-lg border border-border/50">
                 <div className="w-8 h-8 bg-gradient-to-r from-[#0057B8] to-[#003d82] rounded-full flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user?.user_level}</p>
+                  <p className="font-medium text-foreground">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user?.user_level}</p>
                 </div>
               </div>
               

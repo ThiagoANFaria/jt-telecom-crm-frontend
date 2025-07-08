@@ -90,7 +90,9 @@ const DashboardModern: React.FC = () => {
         pendingFollowUps: 18,
         avgResponseTime: '2.5h',
         customerSatisfaction: 98.5,
-        automationSuccess: 94.2
+        automationSuccess: 94.2,
+        activeContractsThisMonth: 42,
+        meetingsHeld: 67
       };
     } else if (user?.user_level === 'admin') {
       return {
@@ -112,7 +114,9 @@ const DashboardModern: React.FC = () => {
         pendingFollowUps: 6,
         avgResponseTime: '1.8h',
         customerSatisfaction: 96.3,
-        automationSuccess: 91.7
+        automationSuccess: 91.7,
+        activeContractsThisMonth: 12,
+        meetingsHeld: 28
       };
     } else {
       return {
@@ -134,7 +138,9 @@ const DashboardModern: React.FC = () => {
         pendingFollowUps: 3,
         avgResponseTime: '1.2h',
         customerSatisfaction: 94.8,
-        automationSuccess: 87.3
+        automationSuccess: 87.3,
+        activeContractsThisMonth: 5,
+        meetingsHeld: 12
       };
     }
   };
@@ -191,6 +197,20 @@ const DashboardModern: React.FC = () => {
       value: mockData.hotLeads,
       color: 'text-red-500',
       bgColor: 'bg-red-100'
+    },
+    {
+      icon: FileCheck,
+      label: 'Contratos Ativos no Mês',
+      value: mockData.activeContractsThisMonth || 0,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100'
+    },
+    {
+      icon: Calendar,
+      label: 'Reuniões Realizadas',
+      value: mockData.meetingsHeld || 0,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-100'
     },
     {
       icon: Phone,

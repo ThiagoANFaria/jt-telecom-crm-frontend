@@ -14,7 +14,7 @@ export const apiService = {
         email: email,
         user_level: 'admin' as const,
         tenant_id: '1',
-        createdAt: new Date().toISOString()
+        createdAt: new Date()
       }
     };
   },
@@ -40,7 +40,7 @@ export const apiService = {
         phone: '(11) 99999-9999',
         company: 'Empresa Exemplo',
         status: 'active' as const,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         monthly_value: 1500,
         payment_status: 'paid' as const,
         contract_start: '2024-01-01'
@@ -58,9 +58,10 @@ export const apiService = {
       status: 'active' as const,
       createdAt: new Date().toISOString(),
       monthly_value: 1500,
-      payment_status: 'paid' as const,
-      contract_start: '2024-01-01',
-      notes: 'Notas do cliente'
+        payment_status: 'paid' as const,
+        contract_start: '2024-01-01',
+        notes: 'Notas do cliente',
+        createdAt: new Date()
     };
   },
 
@@ -68,7 +69,7 @@ export const apiService = {
     return { 
       id: Date.now().toString(), 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -76,7 +77,7 @@ export const apiService = {
     return { 
       id, 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -95,7 +96,7 @@ export const apiService = {
         source: 'website' as const,
         status: 'new' as const,
         score: 85,
-        createdAt: new Date().toISOString()
+        createdAt: new Date()
       }
     ];
   },
@@ -108,9 +109,9 @@ export const apiService = {
       phone: '(11) 99999-9999',
       company: 'Empresa Exemplo',
       source: 'website' as const,
-      status: 'new' as const,
-      score: 85,
-      createdAt: new Date().toISOString()
+        status: 'new' as const,
+        score: 85,
+        createdAt: new Date()
     };
   },
 
@@ -118,7 +119,7 @@ export const apiService = {
     return { 
       id: Date.now().toString(), 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -126,7 +127,7 @@ export const apiService = {
     return { 
       id, 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -144,7 +145,7 @@ export const apiService = {
         status: 'draft' as const,
         created_date: '2024-01-01',
         expiry_date: '2024-02-01',
-        createdAt: new Date().toISOString()
+        createdAt: new Date()
       }
     ];
   },
@@ -153,7 +154,7 @@ export const apiService = {
     return { 
       id: Date.now().toString(), 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -161,7 +162,7 @@ export const apiService = {
     return { 
       id, 
       ...data, 
-      createdAt: new Date().toISOString() 
+      createdAt: new Date()
     };
   },
 
@@ -179,7 +180,8 @@ export const apiService = {
         status: 'active' as const,
         start_date: '2024-01-01',
         end_date: '2024-12-31',
-        createdAt: new Date().toISOString()
+        description: 'Contrato exemplo',
+        createdAt: new Date()
       }
     ];
   },
@@ -190,8 +192,12 @@ export const apiService = {
       totalClients: 85,
       totalProposals: 45,
       totalContracts: 30,
+      monthlyRevenue: 125000,
+      conversionRate: 65.5,
       revenue_this_month: 125000,
-      conversion_rate: 65.5
+      conversion_rate: 65.5,
+      activeContractsThisMonth: 12,
+      meetingsHeld: 28
     };
   },
 

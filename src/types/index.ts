@@ -36,6 +36,11 @@ export interface Client {
   status?: string;
   products?: string[];
   notes?: string;
+  monthly_value?: number;
+  annual_value?: number;
+  payment_status?: string;
+  contract_start?: string;
+  contract_end?: string;
 }
 
 export interface Proposal {
@@ -61,6 +66,10 @@ export interface Contract {
   description: string;
   status: string;
   createdAt: Date;
+  client_id?: string;
+  amount?: number;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface Task {
@@ -128,4 +137,8 @@ export interface DashboardSummary {
   totalContracts: number;
   monthlyRevenue: number;
   conversionRate: number;
+  activeContractsThisMonth?: number;
+  meetingsHeld?: number;
+  revenue_this_month?: number;
+  conversion_rate?: number;
 }

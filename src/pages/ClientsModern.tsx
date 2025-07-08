@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Users, Plus, Search, MoreHorizontal, Phone, Mail, 
   MessageSquare, Building, MapPin, DollarSign, Calendar,
-  Crown, Activity, TrendingUp, Shield
+  Crown, Activity, TrendingUp, Shield, Grid3X3, List
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -30,6 +30,7 @@ const ClientsModern: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { toast } = useToast();
   const navigate = useNavigate();

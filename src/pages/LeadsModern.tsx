@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lead, Tag } from '@/types';
@@ -12,7 +11,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Users, Plus, Search, Filter, MoreHorizontal, Phone, Mail, 
   MessageSquare, Calendar, TrendingUp, Target, Award, Star,
-  Building, MapPin, Clock, Zap, Download, Upload, CheckSquare, Edit, Trash2
+  Building, MapPin, Clock, Zap, Download, Upload, CheckSquare, Edit, Trash2,
+  Grid3X3, List
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -31,6 +31,7 @@ const LeadsModern: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 
   const { toast } = useToast();
@@ -67,58 +68,42 @@ const LeadsModern: React.FC = () => {
             name: 'João Silva',
             email: 'joao@empresa.com',
             phone: '11999999999',
-            whatsapp: '11999999999',
+            createdAt: new Date('2025-01-10T10:00:00Z'),
             company: 'Empresa ABC Ltda',
-            cnpj_cpf: '12.345.678/0001-90',
-            address: 'Rua das Flores, 123',
-            city: 'São Paulo',
-            state: 'SP',
             source: 'Website',
             status: 'Qualificado',
             score: 85,
-            tags: [
-              { id: '1', name: 'VIP', color: '#FFD700', created_at: new Date().toISOString() },
-              { id: '3', name: 'Qualificado', color: '#00AA00', created_at: new Date().toISOString() }
-            ],
-            responsible: 'João Silva',
-            last_contact: '2025-01-15',
-            next_contact: '2025-01-20',
-            notes: 'Lead muito interessado em PABX em nuvem',
-            created_at: '2025-01-10T10:00:00Z',
-            updated_at: '2025-01-15T14:30:00Z'
+            position: 'Diretor',
+            budget: 50000,
+            timeline: '3 meses',
+            interests: ['PABX em Nuvem'],
+            tags: ['VIP', 'Qualificado'],
+            notes: 'Lead muito interessado em PABX em nuvem'
           },
           {
             id: '2',
             name: 'Maria Santos',
             email: 'maria@comercio.com',
             phone: '11888888888',
+            createdAt: new Date('2025-01-08T09:00:00Z'),
             company: 'Comércio XYZ',
-            city: 'São Paulo',
-            state: 'SP',
             source: 'Indicação',
             status: 'Em Contato',
             score: 72,
-            tags: [
-              { id: '2', name: 'Urgente', color: '#FF4444', created_at: new Date().toISOString() }
-            ],
-            responsible: 'Maria Santos',
-            notes: 'Interessada em URA Reversa',
-            created_at: '2025-01-08T09:00:00Z'
+            tags: ['Urgente'],
+            notes: 'Interessada em URA Reversa'
           },
           {
             id: '3',
             name: 'Pedro Costa',
             email: 'pedro@startup.com',
             phone: '11777777777',
+            createdAt: new Date('2025-01-05T11:00:00Z'),
             company: 'Startup Tech',
-            city: 'Rio de Janeiro',
-            state: 'RJ',
             source: 'LinkedIn',
             status: 'Novo',
             score: 45,
-            responsible: 'Pedro Costa',
-            notes: 'Startup em crescimento',
-            created_at: '2025-01-05T11:00:00Z'
+            notes: 'Startup em crescimento'
           }
         ];
         setLeads(mockLeads);
@@ -174,10 +159,6 @@ const LeadsModern: React.FC = () => {
       filtered = filtered.filter(lead => filters.source.includes(lead.source));
     }
 
-    if (filters.responsible?.length) {
-      filtered = filtered.filter(lead => filters.responsible.includes(lead.responsible));
-    }
-
     if (filters.scoreRange) {
       filtered = filtered.filter(lead => 
         (lead.score || 0) >= filters.scoreRange[0] && 
@@ -185,19 +166,9 @@ const LeadsModern: React.FC = () => {
       );
     }
 
-    if (filters.city) {
-      filtered = filtered.filter(lead => 
-        lead.city?.toLowerCase().includes(filters.city.toLowerCase())
-      );
-    }
-
-    if (filters.state) {
-      filtered = filtered.filter(lead => lead.state === filters.state);
-    }
-
     if (filters.tags?.length) {
       filtered = filtered.filter(lead => 
-        lead.tags?.some(tag => filters.tags.includes(tag.id))
+        lead.tags?.some(tag => filters.tags.includes(tag))
       );
     }
 
@@ -255,7 +226,7 @@ const LeadsModern: React.FC = () => {
     qualified: leads.filter(l => l.status === 'Qualificado').length,
     hot: leads.filter(l => (l.score || 0) >= 80).length,
     thisMonth: leads.filter(l => {
-      const created = new Date(l.created_at);
+      const created = new Date(l.createdAt);
       const now = new Date();
       return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
     }).length
@@ -279,6 +250,24 @@ const LeadsModern: React.FC = () => {
             <p className="text-gray-600">Gerencie e acompanhe seus leads</p>
           </div>
           <div className="flex gap-2">
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="px-3"
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="px-3"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
             <Button variant="outline" size="sm">
               <Upload className="w-4 h-4 mr-2" />
               Importar
@@ -390,7 +379,7 @@ const LeadsModern: React.FC = () => {
           </div>
         </div>
 
-        {/* Leads Grid */}
+        {/* Content */}
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -418,174 +407,297 @@ const LeadsModern: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredLeads.map((lead) => (
-              <Card key={lead.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
-                <CardContent className="p-6">
-                  {/* Header do Lead */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-12 h-12">
-                        <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                          {getInitials(lead.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          {lead.name}
-                        </h3>
-                        <p className="text-sm text-gray-500">{lead.email}</p>
+          <>
+            {/* Grid View */}
+            {viewMode === 'grid' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredLeads.map((lead) => (
+                  <Card key={lead.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
+                    <CardContent className="p-6">
+                      {/* Header do Lead */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                              {getInitials(lead.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {lead.name}
+                            </h3>
+                            <p className="text-sm text-gray-500">{lead.email}</p>
+                          </div>
+                        </div>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedLead(lead);
+                              setIsModalOpen(true);
+                            }}>
+                              <Edit className="w-4 h-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/leads/${lead.id}`)}>
+                              Ver Detalhes
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleTasks(lead.id)}>
+                              <CheckSquare className="w-4 h-4 mr-2" />
+                              Tarefas
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`tel:${lead.phone}`)}>
+                              <Phone className="w-4 h-4 mr-2" />
+                              Ligar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`mailto:${lead.email}`)}>
+                              <Mail className="w-4 h-4 mr-2" />
+                              Enviar Email
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(lead.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </div>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => {
-                          setSelectedLead(lead);
-                          setIsModalOpen(true);
-                        }}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/leads/${lead.id}`)}>
-                          Ver Detalhes
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleTasks(lead.id)}>
-                          <CheckSquare className="w-4 h-4 mr-2" />
-                          Tarefas
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.open(`tel:${lead.phone}`)}>
-                          <Phone className="w-4 h-4 mr-2" />
-                          Ligar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.open(`mailto:${lead.email}`)}>
-                          <Mail className="w-4 h-4 mr-2" />
-                          Enviar Email
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleDelete(lead.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
 
-                  {/* Company e Location */}
-                  {lead.company && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <Building className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{lead.company}</span>
-                    </div>
-                  )}
-                  
-                  {lead.city && lead.state && (
-                    <div className="flex items-center gap-2 mb-4">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{lead.city}, {lead.state}</span>
-                    </div>
-                  )}
-
-                  {/* Status e Score */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(lead.status)}`}></div>
-                      <span className="text-sm font-medium text-gray-700">{lead.status}</span>
-                    </div>
-                    
-                    {lead.score && (
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(lead.score)}`}>
-                        <Star className="w-3 h-3 inline mr-1" />
-                        {lead.score}
+                      {/* Company e info */}
+                      <div className="space-y-2 mb-4">
+                        {lead.company && (
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Building className="w-4 h-4" />
+                            {lead.company}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4" />
+                          {lead.phone}
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Tags */}
-                  {lead.tags && lead.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {lead.tags.slice(0, 2).map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          style={{ backgroundColor: tag.color, color: 'white' }}
-                          className="text-xs"
-                        >
-                          {tag.name}
-                        </Badge>
-                      ))}
-                      {lead.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">+{lead.tags.length - 2}</Badge>
+                      {/* Score e Status */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${getStatusColor(lead.status)}`}></div>
+                          <span className="text-sm font-medium text-gray-700">{lead.status}</span>
+                        </div>
+                        {lead.score && (
+                          <Badge className={`${getScoreColor(lead.score)} border-0 font-semibold`}>
+                            <Star className="w-3 h-3 mr-1" />
+                            {lead.score}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Tags */}
+                      {lead.tags && lead.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {lead.tags.slice(0, 2).map((tag, index) => (
+                            <Badge 
+                              key={index} 
+                              variant="secondary" 
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {lead.tags.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{lead.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  )}
 
-                  {/* Source e Last Contact */}
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>Origem: {lead.source}</span>
-                    {lead.last_contact && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {new Date(lead.last_contact).toLocaleDateString('pt-BR')}
+                      {/* Source */}
+                      <div className="text-xs text-gray-500 mb-4">
+                        <span className="font-medium">Fonte:</span> {lead.source}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open(`tel:${lead.phone}`)}>
-                      <Phone className="w-3 h-3 mr-1" />
-                      Ligar
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open(`mailto:${lead.email}`)}>
-                      <Mail className="w-3 h-3 mr-1" />
-                      Email
-                    </Button>
-                    {lead.whatsapp && (
-                      <Button variant="outline" size="sm" onClick={() => {
-                        const message = `Olá ${lead.name}, tudo bem? Sou da JT Tecnologia e gostaria de conversar sobre nossas soluções.`;
-                        window.open(`https://wa.me/55${lead.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`);
-                      }}>
-                        <MessageSquare className="w-3 h-3" />
-                      </Button>
-                    )}
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-2 border-t border-gray-100">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => window.open(`tel:${lead.phone}`)}
+                        >
+                          <Phone className="w-4 h-4 mr-1" />
+                          Ligar
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => window.open(`mailto:${lead.email}`)}
+                        >
+                          <Mail className="w-4 h-4 mr-1" />
+                          Email
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => navigate(`/leads/${lead.id}`)}
+                        >
+                          Ver Mais
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* List View */}
+            {viewMode === 'list' && (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b">
+                        <tr>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Lead</th>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Empresa</th>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Status</th>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Score</th>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Fonte</th>
+                          <th className="text-left p-4 text-sm font-medium text-gray-900">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {filteredLeads.map((lead) => (
+                          <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-10 h-10">
+                                  <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-sm">
+                                    {getInitials(lead.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium text-gray-900">{lead.name}</p>
+                                  <p className="text-sm text-gray-500">{lead.email}</p>
+                                  <p className="text-sm text-gray-500">{lead.phone}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <p className="text-sm text-gray-900">{lead.company || '-'}</p>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${getStatusColor(lead.status)}`}></div>
+                                <span className="text-sm text-gray-900">{lead.status}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              {lead.score ? (
+                                <Badge className={`${getScoreColor(lead.score)} border-0`}>
+                                  {lead.score}
+                                </Badge>
+                              ) : (
+                                <span className="text-sm text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <p className="text-sm text-gray-900">{lead.source || '-'}</p>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(`tel:${lead.phone}`)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(`mailto:${lead.email}`)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => navigate(`/leads/${lead.id}`)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <MessageSquare className="w-4 h-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreHorizontal className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => {
+                                      setSelectedLead(lead);
+                                      setIsModalOpen(true);
+                                    }}>
+                                      <Edit className="w-4 h-4 mr-2" />
+                                      Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => navigate(`/leads/${lead.id}`)}>
+                                      Ver Detalhes
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleTasks(lead.id)}>
+                                      <CheckSquare className="w-4 h-4 mr-2" />
+                                      Tarefas
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDelete(lead.id)}
+                                      className="text-red-600"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Excluir
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Advanced Filters Modal */}
-      <AdvancedFilters
-        isOpen={isAdvancedFiltersOpen}
-        onClose={() => setIsAdvancedFiltersOpen(false)}
-        onApplyFilters={handleAdvancedFilters}
-      />
-
-      {/* Modal de Lead */}
+      {/* Modals */}
       <LeadModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedLead(null);
         }}
-        onSuccess={async () => {
-          setTimeout(async () => {
-            await fetchLeads();
-            setIsModalOpen(false);
-            setSelectedLead(null);
-          }, 100);
-        }}
+        onSuccess={fetchLeads}
         lead={selectedLead}
+      />
+
+      <AdvancedFilters
+        isOpen={isAdvancedFiltersOpen}
+        onClose={() => setIsAdvancedFiltersOpen(false)}
+        onApplyFilters={handleAdvancedFilters}
+        type="leads"
       />
     </div>
   );

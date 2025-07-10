@@ -41,7 +41,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
         source: lead.source || 'website',
         status: lead.status || 'new',
         score: lead.score || 0,
-        tags: lead.tags || [],
+        tags: lead.tags?.map(tag => typeof tag === 'string' ? tag : tag.name) || [],
         notes: lead.notes || '',
         budget: lead.budget?.toString() || '',
         timeline: lead.timeline || '',

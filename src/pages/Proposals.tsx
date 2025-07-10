@@ -330,12 +330,13 @@ const Proposals: React.FC = () => {
         </Card>
       )}
 
-      <ProposalModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSuccess={handleModalSuccess}
-        proposal={selectedProposal}
-      />
+      {isModalOpen && (
+        <ProposalModal
+          onClose={handleCloseModal}
+          onSuccess={handleModalSuccess}
+          proposal={selectedProposal}
+        />
+      )}
     </div>
   );
 };

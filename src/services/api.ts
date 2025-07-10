@@ -56,12 +56,11 @@ export const apiService = {
       phone: '(11) 99999-9999',
       company: 'Empresa Exemplo',
       status: 'active' as const,
-      createdAt: new Date().toISOString(),
       monthly_value: 1500,
-        payment_status: 'paid' as const,
-        contract_start: '2024-01-01',
-        notes: 'Notas do cliente',
-        createdAt: new Date()
+      payment_status: 'paid' as const,
+      contract_start: '2024-01-01',
+      notes: 'Notas do cliente',
+      createdAt: new Date()
     };
   },
 
@@ -109,9 +108,10 @@ export const apiService = {
       phone: '(11) 99999-9999',
       company: 'Empresa Exemplo',
       source: 'website' as const,
-        status: 'new' as const,
-        score: 85,
-        createdAt: new Date()
+      status: 'new' as const,
+      score: 85,
+      notes: 'Anotações do lead',
+      createdAt: new Date()
     };
   },
 
@@ -140,14 +140,48 @@ export const apiService = {
       {
         id: '1',
         title: 'Proposta Exemplo',
+        description: 'Descrição da proposta exemplo',
         client_id: '1',
+        client_name: 'Cliente Exemplo',
+        client_email: 'cliente@exemplo.com',
+        client_phone: '(11) 99999-9999',
         amount: 15000,
         status: 'draft' as const,
         created_date: '2024-01-01',
         expiry_date: '2024-02-01',
-        createdAt: new Date()
+        createdAt: new Date(),
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01'
       }
     ];
+  },
+
+  async getTasks() {
+    return [
+      {
+        id: '1',
+        title: 'Tarefa Exemplo',
+        description: 'Descrição da tarefa exemplo',
+        status: 'pendente',
+        priority: 'alta',
+        assigned_to: 'Admin User',
+        due_date: '2024-02-01',
+        createdAt: new Date(),
+        created_at: '2024-01-01'
+      }
+    ];
+  },
+
+  async sendProposalByEmail(proposalId: string) {
+    return { success: true, message: 'Email enviado com sucesso' };
+  },
+
+  async sendProposalByWhatsApp(proposalId: string) {
+    return { success: true, message: 'WhatsApp enviado com sucesso' };
+  },
+
+  async makeCall(phoneNumber: string) {
+    return { success: true, callId: 'call-123', status: 'connecting' };
   },
 
   async createProposal(data: any) {

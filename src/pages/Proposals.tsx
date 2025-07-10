@@ -135,7 +135,7 @@ const Proposals: React.FC = () => {
 
   const handleSendEmail = async (proposal: Proposal) => {
     try {
-      await apiService.sendProposalByEmail(proposal.id);
+      await apiService.sendProposalByEmail(proposal.id, proposal.client_email || 'cliente@exemplo.com');
       toast({
         title: 'Email enviado',
         description: 'Proposta enviada por email com sucesso.',
@@ -152,7 +152,7 @@ const Proposals: React.FC = () => {
 
   const handleSendWhatsApp = async (proposal: Proposal) => {
     try {
-      await apiService.sendProposalByWhatsApp(proposal.id);
+      await apiService.sendProposalByWhatsApp(proposal.id, proposal.client_phone || '11999999999');
       toast({
         title: 'WhatsApp enviado',
         description: 'Proposta enviada por WhatsApp com sucesso.',

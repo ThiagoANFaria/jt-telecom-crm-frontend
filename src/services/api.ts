@@ -1,4 +1,3 @@
-
 // API Service for JT VOX - Connected to real backend
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.app.jttecnologia.com.br';
 
@@ -46,229 +45,283 @@ export const apiService = {
   },
 
   async getTenants() {
-    return [
-      { id: '1', name: 'JT Telecom', domain: 'jttelecom.com.br', created_at: '2024-01-01', active: true }
-    ];
+    return apiRequest('/tenants');
   },
 
   async getUsers() {
-    return [
-      { id: '1', name: 'Admin User', email: 'admin@jttelecom.com.br', createdAt: new Date().toISOString() }
-    ];
+    return apiRequest('/users');
   },
 
-  async getClients() {
-    return [
-      { 
-        id: '1', 
-        name: 'Cliente Exemplo', 
-        email: 'cliente@exemplo.com', 
-        phone: '(11) 99999-9999',
-        company: 'Empresa Exemplo',
-        status: 'active' as const,
-        createdAt: new Date(),
-        monthly_value: 1500,
-        payment_status: 'paid' as const,
-        contract_start: '2024-01-01'
-      }
-    ];
+  async getClients(page = 1, limit = 50, search = '') {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(search && { search })
+    });
+    return apiRequest(`/clients?${params}`);
   },
 
   async getClient(id: string) {
-    return { 
-      id, 
-      name: 'Cliente Exemplo', 
-      email: 'cliente@exemplo.com', 
-      phone: '(11) 99999-9999',
-      company: 'Empresa Exemplo',
-      status: 'active' as const,
-      monthly_value: 1500,
-      payment_status: 'paid' as const,
-      contract_start: '2024-01-01',
-      notes: 'Notas do cliente',
-      createdAt: new Date()
-    };
+    return apiRequest(`/clients/${id}`);
   },
 
   async createClient(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest('/clients', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   async updateClient(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest(`/clients/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   async deleteClient(id: string) {
-    return { success: true };
+    return apiRequest(`/clients/${id}`, {
+      method: 'DELETE',
+    });
   },
 
-  async getLeads() {
-    return [
-      {
-        id: '1',
-        name: 'Lead Exemplo',
-        email: 'lead@exemplo.com',
-        phone: '(11) 99999-9999',
-        company: 'Empresa Exemplo',
-        source: 'website' as const,
-        status: 'new' as const,
-        score: 85,
-        createdAt: new Date()
-      }
-    ];
+  async getLeads(page = 1, limit = 50, search = '', status = '', source = '') {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(search && { search }),
+      ...(status && { status }),
+      ...(source && { source })
+    });
+    return apiRequest(`/leads?${params}`);
   },
 
   async getLead(id: string) {
-    return {
-      id,
-      name: 'Lead Exemplo',
-      email: 'lead@exemplo.com',
-      phone: '(11) 99999-9999',
-      company: 'Empresa Exemplo',
-      source: 'website' as const,
-      status: 'new' as const,
-      score: 85,
-      notes: 'Anotações do lead',
-      createdAt: new Date()
-    };
+    return apiRequest(`/leads/${id}`);
   },
 
   async createLead(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest('/leads', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   async updateLead(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest(`/leads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   async deleteLead(id: string) {
-    return { success: true };
+    return apiRequest(`/leads/${id}`, {
+      method: 'DELETE',
+    });
   },
 
-  async getProposals() {
-    return [
-      {
-        id: '1',
-        title: 'Proposta Exemplo',
-        description: 'Descrição da proposta exemplo',
-        client_id: '1',
-        client_name: 'Cliente Exemplo',
-        client_email: 'cliente@exemplo.com',
-        client_phone: '(11) 99999-9999',
-        amount: 15000,
-        status: 'draft' as const,
-        created_date: '2024-01-01',
-        expiry_date: '2024-02-01',
-        createdAt: new Date(),
-        created_at: '2024-01-01',
-        updated_at: '2024-01-01'
-      }
-    ];
+  async getProposals(page = 1, limit = 50, status = '') {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status })
+    });
+    return apiRequest(`/proposals?${params}`);
   },
 
-  async getTasks() {
-    return [
-      {
-        id: '1',
-        title: 'Tarefa Exemplo',
-        description: 'Descrição da tarefa exemplo',
-        status: 'pendente',
-        priority: 'alta',
-        assigned_to: 'Admin User',
-        due_date: '2024-02-01',
-        createdAt: new Date(),
-        created_at: '2024-01-01'
-      }
-    ];
-  },
-
-  async sendProposalByEmail(proposalId: string) {
-    return { success: true, message: 'Email enviado com sucesso' };
-  },
-
-  async sendProposalByWhatsApp(proposalId: string) {
-    return { success: true, message: 'WhatsApp enviado com sucesso' };
-  },
-
-  async makeCall(phoneNumber: string) {
-    return { success: true, callId: 'call-123', status: 'connecting' };
+  async getProposal(id: string) {
+    return apiRequest(`/proposals/${id}`);
   },
 
   async createProposal(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest('/proposals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   async updateProposal(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    return apiRequest(`/proposals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   async deleteProposal(id: string) {
-    return { success: true };
+    return apiRequest(`/proposals/${id}`, {
+      method: 'DELETE',
+    });
   },
 
-  async getContracts() {
-    return [
-      {
-        id: '1',
-        title: 'Contrato Exemplo',
-        client_id: '1',
-        amount: 15000,
-        status: 'active' as const,
-        start_date: '2024-01-01',
-        end_date: '2024-12-31',
-        description: 'Contrato exemplo',
-        createdAt: new Date()
-      }
-    ];
+  async sendProposalByEmail(proposalId: string, email: string) {
+    return apiRequest(`/proposals/${proposalId}/send-email`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async sendProposalByWhatsApp(proposalId: string, phone: string) {
+    return apiRequest(`/proposals/${proposalId}/send-whatsapp`, {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    });
+  },
+
+  async getTasks(page = 1, limit = 50, status = '') {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status })
+    });
+    return apiRequest(`/tasks?${params}`);
+  },
+
+  async createTask(data: any) {
+    return apiRequest('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateTask(id: string, data: any) {
+    return apiRequest(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteTask(id: string) {
+    return apiRequest(`/tasks/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getContracts(page = 1, limit = 50, status = '') {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status })
+    });
+    return apiRequest(`/contracts?${params}`);
+  },
+
+  async createContract(data: any) {
+    return apiRequest('/contracts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateContract(id: string, data: any) {
+    return apiRequest(`/contracts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   async getDashboardSummary() {
-    return {
-      totalLeads: 150,
-      totalClients: 85,
-      totalProposals: 45,
-      totalContracts: 30,
-      monthlyRevenue: 125000,
-      conversionRate: 65.5,
-      revenue_this_month: 125000,
-      conversion_rate: 65.5,
-      activeContractsThisMonth: 12,
-      meetingsHeld: 28
-    };
+    return apiRequest('/dashboard/summary');
+  },
+
+  async getAnalytics(period = '30d') {
+    return apiRequest(`/analytics?period=${period}`);
+  },
+
+  async makeCall(phoneNumber: string, leadId?: string) {
+    return apiRequest('/telephony/call', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        phoneNumber, 
+        ...(leadId && { leadId }) 
+      }),
+    });
+  },
+
+  async getCallHistory(page = 1, limit = 50) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+    return apiRequest(`/telephony/history?${params}`);
   },
 
   async triggerAutomation(data: any) {
-    return { success: true, message: 'Automação iniciada', status: 'running' };
+    return apiRequest('/automation/trigger', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
-  async sendChatbotMessage(message: string) {
-    return { response: 'Resposta do chatbot', timestamp: new Date().toISOString() };
+  async getAutomations() {
+    return apiRequest('/automation');
+  },
+
+  async sendChatbotMessage(message: string, sessionId?: string) {
+    return apiRequest('/chatbot/message', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        message, 
+        ...(sessionId && { sessionId }) 
+      }),
+    });
+  },
+
+  async getChatbotHistory(sessionId: string) {
+    return apiRequest(`/chatbot/history/${sessionId}`);
+  },
+
+  async getReports(type = 'sales', period = '30d') {
+    return apiRequest(`/reports?type=${type}&period=${period}`);
+  },
+
+  async generateReport(config: any) {
+    return apiRequest('/reports/generate', {
+      method: 'POST',
+      body: JSON.stringify(config),
+    });
+  },
+
+  async getSettings() {
+    return apiRequest('/settings');
+  },
+
+  async updateSettings(data: any) {
+    return apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async uploadFile(file: File, type = 'document') {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  async searchCNPJ(cnpj: string) {
+    return apiRequest(`/utils/cnpj/${cnpj}`);
+  },
+
+  async searchCEP(cep: string) {
+    return apiRequest(`/utils/cep/${cep}`);
   }
 };
 
-// Export as named export for compatibility
+// Export api as alias for backward compatibility
 export const api = apiService;

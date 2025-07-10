@@ -41,7 +41,7 @@ const Telephony: React.FC = () => {
         phone: phoneNumber,
         status: 'in-progress',
         timestamp: new Date(),
-        call_id: response.callId,
+        call_id: response.call_id,
       };
       
       setCallHistory(prev => [newCall, ...prev]);

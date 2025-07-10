@@ -121,8 +121,31 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="px-6 py-8">
-            <div className="text-xl font-bold text-white">
-              Menu
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-[#0057B8] via-[#0066CC] to-[#003d82] text-white px-4 py-3 rounded-2xl font-montserrat font-black text-base shadow-lg ring-2 ring-white/20">
+                JT
+              </div>
+              {!isCollapsed && (
+                <>
+                  <div className="flex gap-1 items-center">
+                    {[10, 16, 12, 18, 8].map((height, index) => (
+                      <div
+                        key={index}
+                        className="w-1 bg-gradient-to-t from-[#00C853] to-[#00E676] rounded-full animate-pulse shadow-sm"
+                        style={{
+                          height: `${height}px`,
+                          animationDelay: `${index * 0.2}s`,
+                          animationDuration: '2s',
+                          boxShadow: '0 0 8px rgba(0,200,83,0.4)'
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                  <span className="text-white font-montserrat font-bold text-2xl tracking-wide drop-shadow-sm">
+                    VOX
+                  </span>
+                </>
+              )}
             </div>
           </SidebarGroupLabel>
           

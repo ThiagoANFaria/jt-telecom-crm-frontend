@@ -88,17 +88,24 @@ const Leads: React.FC = () => {
           city: 'São Paulo',
           state: 'SP',
           cep: '01234-567',
-          source: 'website',
-          status: 'qualified',
+          source: 'Website',
+          status: 'Qualificado',
           score: 85,
           tags: [
             { id: '1', name: 'VIP', color: '#FFD700', created_at: new Date().toISOString() },
             { id: '3', name: 'Qualificado', color: '#00AA00', created_at: new Date().toISOString() }
           ],
           responsible: 'João Silva',
+          last_contact: '2025-01-15',
+          next_contact: '2025-01-20',
+          custom_fields: {
+            website: 'https://empresa.com',
+            budget: 50000,
+            industry: 'Tecnologia'
+          },
           notes: 'Lead muito interessado em PABX em nuvem',
           created_at: '2025-01-10T10:00:00Z',
-          createdAt: new Date()
+          updated_at: '2025-01-15T14:30:00Z'
         },
         {
           id: '2',
@@ -114,17 +121,23 @@ const Leads: React.FC = () => {
           city: 'São Paulo',
           state: 'SP',
           cep: '01234-567',
-          source: 'referral',
-          status: 'contacted',
+          source: 'Indicação',
+          status: 'Em Contato',
           score: 72,
           tags: [
             { id: '2', name: 'Urgente', color: '#FF4444', created_at: new Date().toISOString() },
             { id: '4', name: 'Follow-up', color: '#4169E1', created_at: new Date().toISOString() }
           ],
           responsible: 'Maria Santos',
+          last_contact: '2025-01-12',
+          next_contact: '2025-01-18',
+          custom_fields: {
+            company_size: '11-50 funcionários',
+            timeline: '15 dias'
+          },
           notes: 'Interessada em URA Reversa',
           created_at: '2025-01-08T09:00:00Z',
-          createdAt: new Date()
+          updated_at: '2025-01-12T16:45:00Z'
         },
         {
           id: '3',
@@ -132,8 +145,8 @@ const Leads: React.FC = () => {
           email: 'pedro@startup.com',
           phone: '11777777777',
           company: 'Startup Tech',
-          source: 'social',
-          status: 'new',
+          source: 'LinkedIn',
+          status: 'Novo',
           score: 45,
           tags: [
             { id: '5', name: 'Orçamento Alto', color: '#8B5CF6', created_at: new Date().toISOString() }
@@ -141,9 +154,12 @@ const Leads: React.FC = () => {
           responsible: 'Pedro Costa',
           city: 'Rio de Janeiro',
           state: 'RJ',
+          custom_fields: {
+            industry: 'Tecnologia',
+            budget: 100000
+          },
           notes: 'Startup em crescimento',
-          created_at: '2025-01-05T11:00:00Z',
-          createdAt: new Date()
+          created_at: '2025-01-05T11:00:00Z'
         }
       ];
       setLeads(mockLeads);
@@ -296,7 +312,7 @@ const Leads: React.FC = () => {
   // Estatísticas dos leads
   const stats = {
     total: leads.length,
-    qualified: leads.filter(l => l.status === 'qualified').length,
+    qualified: leads.filter(l => l.status === 'Qualificado').length,
     hot: leads.filter(l => (l.score || 0) >= 80).length,
     thisMonth: leads.filter(l => {
       const created = new Date(l.created_at);

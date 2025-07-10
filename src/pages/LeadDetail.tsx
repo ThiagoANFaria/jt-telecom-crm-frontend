@@ -66,11 +66,10 @@ const LeadDetail: React.FC = () => {
         city: 'São Paulo',
         state: 'SP',
         cep: '01234-567',
-        source: 'website',
-        status: 'new',
+        source: 'Website',
+        status: 'Novo',
         notes: 'Lead interessado em PABX em nuvem. Empresa com 50 funcionários. Orçamento aprovado de até R$ 5.000/mês.',
         created_at: new Date().toISOString(),
-        createdAt: new Date()
       };
       setLead(mockLead);
       setNotes(mockLead.notes || '');

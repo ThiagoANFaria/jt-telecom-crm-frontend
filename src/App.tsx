@@ -38,13 +38,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<LoginJTVox />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DashboardModern />
-                  </Layout>
-                </ProtectedRoute>
-              } />
+              <Route path="/" element={<Navigate to="/login" replace />} />
               
               {/* Rota Master - Admin Master JT Telecom */}
               <Route path="/master" element={

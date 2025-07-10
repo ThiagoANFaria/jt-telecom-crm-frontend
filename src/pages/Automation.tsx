@@ -69,7 +69,7 @@ const Automation: React.FC = () => {
     setAutomationHistory(prev => [newAutomation, ...prev]);
     
     try {
-      const response = await apiService.triggerAutomation(parsedData);
+      const response = await apiService.triggerAutomation(selectedTrigger, parsedData);
       
       setAutomationHistory(prev => 
         prev.map(automation => 

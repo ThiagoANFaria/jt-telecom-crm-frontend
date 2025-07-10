@@ -637,23 +637,22 @@ const Leads: React.FC = () => {
       />
 
       {/* Modal de Lead */}
-      {isModalOpen && (
-        <LeadModal
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedLead(null);
-          }}
-          onSuccess={async () => {
-            // Pequeno delay para garantir que o localStorage foi atualizado
-            setTimeout(async () => {
-              await fetchLeads();
+      <LeadModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedLead(null);
+        }}
+        onSuccess={async () => {
+          // Pequeno delay para garantir que o localStorage foi atualizado
+          setTimeout(async () => {
+            await fetchLeads();
             setIsModalOpen(false);
             setSelectedLead(null);
           }, 100);
         }}
         lead={selectedLead}
-        />
-      )}
+      />
     </div>
   );
 };

@@ -7,11 +7,10 @@ export interface Lead {
   status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'closed' | 'lost';
   source: 'website' | 'referral' | 'social' | 'email' | 'phone' | 'other';
   createdAt: Date;
-  created_at?: string;
   company?: string;
   position?: string;
   score?: number;
-  tags?: Tag[] | string[];
+  tags?: string[];
   notes?: string;
   budget?: number;
   timeline?: string;
@@ -33,8 +32,7 @@ export interface Client {
   name: string;
   email: string;
   phone: string;
-  createdAt?: Date;
-  created_at?: string;
+  createdAt: Date;
   whatsapp?: string;
   company?: string;
   cnpj_cpf?: string;
@@ -59,12 +57,9 @@ export interface Proposal {
   id: string;
   title: string;
   description: string;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'revision';
+  status: string;
   createdAt: Date;
   client_id?: string;
-  client_name?: string;
-  client_email?: string;
-  client_phone?: string;
   amount?: number;
   discount?: number;
   total_amount?: number;
@@ -73,8 +68,6 @@ export interface Proposal {
   notes?: string;
   number?: string;
   content?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface Contract {
@@ -83,7 +76,6 @@ export interface Contract {
   description: string;
   status: string;
   createdAt: Date;
-  created_at?: string;
   client_id?: string;
   amount?: number;
   start_date?: string;
@@ -96,10 +88,6 @@ export interface Task {
   description: string;
   status: string;
   createdAt: Date;
-  priority?: string;
-  assigned_to?: string;
-  due_date?: string;
-  created_at?: string;
 }
 
 export interface Pipeline {
@@ -133,6 +121,7 @@ export interface PipelineStage {
 }
 
 export interface LeadModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
   lead?: Lead;
@@ -146,6 +135,7 @@ export interface AdvancedFiltersProps {
 }
 
 export interface ProposalModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   proposal?: Proposal;
@@ -169,8 +159,4 @@ export interface DashboardSummary {
   meetingsHeld?: number;
   revenue_this_month?: number;
   conversion_rate?: number;
-  total_leads?: number;
-  total_clients?: number;
-  total_proposals?: number;
-  total_contracts?: number;
 }

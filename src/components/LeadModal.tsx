@@ -5,12 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { X, Plus, Mail, Phone, MessageSquare, Star, Clock, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Lead, LeadModalProps } from '@/types';
+import { Lead } from '@/types';
 import { api } from '@/services/api';
 
-const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
-  const [open, setOpen] = useState(true);
+interface LeadModalProps {
+  trigger: React.ReactNode;
+  lead?: Lead;
+  onSave?: (lead: Lead) => void;
+}
+
+const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -20,8 +28,8 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
     phone: '',
     company: '',
     position: '',
-    source: 'website' as Lead['source'],
-    status: 'new' as Lead['status'],
+    source: 'website' as const,
+    status: 'new' as const,
     score: 0,
     tags: [] as string[],
     notes: '',
@@ -31,24 +39,24 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
   });
 
   useEffect(() => {
-    if (lead) {
+    if (lead && open) {
       setFormData({
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
         company: lead.company || '',
         position: lead.position || '',
-        source: lead.source || 'website',
-        status: lead.status || 'new',
+        source: (lead.source || 'website') as Lead['source'],
+        status: (lead.status || 'new') as Lead['status'],
         score: lead.score || 0,
-        tags: lead.tags?.map(tag => typeof tag === 'string' ? tag : tag.name) || [],
+        tags: lead.tags || [],
         notes: lead.notes || '',
         budget: lead.budget?.toString() || '',
         timeline: lead.timeline || '',
         interests: lead.interests || []
       });
     }
-  }, [lead]);
+  }, [lead, open]);
 
   const handleSave = async () => {
     try {
@@ -56,17 +64,19 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
       
       const leadData = {
         ...formData,
-        budget: formData.budget ? parseFloat(formData.budget) : undefined
+        source: formData.source as 'website' | 'social' | 'referral' | 'phone' | 'email' | 'event' | 'ad',
+        status: formData.status as 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
       };
 
+      let savedLead;
       if (lead?.id) {
-        await api.updateLead(lead.id, leadData);
+        savedLead = await api.updateLead(lead.id, leadData);
       } else {
-        await api.createLead(leadData);
+        savedLead = await api.createLead(leadData);
       }
 
-      await onSuccess();
-      handleClose();
+      onSave?.(savedLead);
+      setOpen(false);
       
       toast({
         title: lead?.id ? 'Lead atualizado' : 'Lead criado',
@@ -83,11 +93,6 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    onClose();
-  };
-
   const formFields = [
     { label: 'Nome', key: 'name', type: 'text', placeholder: 'Nome completo' },
     { label: 'Email', key: 'email', type: 'email', placeholder: 'email@exemplo.com' },
@@ -98,34 +103,23 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
       label: 'Fonte', 
       key: 'source', 
       type: 'select', 
-      options: [
-        { value: 'website', label: 'Website' },
-        { value: 'referral', label: 'Indicação' },
-        { value: 'social', label: 'Social' },
-        { value: 'email', label: 'Email' },
-        { value: 'phone', label: 'Telefone' },
-        { value: 'other', label: 'Outro' }
-      ]
+      options: ['website', 'social', 'referral', 'phone', 'email', 'event', 'ad'] 
     },
     { 
       label: 'Status', 
       key: 'status', 
       type: 'select', 
-      options: [
-        { value: 'new', label: 'Novo' },
-        { value: 'contacted', label: 'Contatado' },
-        { value: 'qualified', label: 'Qualificado' },
-        { value: 'proposal', label: 'Proposta' },
-        { value: 'closed', label: 'Fechado' },
-        { value: 'lost', label: 'Perdido' }
-      ]
+      options: ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] 
     },
     { label: 'Orçamento', key: 'budget', type: 'text', placeholder: 'R$ 0,00' },
     { label: 'Timeline', key: 'timeline', type: 'text', placeholder: 'Ex: 3 meses' }
   ];
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#0057B8] font-montserrat">
@@ -147,8 +141,8 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
                   </SelectTrigger>
                   <SelectContent>
                     {field.options.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                      <SelectItem key={option} value={option}>
+                        {option}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -177,7 +171,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ onClose, onSuccess, lead }) => {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
           <Button 

@@ -1,16 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Proposal, ProposalModalProps } from '@/types';
+import { Proposal } from '@/types';
 import { api } from '@/services/api';
 
-const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, proposal }) => {
-  const [open, setOpen] = useState(true);
+interface ProposalModalProps {
+  trigger: React.ReactNode;
+  proposal?: Proposal;
+  onSave?: (proposal: Proposal) => void;
+}
+
+const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave }) => {
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -21,7 +28,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
     amount: 0,
     discount: 0,
     total_amount: 0,
-    status: 'draft' as 'draft' | 'sent' | 'accepted' | 'rejected' | 'revision',
+    status: 'draft' as const,
     valid_until: '',
     template_id: '',
     notes: '',
@@ -30,7 +37,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
   });
 
   useEffect(() => {
-    if (proposal) {
+    if (proposal && open) {
       setFormData({
         title: proposal.title || '',
         client_id: proposal.client_id || '',
@@ -38,7 +45,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
         amount: proposal.amount || 0,
         discount: proposal.discount || 0,
         total_amount: proposal.total_amount || 0,
-        status: proposal.status as 'draft' | 'sent' | 'accepted' | 'rejected' | 'revision' || 'draft',
+        status: proposal.status || 'draft',
         valid_until: proposal.valid_until || '',
         template_id: proposal.template_id || '',
         notes: proposal.notes || '',
@@ -46,7 +53,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
         content: proposal.content || ''
       });
     }
-  }, [proposal]);
+  }, [proposal, open]);
 
   const calculateTotal = () => {
     const total = formData.amount - (formData.amount * formData.discount / 100);
@@ -62,17 +69,19 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
       setLoading(true);
       
       const proposalData = {
-        ...formData
+        ...formData,
+        status: formData.status as 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
       };
 
+      let savedProposal;
       if (proposal?.id) {
-        await api.updateProposal(proposal.id, proposalData);
+        savedProposal = await api.updateProposal(proposal.id, proposalData);
       } else {
-        await api.createProposal(proposalData);
+        savedProposal = await api.createProposal(proposalData);
       }
 
-      onSuccess();
-      handleClose();
+      onSave?.(savedProposal);
+      setOpen(false);
       
       toast({
         title: proposal?.id ? 'Proposta atualizada' : 'Proposta criada',
@@ -89,13 +98,11 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    onClose();
-  };
-
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#0057B8] font-montserrat">
@@ -111,6 +118,16 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Título da proposta"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="client_id">Cliente</Label>
+            <Input
+              id="client_id"
+              value={formData.client_id}
+              onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
+              placeholder="ID do cliente"
             />
           </div>
 
@@ -195,7 +212,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, propo
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
           <Button 

@@ -30,16 +30,27 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 export const apiService = {
   async login(email: string, password: string) {
     console.log('Login attempt to real API:', email);
+    console.log('API Base URL:', API_BASE_URL);
     
     try {
+      console.log('Making request to:', `${API_BASE_URL}/auth/login`);
+      
       const response = await apiRequest('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
       
+      console.log('Login response:', response);
       return response;
     } catch (error) {
-      console.error('Login API error:', error);
+      console.error('Login API error details:', error);
+      
+      // More detailed error logging
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
       throw error;
     }
   },

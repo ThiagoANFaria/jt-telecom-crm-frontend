@@ -121,7 +121,6 @@ export interface PipelineStage {
 }
 
 export interface LeadModalProps {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
   lead?: Lead;
@@ -135,7 +134,6 @@ export interface AdvancedFiltersProps {
 }
 
 export interface ProposalModalProps {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   proposal?: Proposal;

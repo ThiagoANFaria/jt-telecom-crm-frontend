@@ -1,23 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Proposal } from '@/types';
+import { Proposal, ProposalModalProps } from '@/types';
 import { api } from '@/services/api';
 
-interface ProposalModalProps {
-  trigger: React.ReactNode;
-  proposal?: Proposal;
-  onSave?: (proposal: Proposal) => void;
-}
-
-const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave }) => {
-  const [open, setOpen] = useState(false);
+const ProposalModal: React.FC<ProposalModalProps> = ({ onClose, onSuccess, proposal }) => {
+  const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -37,7 +30,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
   });
 
   useEffect(() => {
-    if (proposal && open) {
+    if (proposal) {
       setFormData({
         title: proposal.title || '',
         client_id: proposal.client_id || '',
@@ -53,7 +46,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
         content: proposal.content || ''
       });
     }
-  }, [proposal, open]);
+  }, [proposal]);
 
   const calculateTotal = () => {
     const total = formData.amount - (formData.amount * formData.discount / 100);
@@ -69,19 +62,17 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
       setLoading(true);
       
       const proposalData = {
-        ...formData,
-        status: formData.status as 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' | 'expired'
+        ...formData
       };
 
-      let savedProposal;
       if (proposal?.id) {
-        savedProposal = await api.updateProposal(proposal.id, proposalData);
+        await api.updateProposal(proposal.id, proposalData);
       } else {
-        savedProposal = await api.createProposal(proposalData);
+        await api.createProposal(proposalData);
       }
 
-      onSave?.(savedProposal);
-      setOpen(false);
+      onSuccess();
+      handleClose();
       
       toast({
         title: proposal?.id ? 'Proposta atualizada' : 'Proposta criada',
@@ -98,11 +89,13 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#0057B8] font-montserrat">
@@ -118,16 +111,6 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Título da proposta"
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="client_id">Cliente</Label>
-            <Input
-              id="client_id"
-              value={formData.client_id}
-              onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
-              placeholder="ID do cliente"
             />
           </div>
 
@@ -212,7 +195,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ trigger, proposal, onSave
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={handleClose}>
             Cancelar
           </Button>
           <Button 

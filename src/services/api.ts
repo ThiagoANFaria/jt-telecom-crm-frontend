@@ -1,22 +1,48 @@
 
-// API Service for JT VOX
+// API Service for JT VOX - Connected to real backend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.app.jttecnologia.com.br';
+
+const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  
+  const defaultHeaders: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    defaultHeaders.Authorization = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
 export const apiService = {
   async login(email: string, password: string) {
-    // Simulated login response - replace with real API call
-    console.log('Login attempt:', email);
+    console.log('Login attempt to real API:', email);
     
-    // Mock successful login response
-    return {
-      access_token: 'mock-jwt-token',
-      user: {
-        id: '1',
-        name: 'Admin User',
-        email: email,
-        user_level: 'admin' as const,
-        tenant_id: '1',
-        createdAt: new Date()
-      }
-    };
+    try {
+      const response = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      
+      return response;
+    } catch (error) {
+      console.error('Login API error:', error);
+      throw error;
+    }
   },
 
   async getTenants() {

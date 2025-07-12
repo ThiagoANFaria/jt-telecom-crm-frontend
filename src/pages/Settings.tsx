@@ -500,9 +500,9 @@ const Settings: React.FC = () => {
                     <h4 className="font-medium">Template Padrão</h4>
                     <p className="text-sm text-muted-foreground">Proposta comercial para {{client_name}}...</p>
                     <div className="flex gap-2 mt-2">
-                      <Badge variant="outline">client_name</Badge>
-                      <Badge variant="outline">value</Badge>
-                      <Badge variant="outline">description</Badge>
+                      <Badge variant="outline">{{client_name}}</Badge>
+                      <Badge variant="outline">{{value}}</Badge>
+                      <Badge variant="outline">{{description}}</Badge>
                     </div>
                   </div>
                   <div className="flex gap-2">

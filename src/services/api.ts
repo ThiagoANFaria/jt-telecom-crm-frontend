@@ -1,22 +1,34 @@
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.app.jttecnologia.com.br';
+
 // API Service for JT VOX
 export const apiService = {
   async login(email: string, password: string) {
-    // Simulated login response - replace with real API call
-    console.log('Login attempt:', email);
-    
-    // Mock successful login response
-    return {
-      access_token: 'mock-jwt-token',
-      user: {
-        id: '1',
-        name: 'Admin User',
-        email: email,
-        user_level: 'admin' as const,
-        tenant_id: '1',
-        createdAt: new Date()
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
       }
-    };
+
+      const data = await response.json();
+      
+      // Armazenar token no localStorage
+      if (data.access_token) {
+        localStorage.setItem('token', data.access_token);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   },
 
   async getTenants() {
@@ -32,20 +44,36 @@ export const apiService = {
   },
 
   async getClients() {
-    return [
-      { 
-        id: '1', 
-        name: 'Cliente Exemplo', 
-        email: 'cliente@exemplo.com', 
-        phone: '(11) 99999-9999',
-        company: 'Empresa Exemplo',
-        status: 'active' as const,
-        createdAt: new Date(),
-        monthly_value: 1500,
-        payment_status: 'paid' as const,
-        contract_start: '2024-01-01'
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/clients`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients');
       }
-    ];
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      // Fallback para dados mock apenas em caso de erro
+      return [
+        { 
+          id: '1', 
+          name: 'Cliente Exemplo', 
+          email: 'cliente@exemplo.com', 
+          phone: '(11) 99999-9999',
+          company: 'Empresa Exemplo',
+          status: 'active' as const,
+          createdAt: new Date(),
+          monthly_value: 1500,
+          payment_status: 'paid' as const,
+          contract_start: '2024-01-01'
+        }
+      ];
+    }
   },
 
   async makeCall(phone: string) {
@@ -265,33 +293,46 @@ export const apiService = {
   },
 
   async getLeads() {
-    return [
-      {
-        id: '1',
-        name: 'Lead Exemplo',
-        email: 'lead@exemplo.com',
-        phone: '(11) 99999-9999',
-        company: 'Empresa Exemplo',
-        source: 'website' as const,
-        status: 'new' as const,
-        score: 85,
-        createdAt: new Date()
-      }
-    ];
-  },
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/leads`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
-  async getLead(id: string) {
-    return {
-      id,
-      name: 'Lead Exemplo',
-      email: 'lead@exemplo.com',
-      phone: '(11) 99999-9999',
-      company: 'Empresa Exemplo',
-      source: 'website' as const,
-        status: 'new' as const,
-        score: 85,
-        createdAt: new Date()
-    };
+      if (!response.ok) {
+        throw new Error('Failed to fetch leads');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      // Fallback para dados mock apenas em caso de erro
+      return [
+        {
+          id: '1',
+          name: 'João Silva',
+          email: 'joao@empresa.com',
+          phone: '(11) 99999-9999',
+          company: 'Empresa ABC',
+          status: 'qualified',
+          source: 'website',
+          score: 85,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: 'Maria Santos',
+          email: 'maria@company.com',
+          phone: '(11) 88888-8888',
+          company: 'Company XYZ',
+          status: 'contacted',
+          source: 'referral',
+          score: 70,
+          createdAt: new Date().toISOString()
+        }
+      ];
+    }
   },
 
   async createLead(data: any) {

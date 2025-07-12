@@ -88,7 +88,7 @@ const Settings: React.FC = () => {
         <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            Perfil
+            Usuário
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
@@ -128,7 +128,7 @@ const Settings: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Aba Perfil */}
+        {/* Aba Usuário */}
         <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardHeader>
@@ -150,6 +150,18 @@ const Settings: React.FC = () => {
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
                   <Input id="phone" placeholder="(11) 99999-9999" defaultValue="(11) 99999-9999" />
+                </div>
+                <div>
+                  <Label htmlFor="user-level">Nível de Acesso</Label>
+                  <select 
+                    id="user-level" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    defaultValue="admin"
+                  >
+                    <option value="master">Master</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">Usuário</option>
+                  </select>
                 </div>
                 <div>
                   <Label htmlFor="avatar">Avatar URL</Label>

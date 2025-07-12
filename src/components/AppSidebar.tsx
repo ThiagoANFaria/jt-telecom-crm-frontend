@@ -76,11 +76,6 @@ const menuItems = [
     icon: Phone,
   },
   {
-    title: 'Automação',
-    url: '/automation',
-    icon: Zap,
-  },
-  {
     title: 'Analytics',
     url: '/analytics',
     icon: BarChart,

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Proposal } from '@/types';
 import { apiService } from '@/services/api';
+import ClientSearch from '@/components/ClientSearch';
 
 interface ProposalModalProps {
   isOpen: boolean;
@@ -162,11 +163,19 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="client_name">Nome do Cliente *</Label>
-              <Input
-                id="client_name"
+              <ClientSearch
                 value={formData.client_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
-                placeholder="Nome do cliente"
+                onChange={(value) => setFormData(prev => ({ ...prev, client_name: value }))}
+                onClientSelect={(client) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    client_id: client.id,
+                    client_name: client.name,
+                    client_email: client.email || prev.client_email,
+                    client_phone: client.phone || prev.client_phone
+                  }));
+                }}
+                placeholder="Digite o nome do cliente ou lead"
               />
             </div>
             <div className="grid gap-2">

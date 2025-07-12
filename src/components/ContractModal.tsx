@@ -6,17 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Proposal } from '@/types';
+import { Contract } from '@/types';
 import { apiService } from '@/services/api';
 
-interface ProposalModalProps {
+interface ContractModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  proposal?: Proposal | null;
+  contract?: Contract | null;
 }
 
-const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSuccess, proposal }) => {
+const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSuccess, contract }) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -28,35 +28,33 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
     client_phone: '',
     description: '',
     amount: 0,
-    discount: 0,
-    total_amount: 0,
-    status: 'rascunho' as const,
-    valid_until: '',
+    status: 'pendente' as const,
+    start_date: '',
+    end_date: '',
+    template_id: '',
     notes: '',
-    number: '',
     content: ''
   });
 
   useEffect(() => {
-    if (proposal && isOpen) {
+    if (contract && isOpen) {
       setFormData({
-        title: proposal.title || '',
-        client_id: proposal.client_id || '',
-        client_name: proposal.client_name || '',
-        client_email: proposal.client_email || '',
-        client_phone: proposal.client_phone || '',
-        description: proposal.description || '',
-        amount: proposal.amount || 0,
-        discount: proposal.discount || 0,
-        total_amount: proposal.total_amount || 0,
-        status: proposal.status || 'rascunho',
-        valid_until: proposal.valid_until || '',
-        notes: proposal.notes || '',
-        number: proposal.number || '',
-        content: proposal.content || ''
+        title: contract.title || '',
+        client_id: contract.client_id || '',
+        client_name: contract.client_name || '',
+        client_email: contract.client_email || '',
+        client_phone: contract.client_phone || '',
+        description: contract.description || '',
+        amount: contract.amount || 0,
+        status: contract.status || 'pendente',
+        start_date: contract.start_date || '',
+        end_date: contract.end_date || '',
+        template_id: contract.template_id || '',
+        notes: contract.notes || '',
+        content: contract.content || ''
       });
-    } else if (isOpen && !proposal) {
-      // Reset form for new proposal
+    } else if (isOpen && !contract) {
+      // Reset form for new contract
       setFormData({
         title: '',
         client_id: '',
@@ -65,31 +63,21 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
         client_phone: '',
         description: '',
         amount: 0,
-        discount: 0,
-        total_amount: 0,
-        status: 'rascunho',
-        valid_until: '',
+        status: 'pendente',
+        start_date: '',
+        end_date: '',
+        template_id: '',
         notes: '',
-        number: '',
         content: ''
       });
     }
-  }, [proposal, isOpen]);
-
-  const calculateTotal = () => {
-    const total = formData.amount - (formData.amount * formData.discount / 100);
-    setFormData(prev => ({ ...prev, total_amount: total }));
-  };
-
-  useEffect(() => {
-    calculateTotal();
-  }, [formData.amount, formData.discount]);
+  }, [contract, isOpen]);
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
       toast({
         title: 'Erro de validação',
-        description: 'O título da proposta é obrigatório.',
+        description: 'O título do contrato é obrigatório.',
         variant: 'destructive',
       });
       return;
@@ -104,34 +92,52 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
       return;
     }
 
+    if (!formData.start_date) {
+      toast({
+        title: 'Erro de validação',
+        description: 'A data de início é obrigatória.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.end_date) {
+      toast({
+        title: 'Erro de validação',
+        description: 'A data de fim é obrigatória.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       
-      const proposalData = {
+      const contractData = {
         ...formData,
-        status: formData.status as 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao'
+        status: formData.status as 'pendente' | 'ativo' | 'expirado' | 'cancelado' | 'assinado'
       };
 
-      if (proposal?.id) {
-        await apiService.updateProposal(proposal.id, proposalData);
+      if (contract?.id) {
+        await apiService.updateContract(contract.id, contractData);
         toast({
-          title: 'Proposta atualizada',
-          description: `${proposalData.title} foi atualizada com sucesso.`,
+          title: 'Contrato atualizado',
+          description: `${contractData.title} foi atualizado com sucesso.`,
         });
       } else {
-        await apiService.createProposal(proposalData);
+        await apiService.createContract(contractData);
         toast({
-          title: 'Proposta criada',
-          description: `${proposalData.title} foi criada com sucesso.`,
+          title: 'Contrato criado',
+          description: `${contractData.title} foi criado com sucesso.`,
         });
       }
 
       onSuccess();
     } catch (error) {
-      console.error('Failed to save proposal:', error);
+      console.error('Failed to save contract:', error);
       toast({
         title: 'Erro',
-        description: 'Falha ao salvar a proposta.',
+        description: 'Falha ao salvar o contrato.',
         variant: 'destructive',
       });
     } finally {
@@ -144,7 +150,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#0057B8] font-semibold">
-            {proposal?.id ? 'Editar Proposta' : 'Nova Proposta'}
+            {contract?.id ? 'Editar Contrato' : 'Novo Contrato'}
           </DialogTitle>
         </DialogHeader>
 
@@ -155,7 +161,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
               id="title"
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Título da proposta"
+              placeholder="Título do contrato"
             />
           </div>
 
@@ -208,12 +214,12 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Descrição da proposta"
+              placeholder="Descrição do contrato"
               rows={3}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor (R$)</Label>
               <Input
@@ -227,31 +233,6 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="discount">Desconto (%)</Label>
-              <Input
-                id="discount"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                value={formData.discount}
-                onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
-                placeholder="0"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Valor Total</Label>
-              <div className="flex items-center h-10 px-3 py-2 border border-input bg-background rounded-md text-sm">
-                <span className="text-[#0057B8] font-semibold">
-                  R$ {formData.total_amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
@@ -261,24 +242,47 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rascunho">Rascunho</SelectItem>
-                  <SelectItem value="enviada">Enviada</SelectItem>
-                  <SelectItem value="aceita">Aceita</SelectItem>
-                  <SelectItem value="rejeitada">Rejeitada</SelectItem>
-                  <SelectItem value="revisao">Em Revisão</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="ativo">Ativo</SelectItem>
+                  <SelectItem value="assinado">Assinado</SelectItem>
+                  <SelectItem value="expirado">Expirado</SelectItem>
+                  <SelectItem value="cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="valid_until">Válida até</Label>
+              <Label htmlFor="start_date">Data de Início *</Label>
               <Input
-                id="valid_until"
+                id="start_date"
                 type="date"
-                value={formData.valid_until}
-                onChange={(e) => setFormData(prev => ({ ...prev, valid_until: e.target.value }))}
+                value={formData.start_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
               />
             </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="end_date">Data de Fim *</Label>
+              <Input
+                id="end_date"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="content">Conteúdo do Contrato</Label>
+            <Textarea
+              id="content"
+              value={formData.content}
+              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+              placeholder="Conteúdo detalhado do contrato"
+              rows={5}
+            />
           </div>
 
           <div className="grid gap-2">
@@ -287,7 +291,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Observações sobre a proposta"
+              placeholder="Observações sobre o contrato"
               rows={3}
             />
           </div>
@@ -302,7 +306,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
             disabled={loading}
             className="bg-[#0057B8] hover:bg-[#003d82]"
           >
-            {loading ? 'Salvando...' : (proposal?.id ? 'Atualizar' : 'Criar')}
+            {loading ? 'Salvando...' : (contract?.id ? 'Atualizar' : 'Criar')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -310,5 +314,5 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
   );
 };
 
-export default ProposalModal;
+export default ContractModal;
 

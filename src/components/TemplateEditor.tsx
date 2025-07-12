@@ -49,22 +49,22 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
 
   // Variáveis disponíveis para uso nos templates
   const availableVariables = [
-    { key: '{client_name}', description: 'Nome do cliente' },
-    { key: '{client_email}', description: 'Email do cliente' },
-    { key: '{client_phone}', description: 'Telefone do cliente' },
-    { key: '{client_company}', description: 'Empresa do cliente' },
-    { key: '{client_cnpj}', description: 'CNPJ do cliente' },
-    { key: '{client_address}', description: 'Endereço do cliente' },
-    { key: '{proposal_title}', description: 'Título da proposta' },
-    { key: '{proposal_amount}', description: 'Valor da proposta' },
-    { key: '{proposal_discount}', description: 'Desconto da proposta' },
-    { key: '{proposal_total}', description: 'Valor total da proposta' },
-    { key: '{proposal_date}', description: 'Data da proposta' },
-    { key: '{proposal_valid_until}', description: 'Válida até' },
-    { key: '{company_name}', description: 'JT Tecnologia' },
-    { key: '{company_email}', description: 'contato@jttelecom.com.br' },
-    { key: '{company_phone}', description: 'Telefone da empresa' },
-    { key: '{company_address}', description: 'Endereço da empresa' },
+    { key: '{{client_name}}', description: 'Nome do cliente' },
+    { key: '{{client_email}}', description: 'Email do cliente' },
+    { key: '{{client_phone}}', description: 'Telefone do cliente' },
+    { key: '{{client_company}}', description: 'Empresa do cliente' },
+    { key: '{{client_cnpj}}', description: 'CNPJ do cliente' },
+    { key: '{{client_address}}', description: 'Endereço do cliente' },
+    { key: '{{proposal_title}}', description: 'Título da proposta' },
+    { key: '{{proposal_amount}}', description: 'Valor da proposta' },
+    { key: '{{proposal_discount}}', description: 'Desconto da proposta' },
+    { key: '{{proposal_total}}', description: 'Valor total da proposta' },
+    { key: '{{proposal_date}}', description: 'Data da proposta' },
+    { key: '{{proposal_valid_until}}', description: 'Válida até' },
+    { key: '{{company_name}}', description: 'JT Tecnologia' },
+    { key: '{{company_email}}', description: 'contato@jttelecom.com.br' },
+    { key: '{{company_phone}}', description: 'Telefone da empresa' },
+    { key: '{{company_address}}', description: 'Endereço da empresa' },
   ];
 
   useEffect(() => {
@@ -82,20 +82,20 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
   }, [template]);
 
   const getDefaultTemplate = () => {
-    return `# Proposta Comercial - {company_name}
+    return `# Proposta Comercial - {{company_name}}
 
 ## Soluções em Comunicação Inteligente
 
-**Para:** {client_name}  
-**Empresa:** {client_company}  
-**Email:** {client_email}  
-**Telefone:** {client_phone}  
+**Para:** {{client_name}}  
+**Empresa:** {{client_company}}  
+**Email:** {{client_email}}  
+**Telefone:** {{client_phone}}  
 
 ---
 
 ### Quem Somos
 
-A {company_name} é especialista em soluções que simplificam e potencializam a comunicação empresarial. Ajudamos empresas a reduzirem custos, automatizarem processos e escalarem seus canais de atendimento com tecnologia de ponta, acessível e eficiente.
+A {{company_name}} é especialista em soluções que simplificam e potencializam a comunicação empresarial. Ajudamos empresas a reduzirem custos, automatizarem processos e escalarem seus canais de atendimento com tecnologia de ponta, acessível e eficiente.
 
 ### Nossos Produtos
 
@@ -126,24 +126,24 @@ Potencialize seu atendimento com inteligência artificial avançada.
 
 ### Proposta
 
-**Título:** {proposal_title}  
-**Valor:** R$ {proposal_amount}  
-**Desconto:** R$ {proposal_discount}  
-**Total:** R$ {proposal_total}  
+**Título:** {{proposal_title}}  
+**Valor:** R$ {{proposal_amount}}  
+**Desconto:** R$ {{proposal_discount}}  
+**Total:** R$ {{proposal_total}}  
 
-**Válida até:** {proposal_valid_until}
+**Válida até:** {{proposal_valid_until}}
 
 ---
 
 ### Contato
 
-**{company_name}**  
-Email: {company_email}  
-Telefone: {company_phone}  
+**{{company_name}}**  
+Email: {{company_email}}  
+Telefone: {{company_phone}}  
 
 Estamos à disposição para esclarecer dúvidas e personalizar nossa solução às suas necessidades.
 
-*Proposta gerada em {proposal_date}*`;
+*Proposta gerada em {{proposal_date}}*`;
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -175,22 +175,22 @@ Estamos à disposição para esclarecer dúvidas e personalizar nossa solução 
     // Substituir variáveis por valores de exemplo para preview
     let previewContent = formData.content;
     const exampleData = {
-      '{client_name}': 'João Silva',
-      '{client_email}': 'joao.silva@empresa.com',
-      '{client_phone}': '(11) 99999-8888',
-      '{client_company}': 'Empresa Exemplo Ltda',
-      '{client_cnpj}': '12.345.678/0001-90',
-      '{client_address}': 'Rua Exemplo, 123 - São Paulo/SP',
-      '{proposal_title}': 'Proposta PABX em Nuvem',
-      '{proposal_amount}': '5.000,00',
-      '{proposal_discount}': '500,00',
-      '{proposal_total}': '4.500,00',
-      '{proposal_date}': new Date().toLocaleDateString('pt-BR'),
-      '{proposal_valid_until}': new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
-      '{company_name}': 'JT Tecnologia',
-      '{company_email}': 'contato@jttelecom.com.br',
-      '{company_phone}': '(11) 3000-0000',
-      '{company_address}': 'São Paulo/SP',
+      '{{client_name}}': 'João Silva',
+      '{{client_email}}': 'joao.silva@empresa.com',
+      '{{client_phone}}': '(11) 99999-8888',
+      '{{client_company}}': 'Empresa Exemplo Ltda',
+      '{{client_cnpj}}': '12.345.678/0001-90',
+      '{{client_address}}': 'Rua Exemplo, 123 - São Paulo/SP',
+      '{{proposal_title}}': 'Proposta PABX em Nuvem',
+      '{{proposal_amount}}': '5.000,00',
+      '{{proposal_discount}}': '500,00',
+      '{{proposal_total}}': '4.500,00',
+      '{{proposal_date}}': new Date().toLocaleDateString('pt-BR'),
+      '{{proposal_valid_until}}': new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
+      '{{company_name}}': 'JT Tecnologia',
+      '{{company_email}}': 'contato@jttelecom.com.br',
+      '{{company_phone}}': '(11) 3000-0000',
+      '{{company_address}}': 'São Paulo/SP',
     };
 
     Object.entries(exampleData).forEach(([key, value]) => {
@@ -226,7 +226,7 @@ Estamos à disposição para esclarecer dúvidas e personalizar nossa solução 
 
     try {
       // Extrair variáveis do conteúdo
-      const variables = Array.from(formData.content.matchAll(/\{([^}]+)\}/g))
+      const variables = Array.from(formData.content.matchAll(/\{\{([^}]+)\}\}/g))
         .map(match => match[0])
         .filter((value, index, self) => self.indexOf(value) === index);
 

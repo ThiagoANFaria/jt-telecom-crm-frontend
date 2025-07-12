@@ -920,14 +920,14 @@ const Settings: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="alert-low-conversion">Baixa Conversão</Label>
-                      <p className="text-sm text-muted-foreground">Alertar quando conversão < 20%</p>
+                      <p className="text-sm text-muted-foreground">Alertar quando conversão &lt; 20%</p>
                     </div>
                     <Switch id="alert-low-conversion" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="alert-high-leads">Alto Volume de Leads</Label>
-                      <p className="text-sm text-muted-foreground">Alertar quando leads > 100/dia</p>
+                      <p className="text-sm text-muted-foreground">Alertar quando leads &gt; 100/dia</p>
                     </div>
                     <Switch id="alert-high-leads" />
                   </div>

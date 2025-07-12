@@ -102,6 +102,7 @@ export function AppSidebar() {
   const { isMaster } = useAuth();
   const location = useLocation();
   const isCollapsed = state === 'collapsed';
+  // Deploy: Nomes dos módulos atualizados para Smartbot e JT Vox PABX
 
   // Filtrar itens do menu baseado no nível do usuário
   const filteredMenuItems = menuItems.filter(item => {

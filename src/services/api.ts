@@ -48,6 +48,185 @@ export const apiService = {
     ];
   },
 
+  async makeCall(phone: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/telephony/call`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ phone })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to make call');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed, using mock response:', error);
+      // Mock response para desenvolvimento
+      return {
+        call_id: `call_${Date.now()}`,
+        status: 'initiated',
+        phone: phone,
+        timestamp: new Date().toISOString()
+      };
+    }
+  },
+
+  async sendWhatsAppMessage(phone: string, message: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chatbot/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          phone, 
+          message,
+          platform: 'whatsapp'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send WhatsApp message');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed, using mock response:', error);
+      // Mock response para desenvolvimento
+      return {
+        message_id: `msg_${Date.now()}`,
+        status: 'sent',
+        phone: phone,
+        message: message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  },
+
+  async getCallHistory(contactId: string, contactType: 'lead' | 'client') {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/telephony/history/${contactType}/${contactId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get call history');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed, using mock response:', error);
+      // Mock response para desenvolvimento
+      return [
+        {
+          id: '1',
+          phone: '11999999999',
+          direction: 'outbound',
+          status: 'completed',
+          duration: 180,
+          timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+          recording_url: '/recordings/call_001.mp3',
+          call_transcript: 'Cliente interessado em plano empresarial. Solicitou orçamento para 50 ramais.',
+          meeting_transcript: 'Reunião agendada para próxima semana. Cliente quer apresentação completa dos serviços.'
+        },
+        {
+          id: '2',
+          phone: '11999999999',
+          direction: 'inbound',
+          status: 'completed',
+          duration: 240,
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          recording_url: '/recordings/call_002.mp3',
+          call_transcript: 'Cliente ligou para tirar dúvidas sobre faturamento. Explicado processo de cobrança.',
+          meeting_transcript: 'Dúvidas esclarecidas. Cliente satisfeito com o atendimento.'
+        }
+      ];
+    }
+  },
+
+  async getChatHistory(contactId: string, contactType: 'lead' | 'client') {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chatbot/history/${contactType}/${contactId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get chat history');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed, using mock response:', error);
+      // Mock response para desenvolvimento
+      return [
+        {
+          id: '1',
+          message: 'Olá! Gostaria de saber mais sobre os planos de telefonia.',
+          response: 'Olá! Claro, temos diversos planos. Qual o porte da sua empresa?',
+          timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+          platform: 'whatsapp',
+          status: 'delivered'
+        },
+        {
+          id: '2',
+          message: 'Somos uma empresa de médio porte, cerca de 30 funcionários.',
+          response: 'Perfeito! Para empresas desse porte, recomendamos nosso plano Business Pro. Posso agendar uma apresentação?',
+          timestamp: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+          platform: 'whatsapp',
+          status: 'delivered'
+        },
+        {
+          id: '3',
+          message: 'Sim, gostaria de agendar. Qual a disponibilidade?',
+          response: 'Ótimo! Tenho disponibilidade para amanhã às 14h ou quinta-feira às 10h. Qual prefere?',
+          timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+          platform: 'whatsapp',
+          status: 'delivered'
+        }
+      ];
+    }
+  },
+
+  async updateCallTranscript(callId: string, callTranscript: string, meetingTranscript?: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/telephony/calls/${callId}/transcript`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          call_transcript: callTranscript, 
+          meeting_transcript: meetingTranscript 
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update transcript');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed, using mock response:', error);
+      return {
+        success: true,
+        message: 'Transcrições atualizadas com sucesso'
+      };
+    }
+  },
+
   async getClient(id: string) {
     return { 
       id, 

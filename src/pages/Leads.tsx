@@ -11,10 +11,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Users, Plus, Search, Edit, Trash2, Mail, Phone, Building, Download, Upload, 
   MessageCircle, CheckSquare, Filter, TrendingUp, Target, Award, List, Grid3X3,
-  MapPin, Calendar, Star, ExternalLink
+  MapPin, Calendar, Star, ExternalLink, PhoneCall
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import LeadModal from '@/components/LeadModal';
+import ContactHistoryModal from '@/components/ContactHistoryModal';
 
 type ViewMode = 'list' | 'card';
 
@@ -248,6 +249,41 @@ const Leads: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleMakeCall = async (phone: string, leadName: string) => {
+    try {
+      await apiService.makeCall(phone);
+      toast({
+        title: 'Chamada iniciada',
+        description: `Chamada para ${leadName} (${phone}) iniciada via JT Vox PABX.`,
+      });
+    } catch (error) {
+      console.error('Failed to make call:', error);
+      toast({
+        title: 'Erro na chamada',
+        description: 'Não foi possível iniciar a chamada. Verifique as configurações do PABX.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSendWhatsApp = async (phone: string, leadName: string) => {
+    try {
+      const message = `Olá ${leadName}! Sou da JT Telecom e gostaria de conversar sobre nossas soluções de telecomunicações. Quando seria um bom momento para conversarmos?`;
+      await apiService.sendWhatsAppMessage(phone, message);
+      toast({
+        title: 'WhatsApp enviado',
+        description: `Mensagem enviada para ${leadName} via Smartbot.`,
+      });
+    } catch (error) {
+      console.error('Failed to send WhatsApp:', error);
+      toast({
+        title: 'Erro no WhatsApp',
+        description: 'Não foi possível enviar a mensagem. Verifique as configurações do Smartbot.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'novo':
@@ -367,11 +403,31 @@ const Leads: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => handleConvertToClient(lead.id)}
-                className="flex-1 text-green-600 hover:text-green-700"
+                onClick={() => handleMakeCall(lead.phone, lead.name)}
+                className="text-blue-600 hover:text-blue-700"
               >
-                <CheckSquare className="w-4 h-4 mr-1" />
-                Converter
+                <PhoneCall className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleSendWhatsApp(lead.whatsapp || lead.phone, lead.name)}
+                className="text-green-600 hover:text-green-700"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+              <ContactHistoryModal 
+                contactId={lead.id}
+                contactType="lead"
+                contactName={lead.name}
+              />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleConvertToClient(lead.id)}
+                className="text-purple-600 hover:text-purple-700"
+              >
+                <CheckSquare className="w-4 h-4" />
               </Button>
             </div>
           </CardContent>
@@ -463,6 +519,27 @@ const Leads: React.FC = () => {
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleMakeCall(lead.phone, lead.name)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <PhoneCall className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleSendWhatsApp(lead.whatsapp || lead.phone, lead.name)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                    <ContactHistoryModal 
+                      contactId={lead.id}
+                      contactType="lead"
+                      contactName={lead.name}
+                    />
                     <Button 
                       variant="outline" 
                       size="sm"

@@ -31,6 +31,7 @@ const Settings: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  // Force deploy: Menu completo de configurações implementado
   
   // Verificar se o usuário tem permissão de administrador para acessar Configurações
   const isAdmin = user?.user_level === 'admin' || user?.user_level === 'master';

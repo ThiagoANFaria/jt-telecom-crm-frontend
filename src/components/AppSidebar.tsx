@@ -66,12 +66,12 @@ const menuItems = [
     icon: GitBranch,
   },
   {
-    title: 'Chatbot',
+    title: 'Smartbot',
     url: '/chatbot',
     icon: MessageCircle,
   },
   {
-    title: 'Telefonia',
+    title: 'JT Vox PABX',
     url: '/telephony',
     icon: Phone,
   },

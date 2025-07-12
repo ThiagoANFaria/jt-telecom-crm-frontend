@@ -27,7 +27,11 @@ import {
   FileCheck,
   Edit,
   Trash2,
-  Plus
+  Plus,
+  BarChart3,
+  CheckSquare,
+  FileBarChart,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -85,7 +89,7 @@ const Settings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-14">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Usuário
@@ -121,6 +125,22 @@ const Settings: React.FC = () => {
           <TabsTrigger value="d4sign" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
             D4Sign
+          </TabsTrigger>
+          <TabsTrigger value="pipeline-config" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Pipeline
+          </TabsTrigger>
+          <TabsTrigger value="tasks-config" className="flex items-center gap-2">
+            <CheckSquare className="w-4 h-4" />
+            Tarefas
+          </TabsTrigger>
+          <TabsTrigger value="reports-config" className="flex items-center gap-2">
+            <FileBarChart className="w-4 h-4" />
+            Relatórios
+          </TabsTrigger>
+          <TabsTrigger value="analytics-config" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="automation" className="flex items-center gap-2">
             <Zap className="w-4 h-4" />
@@ -615,6 +635,302 @@ const Settings: React.FC = () => {
                 <div className="text-center p-4 border rounded">
                   <h4 className="font-medium">Taxa de Assinatura</h4>
                   <p className="text-2xl font-bold text-purple-600">87.5%</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Aba Configuração de Pipeline */}
+        <TabsContent value="pipeline-config" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-[#0057B8]" />
+                Configuração de Pipeline
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Funis de Vendas</h3>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Funil
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Funil Principal</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      <Badge className="bg-blue-500 text-white">Lead</Badge>
+                      <Badge className="bg-green-500 text-white">Qualificado</Badge>
+                      <Badge className="bg-yellow-500 text-white">Proposta</Badge>
+                      <Badge className="bg-purple-500 text-white">Fechado</Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h4 className="font-medium">Configurações Gerais</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="pipeline-default">Pipeline Padrão</Label>
+                    <Switch id="pipeline-default" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="pipeline-active">Ativo</Label>
+                    <Switch id="pipeline-active" defaultChecked />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Aba Configuração de Tarefas */}
+        <TabsContent value="tasks-config" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckSquare className="w-5 h-5 text-[#0057B8]" />
+                Configuração de Tarefas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Tipos de Prioridade</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge className="bg-red-500 text-white">Alta</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge className="bg-yellow-500 text-white">Média</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge className="bg-green-500 text-white">Baixa</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Status de Tarefas</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge variant="outline">Pendente</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge className="bg-blue-500 text-white">Em Andamento</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-2 border rounded">
+                      <Badge className="bg-green-500 text-white">Concluída</Badge>
+                      <Button variant="outline" size="sm">Editar</Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h4 className="font-medium">Templates de Tarefas</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-4 border rounded">
+                    <div>
+                      <h5 className="font-medium">Follow-up de Lead</h5>
+                      <p className="text-sm text-muted-foreground">Entrar em contato com lead qualificado</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <Button className="w-full" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Template
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Aba Configuração de Relatórios */}
+        <TabsContent value="reports-config" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileBarChart className="w-5 h-5 text-[#0057B8]" />
+                Configuração de Relatórios
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Templates de Relatórios</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-4 border rounded">
+                      <div>
+                        <h5 className="font-medium">Relatório de Vendas</h5>
+                        <p className="text-sm text-muted-foreground">Vendas por período e vendedor</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded">
+                      <div>
+                        <h5 className="font-medium">Relatório de Leads</h5>
+                        <p className="text-sm text-muted-foreground">Origem e conversão de leads</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Configurações Gerais</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="default-period">Período Padrão</Label>
+                      <select 
+                        id="default-period" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly">Mensal</option>
+                        <option value="quarterly">Trimestral</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="export-format">Formato de Exportação</Label>
+                      <select 
+                        id="export-format" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                        <option value="csv">CSV</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h4 className="font-medium">Agendamento Automático</h4>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto-reports">Relatórios Automáticos</Label>
+                    <p className="text-sm text-muted-foreground">Enviar relatórios automaticamente</p>
+                  </div>
+                  <Switch id="auto-reports" />
+                </div>
+                <div>
+                  <Label htmlFor="recipients">Destinatários</Label>
+                  <Input id="recipients" placeholder="email1@exemplo.com, email2@exemplo.com" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Aba Configuração de Analytics */}
+        <TabsContent value="analytics-config" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-[#0057B8]" />
+                Configuração de Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Widgets do Dashboard</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="widget-funnel">Funil de Vendas</Label>
+                      <Switch id="widget-funnel" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="widget-leads">Origem de Leads</Label>
+                      <Switch id="widget-leads" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="widget-conversion">Taxa de Conversão</Label>
+                      <Switch id="widget-conversion" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="widget-revenue">Receita Mensal</Label>
+                      <Switch id="widget-revenue" defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Configurações de Análise</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="analysis-period">Período Padrão</Label>
+                      <select 
+                        id="analysis-period" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30">Últimos 30 dias</option>
+                        <option value="90">Últimos 90 dias</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="refresh-interval">Atualização Automática</Label>
+                      <select 
+                        id="refresh-interval" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="5">5 minutos</option>
+                        <option value="15">15 minutos</option>
+                        <option value="60">1 hora</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-6">
+                <h4 className="font-medium">Alertas e Notificações</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="alert-low-conversion">Baixa Conversão</Label>
+                      <p className="text-sm text-muted-foreground">Alertar quando conversão < 20%</p>
+                    </div>
+                    <Switch id="alert-low-conversion" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="alert-high-leads">Alto Volume de Leads</Label>
+                      <p className="text-sm text-muted-foreground">Alertar quando leads > 100/dia</p>
+                    </div>
+                    <Switch id="alert-high-leads" />
+                  </div>
                 </div>
               </div>
             </CardContent>

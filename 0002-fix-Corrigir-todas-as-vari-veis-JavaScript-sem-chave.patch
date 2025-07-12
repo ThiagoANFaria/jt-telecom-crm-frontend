@@ -1,0 +1,31 @@
+From b39923b12d244c0e7873e8a99bda2853f02fef9f Mon Sep 17 00:00:00 2001
+From: ThiagoANFaria <thiago@jttecnologia.com.br>
+Date: Sat, 12 Jul 2025 02:24:41 -0400
+Subject: [PATCH 2/2] =?UTF-8?q?fix:=20Corrigir=20todas=20as=20vari=C3=A1ve?=
+ =?UTF-8?q?is=20JavaScript=20sem=20chaves=20duplas?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ src/pages/Settings.tsx | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/pages/Settings.tsx b/src/pages/Settings.tsx
+index be21454..7aa5ab9 100644
+--- a/src/pages/Settings.tsx
++++ b/src/pages/Settings.tsx
+@@ -501,8 +501,8 @@ const Settings: React.FC = () => {
+                     <p className="text-sm text-muted-foreground">Proposta comercial para {{client_name}}...</p>
+                     <div className="flex gap-2 mt-2">
+                       <Badge variant="outline">{{client_name}}</Badge>
+-                      <Badge variant="outline">value</Badge>
+-                      <Badge variant="outline">description</Badge>
++                      <Badge variant="outline">{{value}}</Badge>
++                      <Badge variant="outline">{{description}}</Badge>
+                     </div>
+                   </div>
+                   <div className="flex gap-2">
+-- 
+2.34.1
+

@@ -34,6 +34,7 @@ import {
   Send
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { apiService } from '@/services/api';
 
 interface MetricCard {
   title: string;
@@ -67,6 +68,47 @@ const DashboardModern: React.FC = () => {
       setLoading(false);
     }, 1500);
     return () => clearTimeout(timer);
+  }, []);
+
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoadingData(true);
+      const data = await apiService.getDashboardSummary();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Em caso de erro, usar dados vazios
+      setDashboardData({
+        totalLeads: 0,
+        totalClients: 0,
+        totalProposals: 0,
+        totalContracts: 0,
+        monthlyRevenue: 0,
+        conversionRate: 0,
+        hotLeads: 0,
+        callsMade: 0,
+        emailsSent: 0,
+        meetingsScheduled: 0,
+        tasksCompleted: 0,
+        pendingFollowUps: 0,
+        avgResponseTime: '0h',
+        customerSatisfaction: 0,
+        automationSuccess: 0,
+        activeDeals: 0,
+        closingDeals: 0,
+        activeContractsThisMonth: 0,
+        meetingsHeld: 0
+      });
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
 
   const getMockData = () => {
@@ -145,12 +187,33 @@ const DashboardModern: React.FC = () => {
     }
   };
 
-  const mockData = getMockData();
+  // Usar dados reais ou dados vazios se ainda carregando
+  const currentData = dashboardData || {
+    totalLeads: 0,
+    totalClients: 0,
+    totalProposals: 0,
+    totalContracts: 0,
+    monthlyRevenue: 0,
+    conversionRate: 0,
+    hotLeads: 0,
+    callsMade: 0,
+    emailsSent: 0,
+    meetingsScheduled: 0,
+    tasksCompleted: 0,
+    pendingFollowUps: 0,
+    avgResponseTime: '0h',
+    customerSatisfaction: 0,
+    automationSuccess: 0,
+    activeDeals: 0,
+    closingDeals: 0,
+    activeContractsThisMonth: 0,
+    meetingsHeld: 0
+  };
 
   const mainMetrics: MetricCard[] = [
     {
       title: 'Total de Leads',
-      value: mockData.totalLeads.toLocaleString('pt-BR'),
+      value: isLoadingData ? '...' : currentData.totalLeads.toLocaleString('pt-BR'),
       change: 12.5,
       trend: 'up',
       icon: Users,
@@ -160,7 +223,7 @@ const DashboardModern: React.FC = () => {
     },
     {
       title: 'Clientes Ativos',
-      value: mockData.totalClients.toLocaleString('pt-BR'),
+      value: currentData.totalClients.toLocaleString('pt-BR'),
       change: 8.2,
       trend: 'up',
       icon: CheckCircle2,
@@ -170,7 +233,7 @@ const DashboardModern: React.FC = () => {
     },
     {
       title: 'Receita Mensal',
-      value: `R$ ${(mockData.monthlyRevenue / 1000).toFixed(0)}K`,
+      value: `R$ ${(currentData.monthlyRevenue / 1000).toFixed(0)}K`,
       change: 15.7,
       trend: 'up',
       icon: DollarSign,
@@ -180,7 +243,7 @@ const DashboardModern: React.FC = () => {
     },
     {
       title: 'Taxa de Conversão',
-      value: `${mockData.conversionRate}%`,
+      value: `${currentData.conversionRate}%`,
       change: -2.1,
       trend: 'down',
       icon: Target,
@@ -194,42 +257,42 @@ const DashboardModern: React.FC = () => {
     {
       icon: Flame,
       label: 'Leads Quentes',
-      value: mockData.hotLeads,
+      value: currentData.hotLeads,
       color: 'text-red-500',
       bgColor: 'bg-red-100'
     },
     {
       icon: FileCheck,
       label: 'Contratos Ativos no Mês',
-      value: mockData.activeContractsThisMonth || 0,
+      value: currentData.activeContractsThisMonth || 0,
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
       icon: Calendar,
       label: 'Reuniões Realizadas',
-      value: mockData.meetingsHeld || 0,
+      value: currentData.meetingsHeld || 0,
       color: 'text-purple-500',
       bgColor: 'bg-purple-100'
     },
     {
       icon: Phone,
       label: 'Chamadas Realizadas',
-      value: mockData.callsMade,
+      value: currentData.callsMade,
       color: 'text-[#0057B8]',
       bgColor: 'bg-blue-100'
     },
     {
       icon: Send,
       label: 'E-mails Enviados',
-      value: mockData.emailsSent,
+      value: currentData.emailsSent,
       color: 'text-[#00C853]',
       bgColor: 'bg-green-100'
     },
     {
       icon: Calendar,
       label: 'Reuniões Agendadas',
-      value: mockData.meetingsScheduled,
+      value: currentData.meetingsScheduled,
       color: 'text-purple-500',
       bgColor: 'bg-purple-100'
     }
@@ -612,7 +675,7 @@ const DashboardModern: React.FC = () => {
                     <span className="font-medium font-opensans">Satisfação do Cliente</span>
                   </div>
                   <Badge variant="secondary" className="bg-[#0057B8] text-white hover:bg-[#003d82]">
-                    {mockData.customerSatisfaction}%
+                    {currentData.customerSatisfaction}%
                   </Badge>
                 </div>
                 
@@ -622,7 +685,7 @@ const DashboardModern: React.FC = () => {
                     <span className="font-medium font-opensans">Tempo Médio de Resposta</span>
                   </div>
                   <Badge variant="secondary" className="bg-orange-500 text-white hover:bg-orange-600">
-                    {mockData.avgResponseTime}
+                    {currentData.avgResponseTime}
                   </Badge>
                 </div>
 
@@ -632,7 +695,7 @@ const DashboardModern: React.FC = () => {
                     <span className="font-medium font-opensans">Automação Efetiva</span>
                   </div>
                   <Badge variant="secondary" className="bg-purple-500 text-white hover:bg-purple-600">
-                    {mockData.automationSuccess}%
+                    {currentData.automationSuccess}%
                   </Badge>
                 </div>
               </div>
@@ -647,25 +710,25 @@ const DashboardModern: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center space-y-2">
                   <div className="text-3xl font-bold text-[#0057B8] font-montserrat">
-                    {mockData.activeDeals}
+                    {currentData.activeDeals}
                   </div>
                   <div className="text-sm text-gray-600 font-opensans">Negócios Ativos</div>
                 </div>
                 <div className="text-center space-y-2">
                   <div className="text-3xl font-bold text-[#00C853] font-montserrat">
-                    {mockData.closingDeals}
+                    {currentData.closingDeals}
                   </div>
                   <div className="text-sm text-gray-600 font-opensans">Fechando Hoje</div>
                 </div>
                 <div className="text-center space-y-2">
                   <div className="text-3xl font-bold text-[#0057B8] font-montserrat">
-                    R$ {(mockData.monthlyRevenue / 30 / 1000).toFixed(0)}K
+                    R$ {(currentData.monthlyRevenue / 30 / 1000).toFixed(0)}K
                   </div>
                   <div className="text-sm text-gray-600 font-opensans">Receita Diária</div>
                 </div>
                 <div className="text-center space-y-2">
                   <div className="text-3xl font-bold text-[#00C853] font-montserrat">
-                    {mockData.tasksCompleted}
+                    {currentData.tasksCompleted}
                   </div>
                   <div className="text-sm text-gray-600 font-opensans">Tarefas Concluídas</div>
                 </div>

@@ -407,18 +407,68 @@ export const apiService = {
   },
 
   async getDashboardSummary() {
-    return {
-      totalLeads: 150,
-      totalClients: 85,
-      totalProposals: 45,
-      totalContracts: 30,
-      monthlyRevenue: 125000,
-      conversionRate: 65.5,
-      revenue_this_month: 125000,
-      conversion_rate: 65.5,
-      activeContractsThisMonth: 12,
-      meetingsHeld: 28
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/dashboard/summary`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        // Se a API não estiver disponível, retornar dados vazios em vez de fictícios
+        return {
+          totalLeads: 0,
+          totalClients: 0,
+          totalProposals: 0,
+          totalContracts: 0,
+          monthlyRevenue: 0,
+          conversionRate: 0,
+          revenue_this_month: 0,
+          conversion_rate: 0,
+          activeContractsThisMonth: 0,
+          meetingsHeld: 0,
+          hotLeads: 0,
+          callsMade: 0,
+          emailsSent: 0,
+          meetingsScheduled: 0,
+          tasksCompleted: 0,
+          pendingFollowUps: 0,
+          avgResponseTime: '0h',
+          customerSatisfaction: 0,
+          automationSuccess: 0,
+          activeDeals: 0,
+          closingDeals: 0
+        };
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching dashboard summary:', error);
+      // Retornar dados vazios em caso de erro
+      return {
+        totalLeads: 0,
+        totalClients: 0,
+        totalProposals: 0,
+        totalContracts: 0,
+        monthlyRevenue: 0,
+        conversionRate: 0,
+        revenue_this_month: 0,
+        conversion_rate: 0,
+        activeContractsThisMonth: 0,
+        meetingsHeld: 0,
+        hotLeads: 0,
+        callsMade: 0,
+        emailsSent: 0,
+        meetingsScheduled: 0,
+        tasksCompleted: 0,
+        pendingFollowUps: 0,
+        avgResponseTime: '0h',
+        customerSatisfaction: 0,
+        automationSuccess: 0,
+        activeDeals: 0,
+        closingDeals: 0
+      };
+    }
   },
 
   async triggerAutomation(data: any) {

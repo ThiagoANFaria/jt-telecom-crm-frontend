@@ -554,7 +554,10 @@ export const apiService = {
       monthly_sales: 25000,
       conversion_rate: 12.5,
       avg_deal_size: 5000,
-      period: `${startDate || 'início'} - ${endDate || 'fim'}`
+      period: `${startDate || 'início'} - ${endDate || 'fim'}`,
+      summary: {},
+      by_salesperson: [],
+      monthly_evolution: []
     };
   },
 

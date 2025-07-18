@@ -621,6 +621,41 @@ export const apiService = {
       message: 'Automação executada com sucesso',
       status: 'completed'
     };
+  },
+
+  // APIs para Master Panel - Tenants
+  async createTenant(tenantData: any) {
+    return {
+      success: true,
+      tenant: {
+        id: `tenant_${Date.now()}`,
+        name: tenantData.name,
+        domain: tenantData.domain,
+        admin_email: tenantData.admin_email,
+        admin_name: tenantData.admin_name,
+        phone: tenantData.phone,
+        plan: tenantData.plan,
+        active: true,
+        created_at: new Date().toISOString(),
+        users_count: 1,
+        storage_used: '0MB'
+      },
+      message: 'Tenant criado com sucesso'
+    };
+  },
+
+  async deleteTenant(tenantId: string) {
+    return {
+      success: true,
+      message: 'Tenant excluído com sucesso'
+    };
+  },
+
+  async updateTenant(tenantId: string, data: any) {
+    return {
+      success: true,
+      message: 'Tenant atualizado com sucesso'
+    };
   }
 };
 

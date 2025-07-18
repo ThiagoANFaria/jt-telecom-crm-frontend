@@ -50,124 +50,67 @@ const Leads: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Tentar localStorage primeiro
-      const storedLeads = localStorage.getItem('jt-crm-leads');
-      if (storedLeads) {
-        const parsedLeads = JSON.parse(storedLeads);
-        setLeads([...parsedLeads]);
-        setIsLoading(false);
-        return;
-      }
+      // Conectar à API real da JT Telecom
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
       
-      // Tentar API
-      try {
-        const data = await apiService.getLeads();
-        setLeads([...data]);
-        localStorage.setItem('jt-crm-leads', JSON.stringify(data));
-        return;
-      } catch (apiError) {
-        console.log('API não disponível, usando dados mock');
+      if (!token) {
+        throw new Error('Token EASEPANEL_TOKEN não configurado');
       }
-      
-      // Dados mock
-      const mockLeads: Lead[] = [
-        {
-          id: '1',
-          name: 'João Silva',
-          email: 'joao@empresa.com',
-          phone: '11999999999',
-          whatsapp: '11999999999',
-          company: 'Empresa ABC Ltda',
-          cnpj_cpf: '12.345.678/0001-90',
-          ie_rg: '123456789',
-          address: 'Rua das Flores, 123',
-          number: '123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          state: 'SP',
-          cep: '01234-567',
-          source: 'Website',
-          status: 'Qualificado',
-          score: 85,
-          tags: [
-            { id: '1', name: 'VIP', color: '#FFD700', created_at: new Date().toISOString() },
-            { id: '3', name: 'Qualificado', color: '#00AA00', created_at: new Date().toISOString() }
-          ],
-          responsible: 'João Silva',
-          last_contact: '2025-01-15',
-          next_contact: '2025-01-20',
-          notes: 'Cliente interessado em plano empresarial',
-          created_at: '2025-01-10T10:00:00Z',
-          updated_at: '2025-01-15T14:30:00Z'
-        },
-        {
-          id: '2',
-          name: 'Maria Santos',
-          email: 'maria@startup.com',
-          phone: '11888888888',
-          whatsapp: '11888888888',
-          company: 'Startup XYZ',
-          cnpj_cpf: '98.765.432/0001-10',
-          ie_rg: '987654321',
-          address: 'Av. Paulista, 1000',
-          number: '1000',
-          neighborhood: 'Bela Vista',
-          city: 'São Paulo',
-          state: 'SP',
-          cep: '01310-100',
-          source: 'Instagram',
-          status: 'Novo',
-          score: 65,
-          tags: [
-            { id: '2', name: 'Urgente', color: '#FF4444', created_at: new Date().toISOString() },
-            { id: '4', name: 'Follow-up', color: '#4169E1', created_at: new Date().toISOString() }
-          ],
-          responsible: 'Maria Santos',
-          last_contact: '2025-01-12',
-          next_contact: '2025-01-18',
-          notes: 'Interessada em soluções de telefonia para startup',
-          created_at: '2025-01-08T09:15:00Z',
-          updated_at: '2025-01-12T16:45:00Z'
-        },
-        {
-          id: '3',
-          name: 'Pedro Costa',
-          email: 'pedro@industria.com',
-          phone: '11777777777',
-          whatsapp: '11777777777',
-          company: 'Indústria 123',
-          cnpj_cpf: '11.222.333/0001-44',
-          ie_rg: '112233445',
-          address: 'Rua Industrial, 500',
-          number: '500',
-          neighborhood: 'Vila Industrial',
-          city: 'São Bernardo do Campo',
-          state: 'SP',
-          cep: '09600-000',
-          source: 'Indicação',
-          status: 'Em Negociação',
-          score: 92,
-          tags: [
-            { id: '1', name: 'VIP', color: '#FFD700', created_at: new Date().toISOString() },
-            { id: '5', name: 'Orçamento Alto', color: '#8B5CF6', created_at: new Date().toISOString() }
-          ],
-          responsible: 'Pedro Costa',
-          last_contact: '2025-01-14',
-          next_contact: '2025-01-21',
-          notes: 'Grande potencial, necessita de solução robusta',
-          created_at: '2025-01-05T11:30:00Z',
-          updated_at: '2025-01-14T13:20:00Z'
+
+      const response = await fetch('https://api.app.jttecnologia.com.br/leads', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      ];
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const apiData = await response.json();
       
-      setLeads(mockLeads);
-      localStorage.setItem('jt-crm-leads', JSON.stringify(mockLeads));
+      // Mapear dados da API para o formato esperado
+      const mappedLeads: Lead[] = apiData.map((lead: any) => ({
+        id: lead.id,
+        name: lead.nome,
+        email: lead.email,
+        phone: lead.telefone || '',
+        whatsapp: lead.whatsapp || lead.telefone || '',
+        company: lead.empresa || '',
+        status: lead.status || 'new',
+        source: lead.origem || 'website',
+        responsible: lead.responsavel || 'Não definido',
+        score: lead.pontuacao || 0,
+        interest: lead.interesse || '',
+        budget: lead.orcamento || 0,
+        expected_close: lead.previsao_fechamento || '',
+        notes: lead.observacoes || '',
+        created_at: lead.data_criacao || new Date().toISOString(),
+        updated_at: lead.data_atualizacao || new Date().toISOString()
+      }));
+
+      setLeads(mappedLeads);
       
-    } catch (error) {
+      if (mappedLeads.length === 0) {
+        toast({
+          title: 'Nenhum lead encontrado',
+          description: 'Não há leads cadastrados no sistema.',
+        });
+      } else {
+        toast({
+          title: 'Leads carregados',
+          description: `${mappedLeads.length} leads carregados com sucesso.`,
+        });
+      }
+        
+    } catch (error: any) {
       console.error('Failed to fetch leads:', error);
+      setLeads([]);
       toast({
         title: 'Erro ao carregar leads',
-        description: 'Não foi possível carregar a lista de leads.',
+        description: error.message || 'Não foi possível carregar a lista de leads.',
         variant: 'destructive',
       });
     } finally {

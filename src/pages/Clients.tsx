@@ -42,103 +42,59 @@ const Clients: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Tentar localStorage primeiro
-      const storedClients = localStorage.getItem('jt-crm-clients');
-      if (storedClients) {
-        const parsedClients = JSON.parse(storedClients);
-        setClients([...parsedClients]);
-        setIsLoading(false);
-        return;
-      }
+      // Buscar dados da API real da JT Telecom
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
       
-      // Tentar API
-      try {
-        const data = await apiService.getClients();
-        setClients([...data]);
-        localStorage.setItem('jt-crm-clients', JSON.stringify(data));
-        return;
-      } catch (apiError) {
-        console.log('API não disponível, usando dados mock');
+      if (!token) {
+        throw new Error('Token EASEPANEL_TOKEN não configurado');
       }
-      
-      // Dados mock
-      const mockClients: Client[] = [
-        {
-          id: '1',
-          name: 'Ana Costa',
-          email: 'ana@empresaabc.com',
-          phone: '11999999999',
-          whatsapp: '11999999999',
-          company: 'Empresa ABC Ltda',
-          cnpj_cpf: '12.345.678/0001-90',
-          ie_rg: '123456789',
-          address: 'Rua das Flores, 123',
-          number: '123',
-          neighborhood: 'Centro',
-          city: 'São Paulo',
-          state: 'SP',
-          cep: '01234-567',
-          status: 'Ativo',
-          responsible: 'João Silva',
-          contract_value: 15000,
-          contract_start: '2024-01-15',
-          contract_end: '2025-01-15',
-          notes: 'Cliente premium com contrato anual',
-          created_at: '2024-01-10T10:00:00Z',
-          updated_at: '2025-01-15T14:30:00Z'
-        },
-        {
-          id: '2',
-          name: 'Carlos Mendes',
-          email: 'carlos@startup.com',
-          phone: '11888888888',
-          whatsapp: '11888888888',
-          company: 'Startup XYZ',
-          cnpj_cpf: '98.765.432/0001-10',
-          ie_rg: '987654321',
-          address: 'Av. Paulista, 1000',
-          number: '1000',
-          neighborhood: 'Bela Vista',
-          city: 'São Paulo',
-          state: 'SP',
-          cep: '01310-100',
-          status: 'Ativo',
-          responsible: 'Maria Santos',
-          contract_value: 8500,
-          contract_start: '2024-03-01',
-          contract_end: '2025-03-01',
-          notes: 'Startup em crescimento, potencial para upgrade',
-          created_at: '2024-02-20T09:15:00Z',
-          updated_at: '2025-01-12T16:45:00Z'
-        },
-        {
-          id: '3',
-          name: 'Fernanda Silva',
-          email: 'fernanda@industria.com',
-          phone: '11777777777',
-          whatsapp: '11777777777',
-          company: 'Indústria 123',
-          cnpj_cpf: '11.222.333/0001-44',
-          ie_rg: '112233445',
-          address: 'Rua Industrial, 500',
-          number: '500',
-          neighborhood: 'Vila Industrial',
-          city: 'São Bernardo do Campo',
-          state: 'SP',
-          cep: '09600-000',
-          status: 'Inativo',
-          responsible: 'Pedro Costa',
-          contract_value: 25000,
-          contract_start: '2023-06-01',
-          contract_end: '2024-06-01',
-          notes: 'Contrato expirado, negociando renovação',
-          created_at: '2023-05-15T11:30:00Z',
-          updated_at: '2024-06-01T13:20:00Z'
+
+      const response = await fetch('https://api.jttelecom.com.br/clientes', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      ];
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
       
-      setClients(mockClients);
-      localStorage.setItem('jt-crm-clients', JSON.stringify(mockClients));
+      // Mapear dados da API para o formato esperado pela interface
+      const mappedClients: Client[] = data.map((client: any) => ({
+        id: client.id,
+        name: client.nome,
+        email: client.email,
+        phone: client.telefone || '',
+        whatsapp: client.whatsapp || client.telefone || '',
+        company: client.empresa,
+        cnpj_cpf: client.cnpj || client.cpf || '',
+        ie_rg: client.ie || client.rg || '',
+        address: client.endereco || '',
+        number: client.numero || '',
+        neighborhood: client.bairro || '',
+        city: client.cidade || '',
+        state: client.estado || '',
+        cep: client.cep || '',
+        status: client.status,
+        responsible: client.responsavel || 'Não definido',
+        contract_value: client.valor_contrato || 0,
+        contract_start: client.inicio_contrato || '',
+        contract_end: client.fim_contrato || '',
+        notes: client.observacoes || '',
+        created_at: client.created_at || new Date().toISOString(),
+        updated_at: client.updated_at || new Date().toISOString()
+      }));
+
+      setClients(mappedClients);
+      
+      toast({
+        title: 'Clientes carregados',
+        description: `${mappedClients.length} clientes carregados da API JT Telecom.`,
+      });
       
     } catch (error) {
       console.error('Failed to fetch clients:', error);

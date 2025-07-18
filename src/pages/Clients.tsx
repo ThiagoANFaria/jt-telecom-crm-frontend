@@ -49,7 +49,7 @@ const Clients: React.FC = () => {
         throw new Error('Token EASEPANEL_TOKEN não configurado');
       }
 
-      const response = await fetch('https://api.jttelecom.com.br/clientes', {
+      const response = await fetch('https://api.app.jttecnologia.com.br/clientes', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

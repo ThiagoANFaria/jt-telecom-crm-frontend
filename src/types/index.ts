@@ -201,7 +201,13 @@ export interface SalesReport {
     start_date: string;
     end_date: string;
   };
-  summary?: any;
-  by_salesperson?: any;
-  monthly_evolution?: any;
+  summary?: {
+    total_revenue: number;
+    total_deals: number;
+    average_deal_size: number;
+    conversion_rate: number;
+    growth_rate: number;
+  };
+  by_salesperson?: any[];
+  monthly_evolution?: any[];
 }

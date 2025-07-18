@@ -558,9 +558,41 @@ export const apiService = {
         start_date: startDate || '2024-01-01',
         end_date: endDate || '2024-12-31'
       },
-      summary: {},
-      by_salesperson: [],
-      monthly_evolution: []
+      summary: {
+        total_revenue: 150000,
+        total_deals: 30,
+        average_deal_size: 5000,
+        conversion_rate: 12.5,
+        growth_rate: 8.3
+      },
+      by_salesperson: [
+        { 
+          name: 'João Silva', 
+          deals_closed: 9, 
+          revenue: 45000, 
+          conversion_rate: 15.2, 
+          average_deal_size: 5000 
+        },
+        { 
+          name: 'Maria Santos', 
+          deals_closed: 8, 
+          revenue: 38000, 
+          conversion_rate: 12.8, 
+          average_deal_size: 4750 
+        },
+        { 
+          name: 'Pedro Costa', 
+          deals_closed: 7, 
+          revenue: 32000, 
+          conversion_rate: 11.5, 
+          average_deal_size: 4571 
+        }
+      ],
+      monthly_evolution: [
+        { month: 'Jan', revenue: 12000, deals: 4 },
+        { month: 'Fev', revenue: 15000, deals: 5 },
+        { month: 'Mar', revenue: 18000, deals: 6 }
+      ]
     };
   },
 

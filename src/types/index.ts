@@ -197,7 +197,10 @@ export interface SalesReport {
   monthly_sales: number;
   conversion_rate: number;
   avg_deal_size: number;
-  period?: string;
+  period?: {
+    start_date: string;
+    end_date: string;
+  };
   summary?: any;
   by_salesperson?: any;
   monthly_evolution?: any;

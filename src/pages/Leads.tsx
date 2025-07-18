@@ -361,20 +361,23 @@ const Leads: React.FC = () => {
 
             {lead.tags && lead.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {lead.tags.slice(0, 2).map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="outline"
-                    style={{ 
-                      backgroundColor: `${tag.color}20`,
-                      borderColor: tag.color,
-                      color: tag.color
-                    }}
-                    className="text-xs"
-                  >
-                    {tag.name}
-                  </Badge>
-                ))}
+                {lead.tags.slice(0, 2).map((tag, index) => {
+                  const tagObj = typeof tag === 'string' ? { id: index.toString(), name: tag, color: '#0057B8' } : tag;
+                  return (
+                    <Badge
+                      key={tagObj.id}
+                      variant="outline"
+                      style={{ 
+                        backgroundColor: `${tagObj.color}20`,
+                        borderColor: tagObj.color,
+                        color: tagObj.color
+                      }}
+                      className="text-xs"
+                    >
+                      {tagObj.name}
+                    </Badge>
+                  );
+                })}
                 {lead.tags.length > 2 && (
                   <Badge variant="outline" className="text-xs">
                     +{lead.tags.length - 2}

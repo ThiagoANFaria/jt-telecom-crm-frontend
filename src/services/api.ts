@@ -1,6 +1,48 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.app.jttecnologia.com.br';
 
+// Helper function to check token expiration
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp < currentTime;
+  } catch {
+    return true;
+  }
+};
+
+// Helper function to handle API requests with automatic logout on 401
+const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  
+  if (!token || isTokenExpired(token)) {
+    console.log('Token expired or missing, clearing auth data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+    throw new Error('Token expired');
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (response.status === 401) {
+    console.log('Received 401 - Token invalid, clearing auth data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+    throw new Error('Token invalid');
+  }
+
+  return response;
+};
+
 // API Service for JT VOX
 export const apiService = {
   async login(email: string, password: string) {
@@ -45,11 +87,7 @@ export const apiService = {
 
   async getClients() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/clients`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/clients`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch clients');
@@ -78,11 +116,10 @@ export const apiService = {
 
   async makeCall(phone: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/telephony/call`, {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/telephony/call`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ phone })
       });
@@ -293,11 +330,7 @@ export const apiService = {
 
   async getLeads() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/leads`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/leads`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch leads');
@@ -407,11 +440,7 @@ export const apiService = {
 
   async getDashboardSummary() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/dashboard/summary`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/dashboard/summary`);
 
       if (!response.ok) {
         // Se a API não estiver disponível, retornar dados vazios em vez de fictícios

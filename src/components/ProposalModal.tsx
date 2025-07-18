@@ -21,7 +21,22 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    client_id: string;
+    client_name: string;
+    client_email: string;
+    client_phone: string;
+    description: string;
+    amount: number;
+    discount: number;
+    total_amount: number;
+    status: 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao';
+    valid_until: string;
+    notes: string;
+    number: string;
+    content: string;
+  }>({
     title: '',
     client_id: '',
     client_name: '',
@@ -31,7 +46,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
     amount: 0,
     discount: 0,
     total_amount: 0,
-    status: 'rascunho' as const,
+    status: 'rascunho',
     valid_until: '',
     notes: '',
     number: '',
@@ -50,7 +65,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
         amount: proposal.amount || 0,
         discount: proposal.discount || 0,
         total_amount: proposal.total_amount || 0,
-        status: proposal.status || 'rascunho',
+        status: (proposal.status as 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao') || 'rascunho',
         valid_until: proposal.valid_until || '',
         notes: proposal.notes || '',
         number: proposal.number || '',

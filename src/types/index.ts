@@ -4,13 +4,15 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'closed' | 'lost';
-  source: 'website' | 'referral' | 'social' | 'email' | 'phone' | 'other';
-  createdAt: Date;
+  status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'closed' | 'lost' | 'Novo' | 'Qualificado' | 'Em Negociação';
+  source: 'website' | 'referral' | 'social' | 'email' | 'phone' | 'other' | 'Website' | 'Instagram' | 'Indicação';
+  createdAt?: Date;
+  created_at?: string;
+  updated_at?: string;
   company?: string;
   position?: string;
   score?: number;
-  tags?: string[];
+  tags?: (string | Tag)[];
   notes?: string;
   budget?: number;
   timeline?: string;
@@ -25,6 +27,8 @@ export interface Lead {
   state?: string;
   cep?: string;
   responsible?: string;
+  next_contact?: string;
+  last_contact?: string;
 }
 
 export interface Client {
@@ -32,8 +36,9 @@ export interface Client {
   name: string;
   email: string;
   phone: string;
-  createdAt: Date;
+  createdAt?: Date;
   created_at?: string; // Para compatibilidade com backend
+  updated_at?: string; // Para compatibilidade com backend
   whatsapp?: string;
   company?: string;
   cnpj_cpf?: string;
@@ -49,7 +54,7 @@ export interface Client {
   notes?: string;
   monthly_value?: number;
   annual_value?: number;
-  payment_status?: 'paid' | 'pending' | 'overdue';
+  payment_status?: 'paid' | 'pending' | 'overdue' | 'em_dia' | 'em_atraso' | 'pendente';
   contract_start?: string;
   contract_end?: string;
   contract_value?: number; // Valor do contrato
@@ -59,9 +64,9 @@ export interface Client {
 export interface Proposal {
   id: string;
   title: string;
-  description: string;
-  status: 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao';
-  createdAt: Date;
+  description?: string;
+  status: 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao' | 'draft';
+  createdAt?: Date;
   created_at?: string;
   updated_at?: string;
   client_id?: string;
@@ -76,14 +81,16 @@ export interface Proposal {
   notes?: string;
   number?: string;
   content?: string;
+  created_date?: string;
+  expiry_date?: string;
 }
 
 export interface Contract {
   id: string;
   title: string;
-  description: string;
-  status: 'pendente' | 'ativo' | 'concluido' | 'cancelado';
-  createdAt: Date;
+  description?: string;
+  status: 'pendente' | 'ativo' | 'concluido' | 'cancelado' | 'active';
+  createdAt?: Date;
   created_at?: string;
   client_id?: string;
   client_name?: string; // Nome do cliente
@@ -104,6 +111,10 @@ export interface Task {
   description: string;
   status: string;
   createdAt: Date;
+  created_at?: string;
+  priority?: string;
+  assigned_to?: string;
+  due_date?: string;
 }
 
 export interface Pipeline {
@@ -175,4 +186,19 @@ export interface DashboardSummary {
   meetingsHeld?: number;
   revenue_this_month?: number;
   conversion_rate?: number;
+  total_leads?: number;
+  total_clients?: number;
+  total_proposals?: number;
+  total_contracts?: number;
+}
+
+export interface SalesReport {
+  total_sales: number;
+  monthly_sales: number;
+  conversion_rate: number;
+  avg_deal_size: number;
+  period?: string;
+  summary?: any;
+  by_salesperson?: any;
+  monthly_evolution?: any;
 }

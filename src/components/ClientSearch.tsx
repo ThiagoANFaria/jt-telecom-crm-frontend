@@ -57,8 +57,8 @@ const ClientSearch: React.FC<ClientSearchProps> = ({
       
       // Buscar em clientes e leads simultaneamente
       const [clientsResponse, leadsResponse] = await Promise.allSettled([
-        apiService.getClients({ search: term }),
-        apiService.getLeads({ search: term })
+        apiService.getClients(),
+        apiService.getLeads()
       ]);
 
       const clients: Client[] = [];

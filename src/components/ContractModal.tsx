@@ -21,7 +21,21 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    client_id: string;
+    client_name: string;
+    client_email: string;
+    client_phone: string;
+    description: string;
+    amount: number;
+    status: 'pendente' | 'ativo' | 'concluido' | 'cancelado';
+    start_date: string;
+    end_date: string;
+    template_id: string;
+    notes: string;
+    content: string;
+  }>({
     title: '',
     client_id: '',
     client_name: '',
@@ -29,7 +43,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
     client_phone: '',
     description: '',
     amount: 0,
-    status: 'pendente' as const,
+    status: 'pendente',
     start_date: '',
     end_date: '',
     template_id: '',
@@ -47,7 +61,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
         client_phone: contract.client_phone || '',
         description: contract.description || '',
         amount: contract.amount || 0,
-        status: contract.status || 'pendente',
+        status: (contract.status as 'pendente' | 'ativo' | 'concluido' | 'cancelado') || 'pendente',
         start_date: contract.start_date || '',
         end_date: contract.end_date || '',
         template_id: contract.template_id || '',
@@ -116,7 +130,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
       
       const contractData = {
         ...formData,
-        status: formData.status as 'pendente' | 'ativo' | 'expirado' | 'cancelado' | 'assinado'
+        status: formData.status as 'pendente' | 'ativo' | 'concluido' | 'cancelado'
       };
 
       if (contract?.id) {
@@ -253,8 +267,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
                 <SelectContent>
                   <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="ativo">Ativo</SelectItem>
-                  <SelectItem value="assinado">Assinado</SelectItem>
-                  <SelectItem value="expirado">Expirado</SelectItem>
+                  <SelectItem value="concluido">Concluído</SelectItem>
                   <SelectItem value="cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>

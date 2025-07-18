@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { 
   PieChart as RechartsPieChart, 
+  Pie,
   Cell, 
   ResponsiveContainer,
   BarChart as RechartsBarChart,

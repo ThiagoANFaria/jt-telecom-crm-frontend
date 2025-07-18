@@ -12,30 +12,48 @@ import { Lead } from '@/types';
 import { api } from '@/services/api';
 
 interface LeadModalProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onSuccess?: () => void;
   lead?: Lead;
   onSave?: (lead: Lead) => void;
 }
 
-const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
+const LeadModal: React.FC<LeadModalProps> = ({ trigger, isOpen: externalOpen, onClose, onSuccess, lead, onSave }) => {
   const [open, setOpen] = useState(false);
+  const actualOpen = externalOpen !== undefined ? externalOpen : open;
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    company: string;
+    position: string;
+    source: 'website' | 'referral' | 'social' | 'email' | 'phone' | 'other';
+    status: 'new' | 'contacted' | 'qualified' | 'proposal' | 'closed' | 'lost';
+    score: number;
+    tags: string[];
+    notes: string;
+    budget: string;
+    timeline: string;
+    interests: string[];
+  }>({
     name: '',
     email: '',
     phone: '',
     company: '',
     position: '',
-    source: 'website' as const,
-    status: 'new' as const,
+    source: 'website',
+    status: 'new',
     score: 0,
-    tags: [] as string[],
+    tags: [],
     notes: '',
     budget: '',
     timeline: '',
-    interests: [] as string[]
+    interests: []
   });
 
   useEffect(() => {
@@ -46,10 +64,10 @@ const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
         phone: lead.phone || '',
         company: lead.company || '',
         position: lead.position || '',
-        source: (lead.source || 'website') as Lead['source'],
-        status: (lead.status || 'new') as Lead['status'],
+        source: (lead.source === 'Website' ? 'website' : lead.source === 'Instagram' ? 'social' : lead.source === 'Indicação' ? 'referral' : lead.source) || 'website',
+        status: (lead.status === 'Novo' ? 'new' : lead.status === 'Qualificado' ? 'qualified' : lead.status === 'Em Negociação' ? 'proposal' : lead.status) || 'new',
         score: lead.score || 0,
-        tags: lead.tags || [],
+        tags: Array.isArray(lead.tags) ? lead.tags.map(tag => typeof tag === 'string' ? tag : tag.name) : [],
         notes: lead.notes || '',
         budget: lead.budget?.toString() || '',
         timeline: lead.timeline || '',
@@ -76,7 +94,12 @@ const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
       }
 
       onSave?.(savedLead);
-      setOpen(false);
+      onSuccess?.();
+      if (onClose) {
+        onClose();
+      } else {
+        setOpen(false);
+      }
       
       toast({
         title: lead?.id ? 'Lead atualizado' : 'Lead criado',
@@ -116,10 +139,12 @@ const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
   ];
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+    <Dialog open={actualOpen} onOpenChange={onClose || setOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#0057B8] font-montserrat">
@@ -171,7 +196,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ trigger, lead, onSave }) => {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={onClose || (() => setOpen(false))}>
             Cancelar
           </Button>
           <Button 

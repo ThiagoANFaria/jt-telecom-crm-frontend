@@ -263,12 +263,11 @@ export const apiService = {
       phone: '(11) 99999-9999',
       company: 'Empresa Exemplo',
       status: 'active' as const,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       monthly_value: 1500,
-        payment_status: 'paid' as const,
-        contract_start: '2024-01-01',
-        notes: 'Notas do cliente',
-        createdAt: new Date()
+      payment_status: 'paid' as const,
+      contract_start: '2024-01-01',
+      notes: 'Notas do cliente'
     };
   },
 
@@ -471,9 +470,6 @@ export const apiService = {
     }
   },
 
-  async triggerAutomation(data: any) {
-    return { success: true, message: 'Automação iniciada', status: 'running' };
-  },
 
   async sendChatbotMessage(message: string) {
     return { response: 'Resposta do chatbot', timestamp: new Date().toISOString() };
@@ -533,7 +529,8 @@ export const apiService = {
       status: 'new' as const,
       source: 'website' as const,
       createdAt: new Date(),
-      company: 'Empresa Exemplo'
+      company: 'Empresa Exemplo',
+      notes: 'Observações sobre o lead'
     };
   },
 
@@ -548,6 +545,44 @@ export const apiService = {
   // API para Analytics
   async getDashboard() {
     return this.getDashboardSummary();
+  },
+
+  // APIs para Relatórios
+  async getSalesReport(startDate?: string, endDate?: string) {
+    return {
+      total_sales: 150000,
+      monthly_sales: 25000,
+      conversion_rate: 12.5,
+      avg_deal_size: 5000,
+      period: `${startDate || 'início'} - ${endDate || 'fim'}`
+    };
+  },
+
+  // APIs para Tarefas
+  async getTasks() {
+    return [
+      {
+        id: '1',
+        title: 'Contatar lead ABC Corp',
+        description: 'Fazer follow-up do lead recebido via website',
+        status: 'pendente',
+        priority: 'alta',
+        assigned_to: 'João Silva',
+        due_date: '2024-01-20',
+        createdAt: new Date(),
+        created_at: new Date().toISOString()
+      }
+    ];
+  },
+
+  // APIs para Automação
+  async triggerAutomation(trigger: string, data?: any) {
+    return {
+      success: true,
+      automation_id: `auto_${Date.now()}`,
+      message: 'Automação executada com sucesso',
+      status: 'completed'
+    };
   }
 };
 

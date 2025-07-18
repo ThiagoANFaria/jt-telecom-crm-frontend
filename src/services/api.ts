@@ -74,15 +74,33 @@ export const apiService = {
   },
 
   async getTenants() {
-    return [
-      { id: '1', name: 'JT Telecom', domain: 'jttelecom.com.br', created_at: '2024-01-01', active: true }
-    ];
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/tenants`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch tenants');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      return [];
+    }
   },
 
   async getUsers() {
-    return [
-      { id: '1', name: 'Admin User', email: 'admin@jttelecom.com.br', createdAt: new Date().toISOString() }
-    ];
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/users`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      return [];
+    }
   },
 
   async getClients() {
@@ -293,39 +311,77 @@ export const apiService = {
   },
 
   async getClient(id: string) {
-    return { 
-      id, 
-      name: 'Cliente Exemplo', 
-      email: 'cliente@exemplo.com', 
-      phone: '(11) 99999-9999',
-      company: 'Empresa Exemplo',
-      status: 'active' as const,
-      createdAt: new Date(),
-      monthly_value: 1500,
-      payment_status: 'paid' as const,
-      contract_start: '2024-01-01',
-      notes: 'Notas do cliente'
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/clients/${id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch client');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async createClient(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/clients`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create client');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async updateClient(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/clients/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update client');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async deleteClient(id: string) {
-    return { success: true };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/clients/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete client');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async getLeads() {
@@ -368,74 +424,151 @@ export const apiService = {
   },
 
   async createLead(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create lead');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async updateLead(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/leads/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update lead');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async deleteLead(id: string) {
-    return { success: true };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/leads/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete lead');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async getProposals() {
-    return [
-      {
-        id: '1',
-        title: 'Proposta Exemplo',
-        client_id: '1',
-        amount: 15000,
-        status: 'draft' as const,
-        created_date: '2024-01-01',
-        expiry_date: '2024-02-01',
-        createdAt: new Date()
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch proposals');
       }
-    ];
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      return [];
+    }
   },
 
   async createProposal(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create proposal');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async updateProposal(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update proposal');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async deleteProposal(id: string) {
-    return { success: true };
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete proposal');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      throw error;
+    }
   },
 
   async getContracts() {
-    return [
-      {
-        id: '1',
-        title: 'Contrato Exemplo',
-        client_id: '1',
-        amount: 15000,
-        status: 'active' as const,
-        start_date: '2024-01-01',
-        end_date: '2024-12-31',
-        description: 'Contrato exemplo',
-        createdAt: new Date()
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/contracts`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch contracts');
       }
-    ];
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call failed:', error);
+      return [];
+    }
   },
 
   async getDashboardSummary() {

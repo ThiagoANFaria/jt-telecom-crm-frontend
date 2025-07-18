@@ -130,11 +130,14 @@ const MasterPanel: React.FC = () => {
 
       setTenants(mappedTenants);
       
-      // Para usuários, usar dados mockados por enquanto
-      const mockUsers = [
-        { id: '1', name: 'Admin Master', email: 'admin@jttecnologia.com.br', role: 'master', tenant_id: null, active: true, last_login: '2025-01-17T10:00:00Z' }
-      ];
-      setUsers(mockUsers);
+      // Buscar usuários da API real
+      try {
+        const usersData = await apiService.getUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        setUsers([]);
+      }
 
       toast({
         title: 'Dados carregados',

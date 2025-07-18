@@ -50,32 +50,11 @@ const LeadDetail: React.FC = () => {
       setNotes(data.notes || '');
     } catch (error) {
       console.error('Failed to fetch lead:', error);
-      // Usar dados mock para demonstração
-      const mockLead: Lead = {
-        id: id,
-        name: 'João Silva',
-        email: 'joao@empresa.com',
-        phone: '11999999999',
-        whatsapp: '11999999999',
-        company: 'Empresa ABC Ltda',
-        cnpj_cpf: '12.345.678/0001-90',
-        ie_rg: '123456789',
-        address: 'Rua das Flores, 123',
-        number: '123',
-        neighborhood: 'Centro',
-        city: 'São Paulo',
-        state: 'SP',
-        cep: '01234-567',
-        source: 'Website',
-        status: 'Novo',
-        notes: 'Lead interessado em PABX em nuvem. Empresa com 50 funcionários. Orçamento aprovado de até R$ 5.000/mês.',
-        created_at: new Date().toISOString(),
-      };
-      setLead(mockLead);
-      setNotes(mockLead.notes || '');
+      setLead(null);
       toast({
-        title: 'Modo demonstração',
-        description: 'Exibindo dados de exemplo. API não disponível.',
+        title: 'Erro ao carregar lead',
+        description: 'Não foi possível carregar os dados do lead.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);

@@ -52,32 +52,11 @@ const ClientDetail: React.FC = () => {
       setNotes(data.notes || '');
     } catch (error) {
       console.error('Failed to fetch client:', error);
-      // Usar dados mock para demonstração
-      const mockClient: Client = {
-        id: id,
-        name: 'Ana Costa',
-        email: 'ana@empresaabc.com',
-        phone: '11999999999',
-        whatsapp: '11999999999',
-        company: 'Empresa ABC Ltda',
-        cnpj_cpf: '12.345.678/0001-90',
-        ie_rg: '123456789',
-        address: 'Rua das Flores, 123',
-        number: '123',
-        neighborhood: 'Centro',
-        city: 'São Paulo',
-        state: 'SP',
-        cep: '01234-567',
-        status: 'Ativo',
-        products: ['Pabx em Nuvem', 'Chatbot', 'URA Reversa'],
-        notes: 'Cliente premium com contrato anual. Muito satisfeito com os serviços. Empresa em crescimento com potencial para novos produtos.',
-        created_at: new Date().toISOString(),
-      };
-      setClient(mockClient);
-      setNotes(mockClient.notes || '');
+      setClient(null);
       toast({
-        title: 'Modo demonstração',
-        description: 'Exibindo dados de exemplo. API não disponível.',
+        title: 'Erro ao carregar cliente',
+        description: 'Não foi possível carregar os dados do cliente.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);

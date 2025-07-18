@@ -41,6 +41,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
+    } else {
+      // Criar usuário Master temporário para desenvolvimento
+      const tempMasterUser = {
+        id: 'temp-master',
+        name: 'Master Admin',
+        email: 'master@jttelecom.com.br',
+        user_level: 'master' as const,
+        createdAt: new Date()
+      };
+      setUser(tempMasterUser);
+      localStorage.setItem('user', JSON.stringify(tempMasterUser));
+      localStorage.setItem('token', 'temp-master-token');
+      console.log('Temporary Master user created for development');
     }
     
     setIsLoading(false);

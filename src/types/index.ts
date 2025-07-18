@@ -33,6 +33,7 @@ export interface Client {
   email: string;
   phone: string;
   createdAt: Date;
+  created_at?: string; // Para compatibilidade com backend
   whatsapp?: string;
   company?: string;
   cnpj_cpf?: string;
@@ -48,18 +49,25 @@ export interface Client {
   notes?: string;
   monthly_value?: number;
   annual_value?: number;
-  payment_status?: string;
+  payment_status?: 'paid' | 'pending' | 'overdue';
   contract_start?: string;
   contract_end?: string;
+  contract_value?: number; // Valor do contrato
+  responsible?: string; // Responsável pelo cliente
 }
 
 export interface Proposal {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao';
   createdAt: Date;
+  created_at?: string;
+  updated_at?: string;
   client_id?: string;
+  client_name?: string; // Nome do cliente
+  client_email?: string; // Email do cliente
+  client_phone?: string; // Telefone do cliente
   amount?: number;
   discount?: number;
   total_amount?: number;
@@ -74,12 +82,20 @@ export interface Contract {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: 'pendente' | 'ativo' | 'concluido' | 'cancelado';
   createdAt: Date;
+  created_at?: string;
   client_id?: string;
+  client_name?: string; // Nome do cliente
+  client_email?: string; // Email do cliente  
+  client_phone?: string; // Telefone do cliente
   amount?: number;
   start_date?: string;
   end_date?: string;
+  template_id?: string; // ID do template usado
+  notes?: string; // Observações
+  content?: string; // Conteúdo do contrato
+  d4sign_document_id?: string; // ID do documento no D4Sign
 }
 
 export interface Task {

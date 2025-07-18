@@ -477,6 +477,77 @@ export const apiService = {
 
   async sendChatbotMessage(message: string) {
     return { response: 'Resposta do chatbot', timestamp: new Date().toISOString() };
+  },
+
+  // APIs para Contratos
+  async createContract(data: any) {
+    return { 
+      id: Date.now().toString(), 
+      ...data, 
+      createdAt: new Date()
+    };
+  },
+
+  async updateContract(id: string, data: any) {
+    return { 
+      id, 
+      ...data, 
+      createdAt: new Date()
+    };
+  },
+
+  async deleteContract(id: string) {
+    return { success: true };
+  },
+
+  async sendContractToD4Sign(contractId: string) {
+    return {
+      success: true,
+      d4sign_document_id: `d4sign_${Date.now()}`,
+      message: 'Contrato enviado para D4Sign com sucesso'
+    };
+  },
+
+  // APIs para Propostas
+  async sendProposalByEmail(proposalId: string) {
+    return {
+      success: true,
+      message: 'Proposta enviada por email com sucesso'
+    };
+  },
+
+  async sendProposalByWhatsApp(proposalId: string) {
+    return {
+      success: true,
+      message: 'Proposta enviada por WhatsApp com sucesso'
+    };
+  },
+
+  // APIs para Leads
+  async getLead(id: string) {
+    return {
+      id,
+      name: 'Lead Exemplo',
+      email: 'lead@exemplo.com',
+      phone: '(11) 99999-9999',
+      status: 'new' as const,
+      source: 'website' as const,
+      createdAt: new Date(),
+      company: 'Empresa Exemplo'
+    };
+  },
+
+  async convertLeadToClient(leadId: string) {
+    return {
+      success: true,
+      clientId: `client_${Date.now()}`,
+      message: 'Lead convertido em cliente com sucesso'
+    };
+  },
+
+  // API para Analytics
+  async getDashboard() {
+    return this.getDashboardSummary();
   }
 };
 

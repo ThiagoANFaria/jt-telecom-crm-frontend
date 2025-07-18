@@ -93,17 +93,60 @@ const MasterPanel: React.FC = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [tenantsData, usersData] = await Promise.all([
-        apiService.getTenants(),
-        apiService.getUsers()
-      ]);
-      setTenants(tenantsData);
-      setUsers(usersData);
-    } catch (error) {
+      
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      
+      if (!token) {
+        throw new Error('Token EASEPANEL_TOKEN não configurado');
+      }
+
+      // Buscar tenants da API real
+      const tenantsResponse = await fetch('https://api.jttelecom.com.br/tenants', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!tenantsResponse.ok) {
+        throw new Error(`Erro ${tenantsResponse.status}: ${tenantsResponse.statusText}`);
+      }
+
+      const tenantsData = await tenantsResponse.json();
+      
+      // Mapear dados da API para formato esperado
+      const mappedTenants = tenantsData.map((tenant: any) => ({
+        id: tenant.id,
+        name: tenant.nome,
+        domain: tenant.cnpj || tenant.id, // Usar CNPJ ou ID como domain
+        plan: 'basic', // Valor padrão já que não vem da API
+        users_count: 0, // Valor padrão
+        active: tenant.status === 'ativo' || tenant.status === 'Ativo',
+        created_at: tenant.data_criacao || tenant.created_at || new Date().toISOString(),
+        admin_email: tenant.email_contato,
+        phone: tenant.telefone,
+        status: tenant.status || 'ativo'
+      }));
+
+      setTenants(mappedTenants);
+      
+      // Para usuários, usar dados mockados por enquanto
+      const mockUsers = [
+        { id: '1', name: 'Admin Master', email: 'admin@jttecnologia.com.br', role: 'master', tenant_id: null, active: true, last_login: '2025-01-17T10:00:00Z' }
+      ];
+      setUsers(mockUsers);
+
+      toast({
+        title: 'Dados carregados',
+        description: `${mappedTenants.length} tenants carregados da API.`,
+      });
+
+    } catch (error: any) {
+      console.error('Error fetching data:', error);
       toast({
         title: 'Erro ao carregar dados',
-        description: 'Falha ao carregar informações do painel master.',
-        variant: 'destructive'
+        description: error.message || 'Não foi possível carregar os dados.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -111,64 +154,83 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleCreateTenant = async () => {
-    if (!newTenant.name.trim() || !newTenant.domain.trim() || !newTenant.admin_email.trim()) {
+    if (!newTenant.name.trim() || !newTenant.admin_email.trim()) {
       toast({
-        title: 'Dados incompletos',
-        description: 'Preencha todos os campos obrigatórios.',
-        variant: 'destructive'
+        title: 'Campos obrigatórios',
+        description: 'Preencha nome e email de contato.',
+        variant: 'destructive',
       });
       return;
     }
 
-    // Validar formato do domínio
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]$/;
-    if (!domainRegex.test(newTenant.domain)) {
-      toast({
-        title: 'Domínio inválido',
-        description: 'O domínio deve conter apenas letras, números e hífens.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Validar email
+    // Validação de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newTenant.admin_email)) {
       toast({
         title: 'Email inválido',
-        description: 'Digite um email válido para o administrador.',
-        variant: 'destructive'
+        description: 'Digite um email válido.',
+        variant: 'destructive',
       });
       return;
     }
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      await apiService.createTenant(newTenant);
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
       
+      if (!token) {
+        throw new Error('Token EASEPANEL_TOKEN não configurado');
+      }
+
+      // Criar payload para API da JT Telecom
+      const payload = {
+        nome: newTenant.name,
+        cnpj: newTenant.domain, // Usando domain como CNPJ temporariamente
+        email_contato: newTenant.admin_email,
+        telefone: newTenant.phone || ''
+      };
+
+      const response = await fetch('https://api.jttelecom.com.br/tenants', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
+      }
+
+      const newTenantData = await response.json();
+
       toast({
         title: 'Tenant criado',
         description: `${newTenant.name} foi criado com sucesso.`,
       });
 
-      // Reset form and close modal
+      // Resetar formulário
       setNewTenant({
         name: '',
         domain: '',
-        admin_email: '',
         admin_name: '',
+        admin_email: '',
         phone: '',
         plan: 'basic',
         description: ''
       });
-      setIsCreateModalOpen(false);
-      fetchData();
 
-    } catch (error) {
+      setIsCreateModalOpen(false);
+      fetchData(); // Recarregar dados
+
+    } catch (error: any) {
+      console.error('Error creating tenant:', error);
       toast({
         title: 'Erro ao criar tenant',
-        description: 'Falha ao criar novo tenant. Verifique se o domínio não está em uso.',
-        variant: 'destructive'
+        description: error.message || 'Falha ao criar novo tenant.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -345,77 +407,45 @@ const MasterPanel: React.FC = () => {
                         placeholder="JT Tecnologia Ltda"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="domain">Domínio *</Label>
-                      <Input
-                        id="domain"
-                        value={newTenant.domain}
-                        onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value.toLowerCase() }))}
-                        placeholder="jttelecom"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Será: {newTenant.domain}.jttecnologia.com.br
-                      </p>
-                    </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="domain">CNPJ *</Label>
+                       <Input
+                         id="domain"
+                         value={newTenant.domain}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value }))}
+                         placeholder="12.345.678/0001-90"
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         CNPJ da empresa cliente
+                       </p>
+                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="admin_name">Nome do Administrador *</Label>
-                      <Input
-                        id="admin_name"
-                        value={newTenant.admin_name}
-                        onChange={(e) => setNewTenant(prev => ({ ...prev, admin_name: e.target.value }))}
-                        placeholder="João Silva"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="admin_email">Email do Administrador *</Label>
-                      <Input
-                        id="admin_email"
-                        type="email"
-                        value={newTenant.admin_email}
-                        onChange={(e) => setNewTenant(prev => ({ ...prev, admin_email: e.target.value }))}
-                        placeholder="admin@empresa.com"
-                      />
-                    </div>
-                  </div>
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label htmlFor="phone">Telefone</Label>
+                       <Input
+                         id="phone"
+                         value={newTenant.phone}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, phone: e.target.value }))}
+                         placeholder="(11) 99999-9999"
+                       />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="admin_email">Email de Contato *</Label>
+                       <Input
+                         id="admin_email"
+                         type="email"
+                         value={newTenant.admin_email}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, admin_email: e.target.value }))}
+                         placeholder="contato@empresa.com"
+                       />
+                     </div>
+                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input
-                        id="phone"
-                        value={newTenant.phone}
-                        onChange={(e) => setNewTenant(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="(11) 99999-9999"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="plan">Plano *</Label>
-                      <Select value={newTenant.plan} onValueChange={(value: any) => setNewTenant(prev => ({ ...prev, plan: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white z-50">
-                          <SelectItem value="basic">Básico</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="enterprise">Enterprise</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                   {/* Remove plano e outros campos que não são necessários para a API */}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Descrição (Opcional)</Label>
-                    <Textarea
-                      id="description"
-                      value={newTenant.description}
-                      onChange={(e) => setNewTenant(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Descrição adicional sobre o tenant..."
-                      rows={3}
-                    />
-                  </div>
+                   {/* Remove descrição também */}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
@@ -436,77 +466,67 @@ const MasterPanel: React.FC = () => {
           <Card>
             <CardContent>
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tenant</TableHead>
-                    <TableHead>Domínio</TableHead>
-                    <TableHead>Plano</TableHead>
-                    <TableHead>Usuários</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tenants.map((tenant) => (
-                    <TableRow key={tenant.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{tenant.name}</div>
-                          <div className="text-sm text-muted-foreground">{tenant.admin_email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Globe className="w-4 h-4 text-blue-500" />
-                          <span className="font-mono text-sm">{tenant.domain}.jttecnologia.com.br</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getPlanColor(tenant.plan || 'basic')}>
-                          {getPlanLabel(tenant.plan || 'basic')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-gray-500" />
-                          <span>{tenant.users_count || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={tenant.active ? 'default' : 'secondary'}>
-                          {tenant.active ? 'Ativo' : 'Inativo'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm">
-                            {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleEditTenant(tenant)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleDeleteTenant(tenant.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                 <TableHeader>
+                   <TableRow>
+                     <TableHead>Nome</TableHead>
+                     <TableHead>CNPJ</TableHead>
+                     <TableHead>Email</TableHead>
+                     <TableHead>Status</TableHead>
+                     <TableHead>Data de Criação</TableHead>
+                     <TableHead>Ações</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
+                   {tenants.length === 0 ? (
+                     <TableRow>
+                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                         Nenhuma tenant cadastrada
+                       </TableCell>
+                     </TableRow>
+                   ) : (
+                     tenants.map((tenant) => (
+                       <TableRow key={tenant.id}>
+                         <TableCell>
+                           <div className="font-medium">{tenant.name}</div>
+                         </TableCell>
+                         <TableCell>
+                           <span className="font-mono text-sm">{tenant.domain}</span>
+                         </TableCell>
+                         <TableCell>
+                           <span className="text-sm">{tenant.admin_email}</span>
+                         </TableCell>
+                         <TableCell>
+                           <Badge variant={tenant.active ? 'default' : 'secondary'}>
+                             {tenant.active ? 'Ativo' : 'Inativo'}
+                           </Badge>
+                         </TableCell>
+                         <TableCell>
+                           <span className="text-sm">
+                             {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
+                           </span>
+                         </TableCell>
+                         <TableCell>
+                           <div className="flex gap-2">
+                             <Button variant="outline" size="sm" onClick={() => handleEditTenant(tenant)}>
+                               <Edit className="w-4 h-4" />
+                             </Button>
+                             <Button variant="outline" size="sm">
+                               <Eye className="w-4 h-4" />
+                             </Button>
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               onClick={() => handleDeleteTenant(tenant.id)}
+                               className="text-red-600 hover:text-red-700"
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </Button>
+                           </div>
+                         </TableCell>
+                       </TableRow>
+                     ))
+                   )}
+                 </TableBody>
               </Table>
             </CardContent>
           </Card>

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { sanitizeHTML, validateInput } from '@/utils/security';
 import {
   Dialog,
   DialogContent,
@@ -147,10 +148,19 @@ Estamos à disposição para esclarecer dúvidas e personalizar nossa solução 
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    try {
+      const sanitizedValue = field === 'name' ? validateInput(value, 100) : value;
+      setFormData(prev => ({
+        ...prev,
+        [field]: sanitizedValue,
+      }));
+    } catch (error) {
+      toast({
+        title: 'Entrada inválida',
+        description: error instanceof Error ? error.message : 'Valor inválido',
+        variant: 'destructive',
+      });
+    }
   };
 
   const insertVariable = (variable: string) => {
@@ -207,7 +217,8 @@ Estamos à disposição para esclarecer dúvidas e personalizar nossa solução 
       .replace(/^---$/gim, '<hr class="my-4 border-gray-300">')
       .replace(/\n/g, '<br>');
 
-    return <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: previewContent }} />;
+    const sanitizedContent = sanitizeHTML(previewContent);
+    return <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

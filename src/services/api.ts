@@ -1,15 +1,14 @@
 
+import { validateEnvironment, secureLog, isValidToken } from '@/utils/security';
+
+// Validate environment variables on module load
+validateEnvironment();
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.app.jttecnologia.com.br';
 
-// Helper function to check token expiration
+// Helper function to check token expiration (deprecated - use security utils)
 const isTokenExpired = (token: string): boolean => {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
-  } catch {
-    return true;
-  }
+  return !isValidToken(token);
 };
 
 // Helper function to handle API requests with automatic logout on 401
@@ -17,7 +16,7 @@ const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) 
   const token = localStorage.getItem('token');
   
   if (!token || isTokenExpired(token)) {
-    console.log('Token expired or missing, clearing auth data');
+    secureLog('Token expired or missing, clearing auth data');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/login';
@@ -33,7 +32,7 @@ const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) 
   });
 
   if (response.status === 401) {
-    console.log('Received 401 - Token invalid, clearing auth data');
+    secureLog('Received 401 - Token invalid, clearing auth data');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/login';
@@ -68,7 +67,7 @@ export const apiService = {
       
       return data;
     } catch (error) {
-      console.error('Login error:', error);
+      secureLog('Login error occurred');
       throw error;
     }
   },
@@ -83,7 +82,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getTenants');
       return [];
     }
   },
@@ -98,7 +97,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getUsers');
       return [];
     }
   },
@@ -113,7 +112,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getClients');
       // Fallback para dados mock apenas em caso de erro
       return [
         { 
@@ -148,7 +147,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed, using mock response:', error);
+      secureLog('API call failed: makeCall, using mock response');
       // Mock response para desenvolvimento
       return {
         call_id: `call_${Date.now()}`,
@@ -180,7 +179,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed, using mock response:', error);
+      secureLog('API call failed: sendWhatsAppMessage, using mock response');
       // Mock response para desenvolvimento
       return {
         message_id: `msg_${Date.now()}`,
@@ -207,7 +206,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed, using mock response:', error);
+      secureLog('API call failed: getCallHistory, using mock response');
       // Mock response para desenvolvimento
       return [
         {
@@ -251,7 +250,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed, using mock response:', error);
+      secureLog('API call failed: getChatHistory, using mock response');
       // Mock response para desenvolvimento
       return [
         {
@@ -302,7 +301,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed, using mock response:', error);
+      secureLog('API call failed: updateCallTranscript, using mock response');
       return {
         success: true,
         message: 'Transcrições atualizadas com sucesso'
@@ -320,7 +319,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getClient');
       throw error;
     }
   },
@@ -341,7 +340,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: createClient');
       throw error;
     }
   },
@@ -362,7 +361,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: updateClient');
       throw error;
     }
   },
@@ -379,7 +378,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: deleteClient');
       throw error;
     }
   },
@@ -394,7 +393,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getLeads');
       // Fallback para dados mock apenas em caso de erro
       return [
         {
@@ -439,7 +438,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: createLead');
       throw error;
     }
   },
@@ -460,7 +459,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: updateLead');
       throw error;
     }
   },
@@ -477,7 +476,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: deleteLead');
       throw error;
     }
   },
@@ -492,7 +491,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getProposals');
       return [];
     }
   },
@@ -513,7 +512,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: createProposal');
       throw error;
     }
   },
@@ -534,7 +533,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: updateProposal');
       throw error;
     }
   },
@@ -551,7 +550,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: deleteProposal');
       throw error;
     }
   },
@@ -566,7 +565,7 @@ export const apiService = {
       
       return await response.json();
     } catch (error) {
-      console.error('API call failed:', error);
+      secureLog('API call failed: getContracts');
       return [];
     }
   },
@@ -604,7 +603,7 @@ export const apiService = {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching dashboard summary:', error);
+      secureLog('Error fetching dashboard summary');
       // Retornar dados vazios em caso de erro
       return {
         totalLeads: 0,

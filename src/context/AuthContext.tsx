@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '@/types';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
+import { isValidToken, secureLog } from '@/utils/security';
 
 interface AuthContextType {
   user: User | null;
@@ -30,30 +31,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
-    console.log('Auth check - Token:', !!token, 'User data:', !!userData);
-    
     if (token && userData) {
       try {
-        setUser(JSON.parse(userData));
-        console.log('User authenticated from localStorage');
+        const parsedUser = JSON.parse(userData);
+        if (isValidToken(token)) {
+          setUser(parsedUser);
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       } catch (error) {
-        console.error('Error parsing user data:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
-    } else {
-      // Criar usuário Master temporário para desenvolvimento
-      const tempMasterUser = {
-        id: 'temp-master',
-        name: 'Master Admin',
-        email: 'master@jttelecom.com.br',
-        user_level: 'master' as const,
-        createdAt: new Date()
-      };
-      setUser(tempMasterUser);
-      localStorage.setItem('user', JSON.stringify(tempMasterUser));
-      localStorage.setItem('token', 'temp-master-token');
-      console.log('Temporary Master user created for development');
     }
     
     setIsLoading(false);
@@ -62,11 +52,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: { email: string; password: string }) => {
     try {
       setIsLoading(true);
-      console.log('Attempting login for:', credentials.email);
+      secureLog('Attempting login for user');
       
       const response = await apiService.login(credentials.email, credentials.password);
       
-      console.log('Login successful:', response);
+      secureLog('Login successful');
       
       localStorage.setItem('token', response.access_token);
       localStorage.setItem('user', JSON.stringify(response.user));
@@ -79,7 +69,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       return response.user;
     } catch (error) {
-      console.error('Login failed:', error);
+      secureLog('Login failed');
       toast({
         title: 'Erro no login',
         description: 'Credenciais inválidas ou erro de conexão. Tente novamente.',
@@ -104,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    console.log('User logging out');
+    secureLog('User logging out');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);

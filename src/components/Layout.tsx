@@ -3,6 +3,7 @@ import React from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Bell } from 'lucide-react';
 
@@ -11,7 +12,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
 
   return (
     <SidebarProvider>
@@ -43,15 +45,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium text-foreground">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{user?.user_level}</p>
+                  <p className="font-medium text-foreground">{profile?.name || user?.email}</p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {profile?.user_level === 'master' ? 'Admin Master' : 
+                     profile?.user_level === 'admin' ? 'Administrador' : 'Usuário'}
+                  </p>
                 </div>
               </div>
               
               <Button
                 variant="outline"
                 size="sm"
-                onClick={logout}
+                onClick={signOut}
                 className="flex items-center gap-2 border-[#0057B8]/20 text-[#0057B8] hover:bg-[#0057B8] hover:text-white transition-all duration-200 hover:shadow-lg"
               >
                 <LogOut className="w-4 h-4" />

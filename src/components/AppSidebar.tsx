@@ -2,6 +2,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import {
   Sidebar,
   SidebarContent,

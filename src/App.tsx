@@ -24,6 +24,7 @@ import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
 import SmartbotPage from "@/pages/Smartbot";
+import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Reports from "@/pages/Reports";
@@ -46,26 +47,35 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<LoginJTVox />} />
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/login-jtvox" element={<Navigate to="/auth" replace />} />
+              <Route path="/login-new" element={<Navigate to="/auth" replace />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <DashboardModern />
+                  </Layout>
+                </ProtectedRoute>
+              } />
               
               {/* Rota Master - Admin Master JT Telecom */}
               <Route path="/master" element={
-                <ProtectedRoute requiredLevel="master">
+                <ProtectedRoute>
                   <MasterPanel />
                 </ProtectedRoute>
               } />
               
               {/* Rota Admin - Admin da Tenant */}
               <Route path="/admin" element={
-                <ProtectedRoute requiredLevel="admin">
+                <ProtectedRoute>
                   <TenantAdminPanel />
                 </ProtectedRoute>
               } />
               
               {/* Rota Admin Dashboard - Admin da Tenant com acesso ao CRM */}
               <Route path="/admin/dashboard" element={
-                <ProtectedRoute requiredLevel="admin">
+                <ProtectedRoute>
                   <Layout>
                     <DashboardModern />
                   </Layout>

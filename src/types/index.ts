@@ -70,6 +70,7 @@ export interface Proposal {
   created_at?: string;
   updated_at?: string;
   client_id?: string;
+  lead_id?: string;
   client_name?: string; // Nome do cliente
   client_email?: string; // Email do cliente
   client_phone?: string; // Telefone do cliente

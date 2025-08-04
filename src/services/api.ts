@@ -483,7 +483,11 @@ export const apiService = {
 
   async getProposals() {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals`);
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch proposals');
@@ -498,10 +502,11 @@ export const apiService = {
 
   async createProposal(data: any) {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals`, {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
         },
         body: JSON.stringify(data)
       });
@@ -519,10 +524,11 @@ export const apiService = {
 
   async updateProposal(id: string, data: any) {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals/${id}`, {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
         },
         body: JSON.stringify(data)
       });
@@ -540,8 +546,11 @@ export const apiService = {
 
   async deleteProposal(id: string) {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/proposals/${id}`, {
-        method: 'DELETE'
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+        }
       });
       
       if (!response.ok) {
@@ -678,6 +687,46 @@ export const apiService = {
       success: true,
       message: 'Proposta enviada por WhatsApp com sucesso'
     };
+  },
+
+  // API para buscar leads com autocomplete
+  async searchLeads(query: string) {
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/leads?q=${encodeURIComponent(query)}`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to search leads');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      secureLog('API call failed: searchLeads');
+      return [];
+    }
+  },
+
+  // API para buscar templates de propostas
+  async getProposalTemplates() {
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas/templates`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch proposal templates');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      secureLog('API call failed: getProposalTemplates');
+      return [];
+    }
   },
 
   // APIs para Leads

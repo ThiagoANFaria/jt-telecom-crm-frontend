@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Proposal } from '@/types';
 import { apiService } from '@/services/api';
 import ClientSearch from '@/components/ClientSearch';
+import LeadSearch from '@/components/LeadSearch';
 
 interface ProposalModalProps {
   isOpen: boolean;
@@ -19,11 +20,14 @@ interface ProposalModalProps {
 
 const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSuccess, proposal }) => {
   const [loading, setLoading] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<{
     title: string;
     client_id: string;
+    lead_id: string;
     client_name: string;
     client_email: string;
     client_phone: string;
@@ -36,9 +40,11 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
     notes: string;
     number: string;
     content: string;
+    template_id: string;
   }>({
     title: '',
     client_id: '',
+    lead_id: '',
     client_name: '',
     client_email: '',
     client_phone: '',
@@ -50,14 +56,35 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
     valid_until: '',
     notes: '',
     number: '',
-    content: ''
+    content: '',
+    template_id: ''
   });
+
+  // Carregar templates quando o modal abrir
+  useEffect(() => {
+    if (isOpen) {
+      loadTemplates();
+    }
+  }, [isOpen]);
+
+  const loadTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      const templatesData = await apiService.getProposalTemplates();
+      setTemplates(templatesData || []);
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
 
   useEffect(() => {
     if (proposal && isOpen) {
       setFormData({
         title: proposal.title || '',
         client_id: proposal.client_id || '',
+        lead_id: proposal.lead_id || '',
         client_name: proposal.client_name || '',
         client_email: proposal.client_email || '',
         client_phone: proposal.client_phone || '',
@@ -69,13 +96,15 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
         valid_until: proposal.valid_until || '',
         notes: proposal.notes || '',
         number: proposal.number || '',
-        content: proposal.content || ''
+        content: proposal.content || '',
+        template_id: proposal.template_id || ''
       });
     } else if (isOpen && !proposal) {
       // Reset form for new proposal
       setFormData({
         title: '',
         client_id: '',
+        lead_id: '',
         client_name: '',
         client_email: '',
         client_phone: '',
@@ -87,7 +116,8 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
         valid_until: '',
         notes: '',
         number: '',
-        content: ''
+        content: '',
+        template_id: ''
       });
     }
   }, [proposal, isOpen]);
@@ -190,16 +220,24 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
                     client_phone: client.phone || prev.client_phone
                   }));
                 }}
-                placeholder="Digite o nome do cliente ou lead"
+                placeholder="Digite o nome do cliente"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="client_id">ID do Cliente</Label>
-              <Input
-                id="client_id"
-                value={formData.client_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
-                placeholder="ID do cliente"
+              <Label htmlFor="lead_search">Lead Relacionado</Label>
+              <LeadSearch
+                value={formData.client_name}
+                onChange={(value) => setFormData(prev => ({ ...prev, client_name: value }))}
+                onLeadSelect={(lead) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    lead_id: lead.id,
+                    client_name: lead.name,
+                    client_email: lead.email || prev.client_email,
+                    client_phone: lead.phone || prev.client_phone
+                  }));
+                }}
+                placeholder="Buscar lead..."
               />
             </div>
           </div>
@@ -303,6 +341,27 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
                 onChange={(e) => setFormData(prev => ({ ...prev, valid_until: e.target.value }))}
               />
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="template_id">Template</Label>
+            <Select
+              value={formData.template_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, template_id: value }))}
+              disabled={loadingTemplates}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingTemplates ? "Carregando templates..." : "Selecione um template"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Nenhum template</SelectItem>
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name || template.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-2">

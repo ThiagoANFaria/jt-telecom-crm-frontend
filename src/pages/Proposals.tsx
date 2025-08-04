@@ -7,8 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, Edit, Trash2, FileText, DollarSign, Download, Mail, MessageCircle, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, FileText, Mail, MessageCircle, Download } from 'lucide-react';
 import ProposalModal from '@/components/ProposalModal';
+import { secureLog } from '@/utils/security';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 
 const Proposals: React.FC = () => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -28,7 +31,7 @@ const Proposals: React.FC = () => {
       const data = await apiService.getProposals();
       setProposals(data);
     } catch (error) {
-      console.error('Failed to fetch proposals:', error);
+      secureLog('Failed to fetch proposals');
       toast({
         title: 'Erro ao carregar propostas',
         description: 'Não foi possível carregar a lista de propostas.',
@@ -59,7 +62,7 @@ const Proposals: React.FC = () => {
         });
         fetchProposals();
       } catch (error) {
-        console.error('Failed to delete proposal:', error);
+        secureLog('Failed to delete proposal');
         toast({
           title: 'Erro ao excluir',
           description: 'Não foi possível excluir a proposta.',
@@ -125,7 +128,7 @@ const Proposals: React.FC = () => {
         description: 'Lista de propostas exportada com sucesso.',
       });
     } catch (error) {
-      console.error('Failed to export proposals:', error);
+      secureLog('Failed to export proposals');
       toast({
         title: 'Erro na exportação',
         description: 'Não foi possível exportar a lista de propostas.',
@@ -142,7 +145,7 @@ const Proposals: React.FC = () => {
         description: 'Proposta enviada por email com sucesso.',
       });
     } catch (error) {
-      console.error('Failed to send email:', error);
+      secureLog('Failed to send email');
       toast({
         title: 'Erro ao enviar email',
         description: 'Não foi possível enviar a proposta por email.',
@@ -159,7 +162,7 @@ const Proposals: React.FC = () => {
         description: 'Proposta enviada por WhatsApp com sucesso.',
       });
     } catch (error) {
-      console.error('Failed to send WhatsApp:', error);
+      secureLog('Failed to send WhatsApp');
       toast({
         title: 'Erro ao enviar WhatsApp',
         description: 'Não foi possível enviar a proposta por WhatsApp.',
@@ -195,16 +198,9 @@ const Proposals: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#0057B8]">Propostas</h1>
+          <h1 className="text-3xl font-bold text-primary">Propostas</h1>
         </div>
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
+        <LoadingSpinner size="lg" text="Carregando propostas..." />
       </div>
     );
   }
@@ -212,7 +208,7 @@ const Proposals: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-[#0057B8]">Propostas</h1>
+        <h1 className="text-3xl font-bold text-primary">Propostas</h1>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
@@ -222,7 +218,7 @@ const Proposals: React.FC = () => {
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
-          <Button className="bg-[#0057B8] hover:bg-[#003d82]" onClick={handleCreateProposal}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleCreateProposal}>
             <Plus className="w-4 h-4 mr-2" />
             Nova Proposta
           </Button>
@@ -242,18 +238,17 @@ const Proposals: React.FC = () => {
       </div>
 
       {filteredProposals.length === 0 && !isLoading ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <div className="text-gray-500 mb-4">
-              {searchTerm ? 'Nenhuma proposta encontrada com os filtros aplicados.' : 'Nenhuma proposta criada ainda.'}
-            </div>
-            <Button className="bg-[#0057B8] hover:bg-[#003d82]" onClick={handleCreateProposal}>
+        <EmptyState
+          icon={FileText}
+          title={searchTerm ? 'Nenhuma proposta encontrada' : 'Nenhuma proposta criada ainda'}
+          description={searchTerm ? 'Nenhuma proposta encontrada com os filtros aplicados.' : 'Crie sua primeira proposta para começar.'}
+          action={
+            <Button className="bg-primary hover:bg-primary/90" onClick={handleCreateProposal}>
               <Plus className="w-4 h-4 mr-2" />
-              Criar Primeira Proposta
+              {searchTerm ? 'Nova Proposta' : 'Criar Primeira Proposta'}
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <Card>
           <CardContent className="p-0">
@@ -262,10 +257,9 @@ const Proposals: React.FC = () => {
                 <TableRow>
                   <TableHead className="w-[300px]">Título</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
+                  <TableHead>Lead</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Válida até</TableHead>
-                  <TableHead>Criada em</TableHead>
+                  <TableHead>Data</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -288,9 +282,8 @@ const Proposals: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 font-semibold text-[#0057B8]">
-                        <DollarSign className="w-4 h-4" />
-                        R$ {proposal.amount?.toLocaleString('pt-BR') || '0'}
+                      <div className="text-sm">
+                        {proposal.lead_id ? `Lead ID: ${proposal.lead_id}` : 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -299,13 +292,10 @@ const Proposals: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {proposal.valid_until ? 
-                        new Date(proposal.valid_until).toLocaleDateString('pt-BR') : 
-                        'N/A'
+                      {proposal.created_at ? 
+                        new Date(proposal.created_at).toLocaleDateString('pt-BR') : 
+                        new Date(proposal.createdAt || '').toLocaleDateString('pt-BR')
                       }
-                    </TableCell>
-                    <TableCell>
-                      {new Date(proposal.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">

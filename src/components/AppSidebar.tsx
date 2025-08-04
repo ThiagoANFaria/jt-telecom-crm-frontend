@@ -23,6 +23,7 @@ import {
   GitBranch,
   MessageCircle,
   Phone,
+  Bot,
   Zap,
   BarChart,
   Settings,
@@ -67,8 +68,8 @@ const menuItems = [
   },
   {
     title: 'Smartbot',
-    url: '/chatbot',
-    icon: MessageCircle,
+    url: '/smartbot',
+    icon: Bot,
   },
   {
     title: 'JT Vox PABX',

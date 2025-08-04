@@ -220,3 +220,13 @@ export interface SalesReport {
   by_salesperson?: any[];
   monthly_evolution?: any[];
 }
+
+export interface Smartbot {
+  id: string;
+  nome: string;
+  status: 'ativo' | 'inativo' | 'pausado';
+  canal: 'whatsapp' | 'telegram' | 'webchat' | 'email';
+  data_criacao: string;
+  descricao?: string;
+  configuracoes?: any;
+}

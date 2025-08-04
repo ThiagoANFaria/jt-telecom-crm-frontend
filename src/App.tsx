@@ -23,6 +23,7 @@ import Pipelines from "@/pages/Pipelines";
 import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
+import SmartbotPage from "@/pages/Smartbot";
 import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Reports from "@/pages/Reports";
@@ -162,6 +163,13 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Automation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/smartbot" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SmartbotPage />
                   </Layout>
                 </ProtectedRoute>
               } />

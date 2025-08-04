@@ -1025,6 +1025,119 @@ export const apiService = {
       success: true,
       message: 'Tenant atualizado com sucesso'
     };
+  },
+
+  // SMARTBOTS - Métodos da API
+  async getSmartbots() {
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/smartbots`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      secureLog('Smartbots fetched:', data);
+      return data;
+    } catch (error) {
+      secureLog('Failed to fetch smartbots:', error);
+      throw error;
+    }
+  },
+
+  async createSmartbot(smartbotData: any) {
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/smartbots`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(smartbotData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      secureLog('Smartbot created:', data);
+      return data;
+    } catch (error) {
+      secureLog('Failed to create smartbot:', error);
+      throw error;
+    }
+  },
+
+  async updateSmartbot(id: string, smartbotData: any) {
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/smartbots/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(smartbotData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      secureLog('Smartbot updated:', data);
+      return data;
+    } catch (error) {
+      secureLog('Failed to update smartbot:', error);
+      throw error;
+    }
+  },
+
+  async deleteSmartbot(id: string) {
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/smartbots/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      secureLog('Smartbot deleted successfully');
+      return { success: true };
+    } catch (error) {
+      secureLog('Failed to delete smartbot:', error);
+      throw error;
+    }
   }
 };
 

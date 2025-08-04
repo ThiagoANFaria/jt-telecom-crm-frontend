@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
+import { validateEnvironment } from "@/utils/security";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import LoginJTVox from "@/pages/LoginJTVox";
@@ -28,6 +29,13 @@ import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
+
+// Validate environment variables on app startup
+try {
+  validateEnvironment();
+} catch (error) {
+  console.error('Environment validation failed:', error);
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

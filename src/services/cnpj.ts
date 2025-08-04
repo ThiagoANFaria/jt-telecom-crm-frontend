@@ -100,7 +100,7 @@ class CNPJService {
 
       const cleanCNPJ = this.formatCNPJ(cnpj);
       
-      console.log('Consultando CNPJ na ReceitaWS:', cleanCNPJ);
+      // Secure log without exposing CNPJ details
 
       const response = await fetch(`${this.baseUrl}/${cleanCNPJ}`, {
         method: 'GET',

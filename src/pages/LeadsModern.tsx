@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, Plus, Users, TrendingUp, PhoneCall, Mail } from 'lucide-react';
 import { Lead } from '@/types';
+import { secureLog } from '@/utils/security';
 
 const LeadsModern: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -66,13 +67,13 @@ const LeadsModern: React.FC = () => {
     const loadLeads = async () => {
       try {
         setLoading(true);
-        console.log('Loading leads...');
+        secureLog('Loading leads...');
         
         // Using safe mock data
         setLeads(mockLeads);
         setFilteredLeads(mockLeads);
       } catch (err) {
-        console.error('Error loading leads:', err);
+        secureLog('Error loading leads', { error: 'Failed to load leads' });
         // Still set mock data on error
         setLeads(mockLeads);
         setFilteredLeads(mockLeads);

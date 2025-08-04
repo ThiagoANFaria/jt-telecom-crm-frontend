@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '@/services/api';
+import { secureLog } from '@/utils/security';
 
 interface MetricCard {
   title: string;
@@ -303,25 +304,25 @@ const DashboardModern: React.FC = () => {
       title: 'Novo Lead',
       icon: Users,
       color: 'bg-[#0057B8] hover:bg-[#003d82] text-white shadow-lg hover:shadow-xl',
-      onClick: () => console.log('Novo Lead')
+      onClick: () => secureLog('Quick action: Novo Lead clicked')
     },
     {
       title: 'Nova Proposta',
       icon: FileText,
       color: 'bg-[#00C853] hover:bg-[#00A843] text-white shadow-lg hover:shadow-xl',
-      onClick: () => console.log('Nova Proposta')
+      onClick: () => secureLog('Quick action: Nova Proposta clicked')
     },
     {
       title: 'Fazer Ligação',
       icon: Phone,
       color: 'bg-purple-500 hover:bg-purple-600 text-white shadow-lg hover:shadow-xl',
-      onClick: () => console.log('Fazer Ligação')
+      onClick: () => secureLog('Quick action: Fazer Ligação clicked')
     },
     {
       title: 'Agendar Reunião',
       icon: Calendar,
       color: 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl',
-      onClick: () => console.log('Agendar Reunião')
+      onClick: () => secureLog('Quick action: Agendar Reunião clicked')
     }
   ];
 

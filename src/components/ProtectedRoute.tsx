@@ -1,22 +1,23 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredLevel?: 'master' | 'admin' | 'user';
+  requiredPermission?: { resource: string; action: 'create' | 'read' | 'update' | 'delete' | 'execute' };
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredLevel }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredLevel, requiredPermission }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { hasPermission } = usePermissions();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-jt-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Carregando..." />
       </div>
     );
   }
@@ -35,6 +36,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredLevel
     } else {
       return <Navigate to="/dashboard" replace />;
     }
+  }
+
+  // Verificar permissão específica se especificada
+  if (requiredPermission && !hasPermission(requiredPermission.resource, requiredPermission.action)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8">
+          <h2 className="text-xl font-semibold mb-2">Acesso Negado</h2>
+          <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

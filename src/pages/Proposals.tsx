@@ -87,8 +87,8 @@ const Proposals: React.FC = () => {
       // Preparar dados para exportação
       const exportData = proposals.map(proposal => ({
         ID: proposal.id,
-        Título: proposal.title,
-        'Cliente ID': proposal.client_id,
+        Título: proposal.titulo || proposal.title,
+        'Cliente ID': proposal.cliente_id || proposal.client_id,
         'Nome do Cliente': proposal.client_name || '',
         'Email do Cliente': proposal.client_email || '',
         'Telefone do Cliente': proposal.client_phone || '',
@@ -99,8 +99,13 @@ const Proposals: React.FC = () => {
         Status: proposal.status,
         'Válida até': proposal.valid_until ? new Date(proposal.valid_until).toLocaleDateString('pt-BR') : '',
         Observações: proposal.notes || '',
-        'Data de Criação': new Date(proposal.created_at).toLocaleDateString('pt-BR'),
-        'Última Atualização': new Date(proposal.updated_at).toLocaleDateString('pt-BR'),
+        'Data de Criação': proposal.data_criacao ? 
+          new Date(proposal.data_criacao).toLocaleDateString('pt-BR') : 
+          (proposal.created_at ? 
+            new Date(proposal.created_at).toLocaleDateString('pt-BR') : 
+            (proposal.createdAt ? new Date(proposal.createdAt).toLocaleDateString('pt-BR') : '')
+          ),
+        'Última Atualização': proposal.updated_at ? new Date(proposal.updated_at).toLocaleDateString('pt-BR') : '',
       }));
 
       // Converter para CSV
@@ -171,10 +176,13 @@ const Proposals: React.FC = () => {
     }
   };
 
-  const filteredProposals = proposals.filter(proposal =>
-    proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (proposal.client_name && proposal.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProposals = proposals.filter(proposal => {
+    const title = proposal.titulo || proposal.title || '';
+    const clientName = proposal.client_name || '';
+    
+    return title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           clientName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -268,17 +276,17 @@ const Proposals: React.FC = () => {
                   <TableRow key={proposal.id} className="hover:bg-gray-50">
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-[#0057B8]" />
+                        <FileText className="w-4 h-4 text-primary" />
                         <div>
-                          <div className="font-medium">{proposal.title}</div>
-                          <div className="text-sm text-gray-500">ID: {proposal.id}</div>
+                          <div className="font-medium">{proposal.titulo || proposal.title}</div>
+                          <div className="text-sm text-muted-foreground">ID: {proposal.id}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{proposal.client_name || 'N/A'}</div>
-                        <div className="text-sm text-gray-500">{proposal.client_email || 'N/A'}</div>
+                        <div className="text-sm text-muted-foreground">{proposal.client_email || 'N/A'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -292,9 +300,14 @@ const Proposals: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {proposal.created_at ? 
-                        new Date(proposal.created_at).toLocaleDateString('pt-BR') : 
-                        new Date(proposal.createdAt || '').toLocaleDateString('pt-BR')
+                      {proposal.data_criacao ? 
+                        new Date(proposal.data_criacao).toLocaleDateString('pt-BR') : 
+                        (proposal.created_at ? 
+                          new Date(proposal.created_at).toLocaleDateString('pt-BR') : 
+                          (proposal.createdAt ? 
+                            new Date(proposal.createdAt).toLocaleDateString('pt-BR') : 'N/A'
+                          )
+                        )
                       }
                     </TableCell>
                     <TableCell className="text-right">

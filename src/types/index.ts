@@ -63,13 +63,16 @@ export interface Client {
 
 export interface Proposal {
   id: string;
-  title: string;
+  titulo: string; // Campo da API
+  title?: string; // Para compatibilidade
   description?: string;
   status: 'rascunho' | 'enviada' | 'aceita' | 'rejeitada' | 'revisao' | 'draft';
   createdAt?: Date;
   created_at?: string;
+  data_criacao?: string; // Campo da API
   updated_at?: string;
   client_id?: string;
+  cliente_id?: string; // Campo da API
   lead_id?: string;
   client_name?: string; // Nome do cliente
   client_email?: string; // Email do cliente

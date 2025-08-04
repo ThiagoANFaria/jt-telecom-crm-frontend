@@ -10,6 +10,7 @@ import { Proposal } from '@/types';
 import { apiService } from '@/services/api';
 import ClientSearch from '@/components/ClientSearch';
 import LeadSearch from '@/components/LeadSearch';
+import { secureLog } from '@/utils/security';
 
 interface ProposalModalProps {
   isOpen: boolean;
@@ -73,7 +74,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
       const templatesData = await apiService.getProposalTemplates();
       setTemplates(templatesData || []);
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      secureLog('Failed to load templates');
     } finally {
       setLoadingTemplates(false);
     }
@@ -82,8 +83,8 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
   useEffect(() => {
     if (proposal && isOpen) {
       setFormData({
-        title: proposal.title || '',
-        client_id: proposal.client_id || '',
+        title: proposal.titulo || proposal.title || '',
+        client_id: proposal.cliente_id || proposal.client_id || '',
         lead_id: proposal.lead_id || '',
         client_name: proposal.client_name || '',
         client_email: proposal.client_email || '',
@@ -174,7 +175,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
 
       onSuccess();
     } catch (error) {
-      console.error('Failed to save proposal:', error);
+      secureLog('Failed to save proposal');
       toast({
         title: 'Erro',
         description: 'Falha ao salvar a proposta.',
@@ -189,7 +190,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#0057B8] font-semibold">
+          <DialogTitle className="text-primary font-semibold">
             {proposal?.id ? 'Editar Proposta' : 'Nova Proposta'}
           </DialogTitle>
         </DialogHeader>
@@ -305,7 +306,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
             <div className="grid gap-2">
               <Label>Valor Total</Label>
               <div className="flex items-center h-10 px-3 py-2 border border-input bg-background rounded-md text-sm">
-                <span className="text-[#0057B8] font-semibold">
+                <span className="text-primary font-semibold">
                   R$ {formData.total_amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </span>
               </div>
@@ -319,10 +320,10 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
                 value={formData.status}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as typeof formData.status }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border z-50">
                   <SelectItem value="rascunho">Rascunho</SelectItem>
                   <SelectItem value="enviada">Enviada</SelectItem>
                   <SelectItem value="aceita">Aceita</SelectItem>
@@ -350,13 +351,13 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
               onValueChange={(value) => setFormData(prev => ({ ...prev, template_id: value }))}
               disabled={loadingTemplates}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-background">
                 <SelectValue placeholder={loadingTemplates ? "Carregando templates..." : "Selecione um template"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border z-50">
                 <SelectItem value="">Nenhum template</SelectItem>
                 {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
+                  <SelectItem key={template.id} value={template.id} className="hover:bg-muted">
                     {template.name || template.title}
                   </SelectItem>
                 ))}
@@ -383,7 +384,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ isOpen, onClose, onSucces
           <Button 
             onClick={handleSave}
             disabled={loading}
-            className="bg-[#0057B8] hover:bg-[#003d82]"
+            className="bg-primary hover:bg-primary/90"
           >
             {loading ? 'Salvando...' : (proposal?.id ? 'Atualizar' : 'Criar')}
           </Button>

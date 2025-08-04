@@ -483,17 +483,26 @@ export const apiService = {
 
   async getProposals() {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas`, {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/propostas`, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch proposals');
+        throw new Error(`Failed to fetch proposals: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      secureLog('Proposals loaded successfully');
+      return data;
     } catch (error) {
       secureLog('API call failed: getProposals');
       return [];
@@ -502,17 +511,31 @@ export const apiService = {
 
   async createProposal(data: any) {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas`, {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      // Mapear campos para a API
+      const apiData = {
+        titulo: data.title,
+        cliente_id: data.client_id,
+        lead_id: data.lead_id,
+        status: data.status,
+        ...data
+      };
+
+      const response = await fetch(`${API_BASE_URL}/propostas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(apiData)
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create proposal');
+        throw new Error(`Failed to create proposal: ${response.status}`);
       }
       
       return await response.json();
@@ -692,17 +715,25 @@ export const apiService = {
   // API para buscar leads com autocomplete
   async searchLeads(query: string) {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/leads?q=${encodeURIComponent(query)}`, {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/leads?q=${encodeURIComponent(query)}`, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to search leads');
+        throw new Error(`Failed to search leads: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      return data;
     } catch (error) {
       secureLog('API call failed: searchLeads');
       return [];
@@ -712,17 +743,25 @@ export const apiService = {
   // API para buscar templates de propostas
   async getProposalTemplates() {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/propostas/templates`, {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/propostas/templates`, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_EASEPANEL_TOKEN}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch proposal templates');
+        throw new Error(`Failed to fetch proposal templates: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      return data;
     } catch (error) {
       secureLog('API call failed: getProposalTemplates');
       return [];

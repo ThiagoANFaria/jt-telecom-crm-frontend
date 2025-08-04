@@ -101,7 +101,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { isMaster } = useAuth();
+  const { isMaster } = useProfile();
   const location = useLocation();
   const isCollapsed = state === 'collapsed';
   // Deploy: Nomes dos módulos atualizados para Smartbot e JT Vox PABX

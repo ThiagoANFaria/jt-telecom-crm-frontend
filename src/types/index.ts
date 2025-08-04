@@ -91,18 +91,23 @@ export interface Proposal {
 
 export interface Contract {
   id: string;
-  title: string;
+  titulo: string; // Campo da API
+  title?: string; // Para compatibilidade
   description?: string;
   status: 'pendente' | 'ativo' | 'concluido' | 'cancelado' | 'active';
   createdAt?: Date;
   created_at?: string;
+  data_criacao?: string; // Campo da API
   client_id?: string;
+  cliente_id?: string; // Campo da API
+  lead_id?: string;
   client_name?: string; // Nome do cliente
   client_email?: string; // Email do cliente  
   client_phone?: string; // Telefone do cliente
   amount?: number;
   start_date?: string;
   end_date?: string;
+  validade?: string; // Campo da API
   template_id?: string; // ID do template usado
   notes?: string; // Observações
   content?: string; // Conteúdo do contrato

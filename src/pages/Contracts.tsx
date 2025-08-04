@@ -7,8 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, Edit, Trash2, FileCheck, DollarSign, Calendar, Download, Send } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, FileCheck, Calendar, Download, Send } from 'lucide-react';
 import ContractModal from '@/components/ContractModal';
+import { secureLog } from '@/utils/security';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 
 const Contracts: React.FC = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -28,7 +31,7 @@ const Contracts: React.FC = () => {
       const data = await apiService.getContracts();
       setContracts(data);
     } catch (error) {
-      console.error('Failed to fetch contracts:', error);
+      secureLog('Failed to fetch contracts');
       toast({
         title: 'Erro ao carregar contratos',
         description: 'Não foi possível carregar a lista de contratos.',
@@ -59,7 +62,7 @@ const Contracts: React.FC = () => {
         });
         fetchContracts();
       } catch (error) {
-        console.error('Failed to delete contract:', error);
+        secureLog('Failed to delete contract');
         toast({
           title: 'Erro ao excluir',
           description: 'Não foi possível excluir o contrato.',
@@ -88,7 +91,7 @@ const Contracts: React.FC = () => {
       });
       fetchContracts();
     } catch (error) {
-      console.error('Failed to send to D4Sign:', error);
+      secureLog('Failed to send to D4Sign');
       toast({
         title: 'Erro ao enviar',
         description: 'Não foi possível enviar o contrato para assinatura.',
@@ -101,15 +104,19 @@ const Contracts: React.FC = () => {
     try {
       const exportData = contracts.map(contract => ({
         ID: contract.id,
-        Título: contract.title,
+        Título: contract.titulo || contract.title,
+        'Cliente ID': contract.cliente_id || contract.client_id,
         'Nome do Cliente': contract.client_name || '',
         'Email do Cliente': contract.client_email || '',
         Valor: contract.amount,
         Status: contract.status,
         'Data de Início': contract.start_date ? new Date(contract.start_date).toLocaleDateString('pt-BR') : '',
         'Data de Fim': contract.end_date ? new Date(contract.end_date).toLocaleDateString('pt-BR') : '',
+        'Validade': contract.validade ? new Date(contract.validade).toLocaleDateString('pt-BR') : '',
         'D4Sign ID': contract.d4sign_document_id || '',
-        'Data de Criação': new Date(contract.created_at).toLocaleDateString('pt-BR'),
+        'Data de Criação': contract.data_criacao ? 
+          new Date(contract.data_criacao).toLocaleDateString('pt-BR') : 
+          (contract.created_at ? new Date(contract.created_at).toLocaleDateString('pt-BR') : ''),
       }));
 
       const headers = Object.keys(exportData[0] || {});
@@ -135,7 +142,7 @@ const Contracts: React.FC = () => {
         description: 'Lista de contratos exportada com sucesso.',
       });
     } catch (error) {
-      console.error('Failed to export contracts:', error);
+      secureLog('Failed to export contracts');
       toast({
         title: 'Erro na exportação',
         description: 'Não foi possível exportar a lista de contratos.',
@@ -144,10 +151,13 @@ const Contracts: React.FC = () => {
     }
   };
 
-  const filteredContracts = contracts.filter(contract =>
-    contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (contract.client_name && contract.client_name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredContracts = contracts.filter(contract => {
+    const title = contract.titulo || contract.title || '';
+    const clientName = contract.client_name || '';
+    
+    return title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           clientName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -170,16 +180,9 @@ const Contracts: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#0057B8]">Contratos</h1>
+          <h1 className="text-3xl font-bold text-primary">Contratos</h1>
         </div>
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
+        <LoadingSpinner size="lg" text="Carregando contratos..." />
       </div>
     );
   }
@@ -187,7 +190,7 @@ const Contracts: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-[#0057B8]">Contratos</h1>
+        <h1 className="text-3xl font-bold text-primary">Contratos</h1>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
@@ -197,7 +200,7 @@ const Contracts: React.FC = () => {
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
-          <Button className="bg-[#0057B8] hover:bg-[#003d82]" onClick={handleCreateContract}>
+          <Button className="bg-primary hover:bg-primary/90" onClick={handleCreateContract}>
             <Plus className="w-4 h-4 mr-2" />
             Novo Contrato
           </Button>
@@ -217,18 +220,17 @@ const Contracts: React.FC = () => {
       </div>
 
       {filteredContracts.length === 0 && !isLoading ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <FileCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <div className="text-gray-500 mb-4">
-              {searchTerm ? 'Nenhum contrato encontrado com os filtros aplicados.' : 'Nenhum contrato criado ainda.'}
-            </div>
-            <Button className="bg-[#0057B8] hover:bg-[#003d82]" onClick={handleCreateContract}>
+        <EmptyState
+          icon={FileCheck}
+          title={searchTerm ? 'Nenhum contrato encontrado' : 'Nenhum contrato criado ainda'}
+          description={searchTerm ? 'Nenhum contrato encontrado com os filtros aplicados.' : 'Crie seu primeiro contrato para começar.'}
+          action={
+            <Button className="bg-primary hover:bg-primary/90" onClick={handleCreateContract}>
               <Plus className="w-4 h-4 mr-2" />
-              Criar Primeiro Contrato
+              {searchTerm ? 'Novo Contrato' : 'Criar Primeiro Contrato'}
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <Card>
           <CardContent className="p-0">
@@ -237,10 +239,10 @@ const Contracts: React.FC = () => {
                 <TableRow>
                   <TableHead className="w-[300px]">Título</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
+                  <TableHead>Lead</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>D4Sign</TableHead>
+                  <TableHead>Validade</TableHead>
+                  <TableHead>Data de Criação</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -249,23 +251,22 @@ const Contracts: React.FC = () => {
                   <TableRow key={contract.id} className="hover:bg-gray-50">
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <FileCheck className="w-4 h-4 text-[#0057B8]" />
+                        <FileCheck className="w-4 h-4 text-primary" />
                         <div>
-                          <div className="font-medium">{contract.title}</div>
-                          <div className="text-sm text-gray-500">ID: {contract.id}</div>
+                          <div className="font-medium">{contract.titulo || contract.title}</div>
+                          <div className="text-sm text-muted-foreground">ID: {contract.id}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{contract.client_name || 'N/A'}</div>
-                        <div className="text-sm text-gray-500">{contract.client_email || 'N/A'}</div>
+                        <div className="text-sm text-muted-foreground">{contract.client_email || 'N/A'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 font-semibold text-[#0057B8]">
-                        <DollarSign className="w-4 h-4" />
-                        R$ {contract.amount?.toLocaleString('pt-BR') || '0'}
+                      <div className="text-sm">
+                        {contract.lead_id ? `Lead ID: ${contract.lead_id}` : 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -275,31 +276,24 @@ const Contracts: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {contract.start_date ? 
-                            new Date(contract.start_date).toLocaleDateString('pt-BR') : 
-                            'N/A'
-                          }
-                        </div>
-                        <div className="text-gray-500">
-                          até {contract.end_date ? 
-                            new Date(contract.end_date).toLocaleDateString('pt-BR') : 
-                            'N/A'
-                          }
-                        </div>
+                        {contract.validade ? 
+                          new Date(contract.validade).toLocaleDateString('pt-BR') : 
+                          (contract.end_date ? 
+                            new Date(contract.end_date).toLocaleDateString('pt-BR') : 'N/A'
+                          )
+                        }
                       </div>
                     </TableCell>
                     <TableCell>
-                      {contract.d4sign_document_id ? (
-                        <Badge variant="outline" className="text-green-600">
-                          Enviado
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-gray-500">
-                          Não enviado
-                        </Badge>
-                      )}
+                      {contract.data_criacao ? 
+                        new Date(contract.data_criacao).toLocaleDateString('pt-BR') : 
+                        (contract.created_at ? 
+                          new Date(contract.created_at).toLocaleDateString('pt-BR') : 
+                          (contract.createdAt ? 
+                            new Date(contract.createdAt).toLocaleDateString('pt-BR') : 'N/A'
+                          )
+                        )
+                      }
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">

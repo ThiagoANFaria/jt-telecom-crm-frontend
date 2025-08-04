@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Contract } from '@/types';
 import { apiService } from '@/services/api';
 import ClientSearch from '@/components/ClientSearch';
+import LeadSearch from '@/components/LeadSearch';
+import { secureLog } from '@/utils/security';
 
 interface ContractModalProps {
   isOpen: boolean;
@@ -19,11 +21,14 @@ interface ContractModalProps {
 
 const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSuccess, contract }) => {
   const [loading, setLoading] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<{
     title: string;
     client_id: string;
+    lead_id: string;
     client_name: string;
     client_email: string;
     client_phone: string;
@@ -38,6 +43,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
   }>({
     title: '',
     client_id: '',
+    lead_id: '',
     client_name: '',
     client_email: '',
     client_phone: '',
@@ -51,11 +57,31 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
     content: ''
   });
 
+  // Carregar templates quando o modal abrir
+  useEffect(() => {
+    if (isOpen) {
+      loadTemplates();
+    }
+  }, [isOpen]);
+
+  const loadTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      const templatesData = await apiService.getContractTemplates();
+      setTemplates(templatesData || []);
+    } catch (error) {
+      secureLog('Failed to load templates');
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
   useEffect(() => {
     if (contract && isOpen) {
       setFormData({
-        title: contract.title || '',
-        client_id: contract.client_id || '',
+        title: contract.titulo || contract.title || '',
+        client_id: contract.cliente_id || contract.client_id || '',
+        lead_id: contract.lead_id || '',
         client_name: contract.client_name || '',
         client_email: contract.client_email || '',
         client_phone: contract.client_phone || '',
@@ -63,7 +89,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
         amount: contract.amount || 0,
         status: (contract.status as 'pendente' | 'ativo' | 'concluido' | 'cancelado') || 'pendente',
         start_date: contract.start_date || '',
-        end_date: contract.end_date || '',
+        end_date: contract.end_date || contract.validade || '',
         template_id: contract.template_id || '',
         notes: contract.notes || '',
         content: contract.content || ''
@@ -73,6 +99,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
       setFormData({
         title: '',
         client_id: '',
+        lead_id: '',
         client_name: '',
         client_email: '',
         client_phone: '',
@@ -149,7 +176,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
 
       onSuccess();
     } catch (error) {
-      console.error('Failed to save contract:', error);
+      secureLog('Failed to save contract');
       toast({
         title: 'Erro',
         description: 'Falha ao salvar o contrato.',
@@ -164,7 +191,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#0057B8] font-semibold">
+          <DialogTitle className="text-primary font-semibold">
             {contract?.id ? 'Editar Contrato' : 'Novo Contrato'}
           </DialogTitle>
         </DialogHeader>
@@ -195,16 +222,24 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
                     client_phone: client.phone || prev.client_phone
                   }));
                 }}
-                placeholder="Digite o nome do cliente ou lead"
+                placeholder="Digite o nome do cliente"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="client_id">ID do Cliente</Label>
-              <Input
-                id="client_id"
-                value={formData.client_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, client_id: e.target.value }))}
-                placeholder="ID do cliente"
+              <Label htmlFor="lead_search">Lead Relacionado</Label>
+              <LeadSearch
+                value={formData.client_name}
+                onChange={(value) => setFormData(prev => ({ ...prev, client_name: value }))}
+                onLeadSelect={(lead) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    lead_id: lead.id,
+                    client_name: lead.name,
+                    client_email: lead.email || prev.client_email,
+                    client_phone: lead.phone || prev.client_phone
+                  }));
+                }}
+                placeholder="Buscar lead..."
               />
             </div>
           </div>
@@ -261,10 +296,10 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
                 value={formData.status}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as typeof formData.status }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border z-50">
                   <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="ativo">Ativo</SelectItem>
                   <SelectItem value="concluido">Concluído</SelectItem>
@@ -272,6 +307,27 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="template_id">Template</Label>
+            <Select
+              value={formData.template_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, template_id: value }))}
+              disabled={loadingTemplates}
+            >
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder={loadingTemplates ? "Carregando templates..." : "Selecione um template"} />
+              </SelectTrigger>
+              <SelectContent className="bg-background border z-50">
+                <SelectItem value="">Nenhum template</SelectItem>
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.id} className="hover:bg-muted">
+                    {template.name || template.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -326,7 +382,7 @@ const ContractModal: React.FC<ContractModalProps> = ({ isOpen, onClose, onSucces
           <Button 
             onClick={handleSave}
             disabled={loading}
-            className="bg-[#0057B8] hover:bg-[#003d82]"
+            className="bg-primary hover:bg-primary/90"
           >
             {loading ? 'Salvando...' : (contract?.id ? 'Atualizar' : 'Criar')}
           </Button>

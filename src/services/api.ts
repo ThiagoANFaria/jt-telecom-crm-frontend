@@ -589,13 +589,26 @@ export const apiService = {
 
   async getContracts() {
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/api/contracts`);
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/contratos`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch contracts');
+        throw new Error(`Failed to fetch contracts: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      secureLog('Contracts loaded successfully');
+      return data;
     } catch (error) {
       secureLog('API call failed: getContracts');
       return [];
@@ -670,23 +683,102 @@ export const apiService = {
 
   // APIs para Contratos
   async createContract(data: any) {
-    return { 
-      id: Date.now().toString(), 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      // Mapear campos para a API
+      const apiData = {
+        titulo: data.title,
+        cliente_id: data.client_id,
+        lead_id: data.lead_id,
+        status: data.status,
+        validade: data.end_date,
+        ...data
+      };
+
+      const response = await fetch(`${API_BASE_URL}/contratos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(apiData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create contract: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      secureLog('API call failed: createContract');
+      throw error;
+    }
   },
 
   async updateContract(id: string, data: any) {
-    return { 
-      id, 
-      ...data, 
-      createdAt: new Date()
-    };
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      // Mapear campos para a API
+      const apiData = {
+        titulo: data.title,
+        cliente_id: data.client_id,
+        lead_id: data.lead_id,
+        status: data.status,
+        validade: data.end_date,
+        ...data
+      };
+
+      const response = await fetch(`${API_BASE_URL}/contratos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(apiData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update contract: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      secureLog('API call failed: updateContract');
+      throw error;
+    }
   },
 
   async deleteContract(id: string) {
-    return { success: true };
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/contratos/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete contract: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      secureLog('API call failed: deleteContract');
+      throw error;
+    }
   },
 
   async sendContractToD4Sign(contractId: string) {
@@ -764,6 +856,34 @@ export const apiService = {
       return data;
     } catch (error) {
       secureLog('API call failed: getProposalTemplates');
+      return [];
+    }
+  },
+
+  // API para buscar templates de contratos
+  async getContractTemplates() {
+    try {
+      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
+      if (!token) {
+        throw new Error('EASEPANEL_TOKEN not configured');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/contratos/templates`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contract templates: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      secureLog('API call failed: getContractTemplates');
       return [];
     }
   },

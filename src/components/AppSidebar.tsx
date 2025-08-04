@@ -109,7 +109,7 @@ export function AppSidebar() {
   // Filtrar itens do menu baseado no nível do usuário
   const filteredMenuItems = menuItems.filter(item => {
     if (item.title === 'Master Panel') {
-      return isMaster();
+      return isMaster;
     }
     return true;
   });

@@ -24,7 +24,7 @@ import Telephony from "@/pages/Telephony";
 import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
 import SmartbotPage from "@/pages/Smartbot";
-import Auth from "@/pages/Auth";
+import LoginNew from "@/pages/LoginNew";
 import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Reports from "@/pages/Reports";
@@ -47,7 +47,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth" element={<LoginNew />} />
               <Route path="/login" element={<Navigate to="/auth" replace />} />
               <Route path="/login-jtvox" element={<Navigate to="/auth" replace />} />
               <Route path="/login-new" element={<Navigate to="/auth" replace />} />

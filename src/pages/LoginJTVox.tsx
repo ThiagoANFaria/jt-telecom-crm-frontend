@@ -32,7 +32,7 @@ const LoginJTVox: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-jt-blue flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
@@ -144,12 +144,12 @@ const LoginJTVox: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-500 font-opensans">
+          <p className="text-sm text-white/80 font-opensans">
             Desenvolvido pela JT Telecom
           </p>
           <div className="flex items-center justify-center gap-2 mt-2">
-            <div className="w-2 h-2 bg-[#00A651] rounded-full animate-pulse"></div>
-            <span className="text-xs text-gray-400 font-opensans">Sistema Online</span>
+            <div className="w-2 h-2 bg-jt-green rounded-full animate-pulse"></div>
+            <span className="text-xs text-white/60 font-opensans">Sistema Online</span>
           </div>
         </div>
       </div>

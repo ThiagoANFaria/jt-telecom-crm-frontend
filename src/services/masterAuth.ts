@@ -59,7 +59,7 @@ export class MasterAuthService {
     try {
       console.log('Criando/atualizando perfil para usuário:', userId);
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('profiles')
         .upsert({
           id: userId,
@@ -67,9 +67,7 @@ export class MasterAuthService {
           name: 'Super Administrador Master',
           user_level: 'master',
           tenant_id: null,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          is_active: true
         }, {
           onConflict: 'id'
         });
@@ -79,8 +77,7 @@ export class MasterAuthService {
         throw error;
       }
 
-      console.log('Perfil criado/atualizado com sucesso:', data);
-      return data;
+      console.log('Perfil criado/atualizado com sucesso');
     } catch (error) {
       console.error('Erro ao criar/atualizar perfil:', error);
       throw error;

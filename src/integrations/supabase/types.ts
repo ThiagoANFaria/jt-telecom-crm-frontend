@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      automation_logs: {
+        Row: {
+          automation_id: string
+          created_at: string | null
+          error_message: string | null
+          execution_result: string
+          execution_time_ms: number | null
+          id: string
+          trigger_data: Json | null
+        }
+        Insert: {
+          automation_id: string
+          created_at?: string | null
+          error_message?: string | null
+          execution_result: string
+          execution_time_ms?: number | null
+          id?: string
+          trigger_data?: Json | null
+        }
+        Update: {
+          automation_id?: string
+          created_at?: string | null
+          error_message?: string | null
+          execution_result?: string
+          execution_time_ms?: number | null
+          id?: string
+          trigger_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_logs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automations: {
+        Row: {
+          actions: Json
+          created_at: string | null
+          description: string | null
+          execution_count: number | null
+          id: string
+          is_active: boolean | null
+          last_executed_at: string | null
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actions?: Json
+          created_at?: string | null
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name: string
+          trigger_conditions?: Json
+          trigger_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actions?: Json
+          created_at?: string | null
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address: string | null
@@ -264,6 +347,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string | null
+          credentials: Json
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          name: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          credentials?: Json
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          name: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          credentials?: Json
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {
@@ -596,6 +718,84 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_data: Json | null
+          old_data: Json | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_encrypted: boolean | null
+          key: string
+          tenant_id: string | null
+          updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_encrypted?: boolean | null
+          key: string
+          tenant_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          value: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_encrypted?: boolean | null
+          key?: string
+          tenant_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          value?: Json
         }
         Relationships: []
       }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,18 +6,33 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Crown, Shield, Lock } from 'lucide-react';
+import { Crown, Shield, Lock, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { MasterAuthService } from '@/services/masterAuth';
 
 const MasterLogin: React.FC = () => {
   const [email, setEmail] = useState('master@jttelecom.com');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [error, setError] = useState('');
   
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Verificar e criar usuário master se necessário
+  useEffect(() => {
+    const ensureMasterUser = async () => {
+      try {
+        await MasterAuthService.ensureMasterExists();
+      } catch (error) {
+        console.error('Erro ao verificar usuário master:', error);
+      }
+    };
+    
+    ensureMasterUser();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +54,29 @@ const MasterLogin: React.FC = () => {
       setError(error.message || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreateMasterUser = async () => {
+    setIsCreatingUser(true);
+    setError('');
+    
+    try {
+      const result = await MasterAuthService.createMasterUser();
+      
+      if (result.success) {
+        toast({
+          title: 'Usuário Master criado',
+          description: 'Agora você pode fazer login com as credenciais fornecidas.',
+        });
+      } else {
+        setError('Erro ao criar usuário Master. Tente novamente.');
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar usuário master:', error);
+      setError('Erro ao criar usuário Master. Tente novamente.');
+    } finally {
+      setIsCreatingUser(false);
     }
   };
 
@@ -107,11 +145,33 @@ const MasterLogin: React.FC = () => {
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
-              disabled={isLoading}
+              disabled={isLoading || isCreatingUser}
             >
               {isLoading ? 'Conectando...' : 'Acessar Painel Master'}
             </Button>
           </form>
+
+          {/* Botão para criar usuário Master se necessário */}
+          <div className="mt-4">
+            <Button
+              onClick={handleCreateMasterUser}
+              variant="outline"
+              className="w-full"
+              disabled={isLoading || isCreatingUser}
+            >
+              {isCreatingUser ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Criando Usuário Master...
+                </>
+              ) : (
+                'Criar Usuário Master'
+              )}
+            </Button>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Clique aqui se for o primeiro acesso
+            </p>
+          </div>
           
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">

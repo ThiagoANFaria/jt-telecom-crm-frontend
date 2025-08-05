@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { apiService } from '@/services/api';
+import { analyticsService, AnalyticsData } from '@/services/analytics';
 import { 
   TrendingUp, 
   Users, 
@@ -14,7 +14,12 @@ import {
   Activity,
   Clock,
   Percent,
-  RefreshCw
+  RefreshCw,
+  DollarSign,
+  CheckCircle,
+  FileText,
+  Briefcase,
+  Download
 } from 'lucide-react';
 import { 
   PieChart as RechartsPieChart, 
@@ -27,47 +32,32 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  FunnelChart,
-  Funnel
+  LineChart,
+  Line,
+  Area,
+  AreaChart
 } from 'recharts';
 
-interface DashboardData {
-  tenant_id: string;
-  funil_vendas: {
-    etapas: Array<{
-      nome: string;
-      quantidade: number;
-      percentual_conversao: number;
-      tempo_medio_dias: number;
-      cor: string;
-    }>;
-  };
-  origem_leads: Array<{
-    canal: string;
-    quantidade: number;
-    percentual: number;
-    conversao: number;
-  }>;
-  timestamp: string;
-}
-
 const Analytics: React.FC = () => {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('30');
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchAnalyticsData();
   }, [selectedPeriod]);
 
-  const fetchDashboardData = async () => {
+  const fetchAnalyticsData = async () => {
     try {
       setIsLoading(true);
-      const data = await apiService.getDashboard();
-      setDashboardData(data);
+      const data = await analyticsService.getAnalyticsData({
+        period: parseInt(selectedPeriod)
+      });
+      setAnalyticsData(data);
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error('Failed to fetch analytics data:', error);
       toast({
         title: 'Erro ao carregar analytics',
         description: 'Não foi possível carregar os dados de analytics.',
@@ -75,6 +65,40 @@ const Analytics: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExportData = async (format: 'json' | 'csv') => {
+    try {
+      setIsExporting(true);
+      const data = await analyticsService.exportAnalyticsData({
+        period: parseInt(selectedPeriod)
+      }, format);
+      
+      const blob = new Blob([format === 'json' ? JSON.stringify(data, null, 2) : data as string], {
+        type: format === 'json' ? 'application/json' : 'text/csv'
+      });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analytics-${selectedPeriod}days.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: 'Dados exportados',
+        description: `Relatório exportado em formato ${format.toUpperCase()}.`,
+      });
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      toast({
+        title: 'Erro na exportação',
+        description: 'Não foi possível exportar os dados.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -136,11 +160,28 @@ const Analytics: React.FC = () => {
               <SelectItem value="7">Últimos 7 dias</SelectItem>
               <SelectItem value="30">Últimos 30 dias</SelectItem>
               <SelectItem value="90">Últimos 90 dias</SelectItem>
+              <SelectItem value="365">Último ano</SelectItem>
             </SelectContent>
           </Select>
           <Button 
             variant="outline" 
-            onClick={fetchDashboardData}
+            onClick={() => handleExportData('csv')}
+            disabled={isExporting || !analyticsData}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            CSV
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => handleExportData('json')}
+            disabled={isExporting || !analyticsData}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            JSON
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={fetchAnalyticsData}
             disabled={isLoading}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -149,9 +190,9 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {dashboardData && (
+      {analyticsData && (
         <>
-          {/* Métricas Resumo do Funil */}
+          {/* KPIs Principais */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -160,10 +201,10 @@ const Analytics: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-[#0057B8]">
-                  {dashboardData.funil_vendas.etapas[0]?.quantidade || 0}
+                  {analyticsData.kpis.total_leads}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  leads no funil
+                  leads captados
                 </p>
               </CardContent>
             </Card>
@@ -175,40 +216,103 @@ const Analytics: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {dashboardData.funil_vendas.etapas[dashboardData.funil_vendas.etapas.length - 1]?.percentual_conversao.toFixed(1) || 0}%
+                  {analyticsData.kpis.conversion_rate.toFixed(1)}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  conversão final
+                  leads → clientes
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tempo Médio</CardTitle>
-                <Clock className="h-4 w-4 text-orange-600" />
+                <CardTitle className="text-sm font-medium">Revenue Mensal</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600">
-                  {(dashboardData.funil_vendas.etapas.reduce((acc, etapa) => acc + etapa.tempo_medio_dias, 0) / dashboardData.funil_vendas.etapas.length).toFixed(1)}
+                <div className="text-2xl font-bold text-green-600">
+                  R$ {analyticsData.kpis.monthly_revenue.toLocaleString('pt-BR')}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  dias no funil
+                  faturamento
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Canais Ativos</CardTitle>
-                <Activity className="h-4 w-4 text-purple-600" />
+                <CardTitle className="text-sm font-medium">Deals Ativos</CardTitle>
+                <Briefcase className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">
-                  {dashboardData.origem_leads.length}
+                  {analyticsData.kpis.active_deals}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  fontes de leads
+                  em negociação
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* KPIs Secundários */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Clientes</CardTitle>
+                <Users className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {analyticsData.kpis.total_clients}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  clientes ativos
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Propostas</CardTitle>
+                <FileText className="h-4 w-4 text-orange-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">
+                  {analyticsData.kpis.total_proposals}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  propostas enviadas
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Contratos</CardTitle>
+                <FileText className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {analyticsData.kpis.total_contracts}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  contratos fechados
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Tasks Concluídas</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {analyticsData.kpis.completed_tasks}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  tarefas finalizadas
                 </p>
               </CardContent>
             </Card>
@@ -219,12 +323,12 @@ const Analytics: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-[#0057B8]" />
-                Funil de Vendas
+                Funil de Vendas - Pipeline
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dashboardData.funil_vendas.etapas.map((etapa, index) => (
+                {analyticsData.funil_vendas.etapas.map((etapa, index) => (
                   <div key={etapa.nome} className="relative">
                     <div 
                       className="flex items-center justify-between p-4 rounded-lg border-2"
@@ -249,11 +353,11 @@ const Analytics: React.FC = () => {
                           {etapa.quantidade}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {etapa.percentual_conversao.toFixed(1)}% conversão
+                          {etapa.percentual_conversao.toFixed(1)}% do total
                         </div>
                       </div>
                     </div>
-                    {index < dashboardData.funil_vendas.etapas.length - 1 && (
+                    {index < analyticsData.funil_vendas.etapas.length - 1 && (
                       <div className="flex justify-center my-2">
                         <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[15px] border-l-transparent border-r-transparent border-t-gray-300"></div>
                       </div>
@@ -277,7 +381,7 @@ const Analytics: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <RechartsPieChart>
                     <Pie
-                      data={dashboardData.origem_leads}
+                      data={analyticsData.origem_leads}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -286,7 +390,7 @@ const Analytics: React.FC = () => {
                       fill="#8884d8"
                       dataKey="quantidade"
                     >
-                      {dashboardData.origem_leads.map((entry, index) => (
+                      {analyticsData.origem_leads.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -306,7 +410,7 @@ const Analytics: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {dashboardData.origem_leads.map((origem, index) => (
+                  {analyticsData.origem_leads.map((origem, index) => (
                     <div key={origem.canal} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{getChannelIcon(origem.canal)}</span>
@@ -349,7 +453,7 @@ const Analytics: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <RechartsBarChart data={dashboardData.origem_leads}>
+                <RechartsBarChart data={analyticsData.origem_leads}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="canal" />
                   <YAxis />
@@ -359,6 +463,100 @@ const Analytics: React.FC = () => {
                   <Bar dataKey="quantidade" fill="#0057B8" />
                 </RechartsBarChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          
+          {/* Gráficos de Tendência */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Tendência de Leads */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-[#0057B8]" />
+                  Tendência de Leads
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={analyticsData.tendencias.leads_por_mes}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="quantidade" stroke="#0057B8" fill="#0057B8" fillOpacity={0.3} />
+                    <Area type="monotone" dataKey="conversoes" stroke="#059669" fill="#059669" fillOpacity={0.3} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Evolução de Revenue */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  Evolução de Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={analyticsData.tendencias.revenue_por_mes}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mes" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, 'Revenue']}
+                    />
+                    <Line type="monotone" dataKey="valor" stroke="#059669" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Performance dos Usuários */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#0057B8]" />
+                Performance Individual
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {analyticsData.performance_usuarios.map((usuario, index) => (
+                  <div key={usuario.usuario} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#0057B8] text-white flex items-center justify-center font-bold">
+                        {usuario.usuario.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{usuario.usuario}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {usuario.conversoes > 0 ? ((usuario.conversoes / usuario.leads) * 100).toFixed(1) : 0}% conversão
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <div className="text-lg font-bold text-[#0057B8]">{usuario.leads}</div>
+                        <div className="text-xs text-muted-foreground">Leads</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">{usuario.conversoes}</div>
+                        <div className="text-xs text-muted-foreground">Conversões</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">
+                          R$ {usuario.revenue.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Revenue</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
@@ -374,12 +572,12 @@ const Analytics: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Tenant ID</p>
-                  <p className="font-medium">{dashboardData.tenant_id}</p>
+                  <p className="font-medium">{analyticsData.tenant_id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Última Atualização</p>
                   <p className="font-medium">
-                    {new Date(dashboardData.timestamp).toLocaleString('pt-BR')}
+                    {new Date(analyticsData.timestamp).toLocaleString('pt-BR')}
                   </p>
                 </div>
                 <div>
@@ -392,14 +590,14 @@ const Analytics: React.FC = () => {
         </>
       )}
 
-      {!dashboardData && !isLoading && (
+      {!analyticsData && !isLoading && (
         <Card>
           <CardContent className="text-center py-12">
             <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <div className="text-gray-500 mb-4">
               Nenhum dado de analytics disponível.
             </div>
-            <Button onClick={fetchDashboardData} className="bg-[#0057B8] hover:bg-[#003d82]">
+            <Button onClick={fetchAnalyticsData} className="bg-[#0057B8] hover:bg-[#003d82]">
               <TrendingUp className="w-4 h-4 mr-2" />
               Carregar Dados
             </Button>

@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { apiService } from '@/services/api';
+import { masterPanelService } from '@/services/masterPanel';
 import { 
   Shield, 
   Users, 
@@ -41,7 +41,7 @@ interface Tenant {
   admin_email?: string;
   admin_name?: string;
   phone?: string;
-  plan?: 'basic' | 'premium' | 'enterprise';
+  plan?: 'basic' | 'professional' | 'enterprise';
   users_count?: number;
   storage_used?: string;
   last_activity?: string;
@@ -53,7 +53,7 @@ interface NewTenant {
   admin_email: string;
   admin_name: string;
   phone: string;
-  plan: 'basic' | 'premium' | 'enterprise';
+  plan: 'basic' | 'professional' | 'enterprise';
   description?: string;
 }
 
@@ -96,45 +96,24 @@ const MasterPanel: React.FC = () => {
     try {
       setIsLoading(true);
       
-      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
-      
-      if (!token) {
-        throw new Error('Token EASEPANEL_TOKEN não configurado');
-      }
-
-      // Buscar tenants da API real
-      const tenantsResponse = await fetch('https://api.jttelecom.com.br/tenants', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!tenantsResponse.ok) {
-        throw new Error(`Erro ${tenantsResponse.status}: ${tenantsResponse.statusText}`);
-      }
-
-      const tenantsData = await tenantsResponse.json();
-      
-      // Mapear dados da API para formato esperado
-      const mappedTenants = tenantsData.map((tenant: any) => ({
+      // Buscar tenants do Supabase usando o serviço Master Panel
+      const tenantsData = await masterPanelService.getTenants();
+      setTenants(tenantsData.map((tenant: any) => ({
         id: tenant.id,
-        name: tenant.nome,
-        domain: tenant.cnpj || tenant.id, // Usar CNPJ ou ID como domain
-        plan: 'basic', // Valor padrão já que não vem da API
-        users_count: 0, // Valor padrão
-        active: tenant.status === 'ativo' || tenant.status === 'Ativo',
-        created_at: tenant.data_criacao || tenant.created_at || new Date().toISOString(),
-        admin_email: tenant.email_contato,
-        phone: tenant.telefone,
-        status: tenant.status || 'ativo'
-      }));
-
-      setTenants(mappedTenants);
+        name: tenant.name,
+        domain: tenant.domain,
+        plan: tenant.plan,
+        users_count: tenant.current_users,
+        active: tenant.status === 'active' || tenant.status === 'trial',
+        created_at: tenant.created_at,
+        admin_email: '', // Será buscado separadamente se necessário
+        phone: '',
+        status: tenant.status
+      })));
       
-      // Buscar usuários da API real
+      // Buscar usuários do Supabase
       try {
-        const usersData = await apiService.getUsers();
+        const usersData = await masterPanelService.getUsers();
         setUsers(usersData);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -143,7 +122,7 @@ const MasterPanel: React.FC = () => {
 
       toast({
         title: 'Dados carregados',
-        description: `${mappedTenants.length} tenants carregados da API.`,
+        description: `${tenantsData.length} tenants carregados com sucesso.`,
       });
 
     } catch (error: any) {
@@ -181,39 +160,20 @@ const MasterPanel: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const token = import.meta.env.VITE_EASEPANEL_TOKEN;
-      
-      if (!token) {
-        throw new Error('Token EASEPANEL_TOKEN não configurado');
-      }
+      // Gerar senha temporária para o admin
+      const tempPassword = 'Admin123!'; // Em produção, gerar uma senha aleatória
 
-      // Criar payload para API da JT Telecom
-      const payload = {
-        nome: newTenant.name,
-        cnpj: newTenant.domain, // Usando domain como CNPJ temporariamente
-        email_contato: newTenant.admin_email,
-        telefone: newTenant.phone || ''
-      };
-
-      const response = await fetch('https://api.jttelecom.com.br/tenants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
+      const newTenantData = await masterPanelService.createTenant({
+        name: newTenant.name,
+        domain: newTenant.domain,
+        plan: newTenant.plan,
+        admin_email: newTenant.admin_email,
+        admin_password: tempPassword
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Erro ${response.status}: ${response.statusText}`);
-      }
-
-      const newTenantData = await response.json();
 
       toast({
         title: 'Tenant criado',
-        description: `${newTenant.name} foi criado com sucesso.`,
+        description: `${newTenant.name} foi criado com sucesso. Senha temporária: ${tempPassword}`,
       });
 
       // Resetar formulário
@@ -253,25 +213,28 @@ const MasterPanel: React.FC = () => {
     }
 
     try {
-      await apiService.deleteTenant(tenantId);
+      setIsLoading(true);
+      await masterPanelService.deleteTenant(tenantId);
       toast({
         title: 'Tenant excluído',
         description: 'Tenant removido com sucesso.',
       });
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Erro ao excluir',
-        description: 'Não foi possível excluir o tenant.',
+        description: error.message || 'Não foi possível excluir o tenant.',
         variant: 'destructive'
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const getPlanColor = (plan: string) => {
     switch (plan) {
       case 'basic': return 'bg-gray-100 text-gray-800';
-      case 'premium': return 'bg-blue-100 text-blue-800';
+      case 'professional': return 'bg-blue-100 text-blue-800';
       case 'enterprise': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -280,7 +243,7 @@ const MasterPanel: React.FC = () => {
   const getPlanLabel = (plan: string) => {
     switch (plan) {
       case 'basic': return 'Básico';
-      case 'premium': return 'Premium';
+      case 'professional': return 'Profissional';
       case 'enterprise': return 'Enterprise';
       default: return 'Básico';
     }
@@ -357,7 +320,7 @@ const MasterPanel: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {tenants.filter(t => t.plan === 'premium' || t.plan === 'enterprise').length}
+              {tenants.filter(t => t.plan === 'professional' || t.plan === 'enterprise').length}
             </div>
             <p className="text-xs text-muted-foreground">
               tenants premium+
@@ -403,54 +366,65 @@ const MasterPanel: React.FC = () => {
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nome da Empresa *</Label>
-                      <Input
-                        id="name"
-                        value={newTenant.name}
-                        onChange={(e) => setNewTenant(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="JT Tecnologia Ltda"
-                      />
-                    </div>
                      <div className="space-y-2">
-                       <Label htmlFor="domain">CNPJ *</Label>
+                       <Label htmlFor="name">Nome da Empresa *</Label>
                        <Input
-                         id="domain"
-                         value={newTenant.domain}
-                         onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value }))}
-                         placeholder="12.345.678/0001-90"
+                         id="name"
+                         value={newTenant.name}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, name: e.target.value }))}
+                         placeholder="JT Tecnologia Ltda"
                        />
-                       <p className="text-xs text-muted-foreground">
-                         CNPJ da empresa cliente
-                       </p>
                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="domain">Domínio</Label>
+                        <Input
+                          id="domain"
+                          value={newTenant.domain}
+                          onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value }))}
+                          placeholder="empresa.com.br"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Domínio personalizado (opcional)
+                        </p>
+                      </div>
                   </div>
 
                    <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-2">
-                       <Label htmlFor="phone">Telefone</Label>
-                       <Input
-                         id="phone"
-                         value={newTenant.phone}
-                         onChange={(e) => setNewTenant(prev => ({ ...prev, phone: e.target.value }))}
-                         placeholder="(11) 99999-9999"
-                       />
-                     </div>
-                     <div className="space-y-2">
-                       <Label htmlFor="admin_email">Email de Contato *</Label>
+                       <Label htmlFor="admin_email">Email do Admin *</Label>
                        <Input
                          id="admin_email"
                          type="email"
                          value={newTenant.admin_email}
                          onChange={(e) => setNewTenant(prev => ({ ...prev, admin_email: e.target.value }))}
-                         placeholder="contato@empresa.com"
+                         placeholder="admin@empresa.com"
                        />
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="plan">Plano *</Label>
+                       <Select value={newTenant.plan} onValueChange={(value) => setNewTenant(prev => ({ ...prev, plan: value as any }))}>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Selecione o plano" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="basic">Básico</SelectItem>
+                           <SelectItem value="professional">Profissional</SelectItem>
+                           <SelectItem value="enterprise">Enterprise</SelectItem>
+                         </SelectContent>
+                       </Select>
                      </div>
                    </div>
 
-                   {/* Remove plano e outros campos que não são necessários para a API */}
-
-                   {/* Remove descrição também */}
+                   <div className="space-y-2">
+                     <Label htmlFor="description">Descrição (opcional)</Label>
+                     <Textarea
+                       id="description"
+                       value={newTenant.description}
+                       onChange={(e) => setNewTenant(prev => ({ ...prev, description: e.target.value }))}
+                       placeholder="Descrição do tenant..."
+                       rows={3}
+                     />
+                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
@@ -474,9 +448,10 @@ const MasterPanel: React.FC = () => {
                  <TableHeader>
                    <TableRow>
                      <TableHead>Nome</TableHead>
-                     <TableHead>CNPJ</TableHead>
-                     <TableHead>Email</TableHead>
+                     <TableHead>Domínio</TableHead>
+                     <TableHead>Plano</TableHead>
                      <TableHead>Status</TableHead>
+                     <TableHead>Usuários</TableHead>
                      <TableHead>Data de Criação</TableHead>
                      <TableHead>Ações</TableHead>
                    </TableRow>
@@ -484,7 +459,7 @@ const MasterPanel: React.FC = () => {
                  <TableBody>
                    {tenants.length === 0 ? (
                      <TableRow>
-                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                          Nenhuma tenant cadastrada
                        </TableCell>
                      </TableRow>
@@ -495,10 +470,12 @@ const MasterPanel: React.FC = () => {
                            <div className="font-medium">{tenant.name}</div>
                          </TableCell>
                          <TableCell>
-                           <span className="font-mono text-sm">{tenant.domain}</span>
+                           <span className="font-mono text-sm">{tenant.domain || '-'}</span>
                          </TableCell>
                          <TableCell>
-                           <span className="text-sm">{tenant.admin_email}</span>
+                           <Badge className={getPlanColor(tenant.plan)}>
+                             {getPlanLabel(tenant.plan)}
+                           </Badge>
                          </TableCell>
                          <TableCell>
                            <Badge variant={tenant.active ? 'default' : 'secondary'}>
@@ -506,11 +483,12 @@ const MasterPanel: React.FC = () => {
                            </Badge>
                          </TableCell>
                          <TableCell>
-                           <span className="text-sm">
-                             {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
-                           </span>
+                           {tenant.users_count || 0}
                          </TableCell>
                          <TableCell>
+                           {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
+                         </TableCell>
+                          <TableCell>
                            <div className="flex gap-2">
                              <Button variant="outline" size="sm" onClick={() => handleEditTenant(tenant)}>
                                <Edit className="w-4 h-4" />
@@ -556,9 +534,9 @@ const MasterPanel: React.FC = () => {
                         {user.user_level === 'master' ? 'Master' : user.user_level === 'admin' ? 'Admin' : 'Usuário'}
                       </Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(user.createdAt).toLocaleDateString('pt-BR')}
-                    </div>
+                     <div className="text-sm text-muted-foreground">
+                       {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                     </div>
                   </div>
                 ))}
               </div>

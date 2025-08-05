@@ -7,10 +7,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { validateEnvironment } from "@/utils/security";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import MasterRoute from "@/components/MasterRoute";
 import Layout from "@/components/Layout";
 import LoginJTVox from "@/pages/LoginJTVox";
 import DashboardModern from "@/pages/DashboardModern";
-import MasterPanel from "@/pages/MasterPanelSimple";
+import MasterPanel from "@/pages/MasterPanel";
 import TenantAdminPanel from "@/pages/TenantAdminPanel";
 import ClientsModern from "@/pages/ClientsModern";
 import ClientDetail from "@/pages/ClientDetail";
@@ -25,6 +26,7 @@ import Chatbot from "@/pages/Chatbot";
 import Automation from "@/pages/Automation";
 import SmartbotPage from "@/pages/Smartbot";
 import LoginNew from "@/pages/LoginNew";
+import MasterLogin from "@/pages/MasterLogin";
 import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Reports from "@/pages/Reports";
@@ -51,6 +53,7 @@ const App = () => (
               <Route path="/login" element={<Navigate to="/auth" replace />} />
               <Route path="/login-jtvox" element={<Navigate to="/auth" replace />} />
               <Route path="/login-new" element={<Navigate to="/auth" replace />} />
+              <Route path="/master-login" element={<MasterLogin />} />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Layout>
@@ -61,9 +64,9 @@ const App = () => (
               
               {/* Rota Master - Admin Master JT Telecom */}
               <Route path="/master" element={
-                <ProtectedRoute>
+                <MasterRoute>
                   <MasterPanel />
-                </ProtectedRoute>
+                </MasterRoute>
               } />
               
               {/* Rota Admin - Admin da Tenant */}

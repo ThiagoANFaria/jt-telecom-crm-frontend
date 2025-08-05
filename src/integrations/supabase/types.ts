@@ -97,6 +97,60 @@ export type Database = {
         }
         Relationships: []
       }
+      call_history: {
+        Row: {
+          called: string
+          caller: string
+          cost: number | null
+          created_at: string
+          direction: string
+          duration: number | null
+          end_time: string | null
+          extension: string | null
+          external_id: string | null
+          id: string
+          recording_url: string | null
+          start_time: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          called: string
+          caller: string
+          cost?: number | null
+          created_at?: string
+          direction: string
+          duration?: number | null
+          end_time?: string | null
+          extension?: string | null
+          external_id?: string | null
+          id?: string
+          recording_url?: string | null
+          start_time: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          called?: string
+          caller?: string
+          cost?: number | null
+          created_at?: string
+          direction?: string
+          duration?: number | null
+          end_time?: string | null
+          extension?: string | null
+          external_id?: string | null
+          id?: string
+          recording_url?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address: string | null

@@ -251,7 +251,12 @@ class SettingsService {
       { key: 'max_clients', value: 500, category: 'clients', description: 'Limite máximo de clientes' },
 
       // Integrations
-      { key: 'webhook_urls', value: [], category: 'integrations', description: 'URLs de webhooks' }
+      { key: 'webhook_urls', value: [], category: 'integrations', description: 'URLs de webhooks' },
+      
+      // PABX
+      { key: 'pabx_token', value: '', category: 'pabx', description: 'Token de autenticação do PABX', isEncrypted: true },
+      { key: 'pabx_usuario', value: 'jt_tecnologia', category: 'pabx', description: 'Usuário de autenticação do PABX' },
+      { key: 'pabx_enabled', value: false, category: 'pabx', description: 'Integração PABX habilitada' }
     ];
 
     await this.setMultipleSettings(defaultSettings);

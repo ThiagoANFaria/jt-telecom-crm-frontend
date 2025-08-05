@@ -21,18 +21,6 @@ const MasterLogin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Verificar e criar usuário master se necessário
-  useEffect(() => {
-    const ensureMasterUser = async () => {
-      try {
-        await MasterAuthService.ensureMasterExists();
-      } catch (error) {
-        console.error('Erro ao verificar usuário master:', error);
-      }
-    };
-    
-    ensureMasterUser();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,19 +50,41 @@ const MasterLogin: React.FC = () => {
     setError('');
     
     try {
+      console.log('Botão clicado - Criando usuário Master...');
       const result = await MasterAuthService.createMasterUser();
+      
+      console.log('Resultado da criação:', result);
       
       if (result.success) {
         toast({
-          title: 'Usuário Master criado',
-          description: 'Agora você pode fazer login com as credenciais fornecidas.',
+          title: 'Usuário Master configurado!',
+          description: result.message || 'Agora você pode fazer login com as credenciais fornecidas.',
+          variant: 'default'
         });
+        
+        // Limpar o erro anterior
+        setError('');
       } else {
-        setError('Erro ao criar usuário Master. Tente novamente.');
+        const errorMessage = result.error || 'Erro ao criar usuário Master. Tente novamente.';
+        console.error('Erro na criação:', errorMessage);
+        setError(errorMessage);
+        
+        toast({
+          title: 'Erro ao criar usuário',
+          description: errorMessage,
+          variant: 'destructive'
+        });
       }
     } catch (error: any) {
-      console.error('Erro ao criar usuário master:', error);
-      setError('Erro ao criar usuário Master. Tente novamente.');
+      console.error('Erro na execução:', error);
+      const errorMessage = error.message || 'Erro inesperado ao criar usuário Master.';
+      setError(errorMessage);
+      
+      toast({
+        title: 'Erro inesperado',
+        description: errorMessage,
+        variant: 'destructive'
+      });
     } finally {
       setIsCreatingUser(false);
     }

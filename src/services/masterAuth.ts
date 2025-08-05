@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 export class MasterAuthService {
   static async createMasterUser() {
     try {
-      // Primeiro, tenta fazer signup do usuário master
+      console.log('Iniciando criação do usuário Master...');
+      
+      // Criar o usuário através do signup do Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: 'master@jttelecom.com',
         password: 'JTMaster2024!',
@@ -16,54 +18,73 @@ export class MasterAuthService {
         }
       });
 
-      if (authError && authError.message !== 'User already registered') {
-        throw authError;
-      }
+      console.log('Resultado do signup:', { authData, authError });
 
-      // Se o usuário foi criado ou já existe, vamos atualizar/criar o perfil
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
+      if (authError) {
+        // Se o erro for que o usuário já existe, isso é esperado
+        if (authError.message.includes('User already registered') || 
+            authError.message.includes('already been registered')) {
+          console.log('Usuário já existe, verificando perfil...');
+          
+          // Tentar fazer login para pegar o ID do usuário
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
             email: 'master@jttelecom.com',
-            name: 'Super Administrador Master',
-            user_level: 'master',
-            tenant_id: null,
-            is_active: true
+            password: 'JTMaster2024!'
           });
 
-        if (profileError) {
-          console.error('Erro ao criar perfil:', profileError);
+          if (loginData.user) {
+            // Criar/atualizar o perfil se o login funcionou
+            await this.createOrUpdateProfile(loginData.user.id);
+            await supabase.auth.signOut(); // Fazer logout após criar o perfil
+            return { success: true, message: 'Usuário Master configurado com sucesso!' };
+          }
+        } else {
+          throw authError;
         }
+      } else if (authData.user) {
+        // Se o usuário foi criado com sucesso, criar o perfil
+        console.log('Usuário criado, criando perfil...');
+        await this.createOrUpdateProfile(authData.user.id);
+        return { success: true, message: 'Usuário Master criado com sucesso!' };
       }
 
-      return { success: true };
-    } catch (error) {
-      console.error('Erro ao criar usuário master:', error);
-      return { success: false, error };
+      return { success: false, error: 'Falha ao criar usuário Master' };
+    } catch (error: any) {
+      console.error('Erro detalhado ao criar usuário master:', error);
+      return { success: false, error: error.message };
     }
   }
 
-  static async ensureMasterExists() {
+  static async createOrUpdateProfile(userId: string) {
     try {
-      // Verificar se já existe um perfil master
-      const { data: existingProfile } = await supabase
+      console.log('Criando/atualizando perfil para usuário:', userId);
+      
+      const { data, error } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('email', 'master@jttelecom.com')
-        .eq('user_level', 'master')
-        .single();
+        .upsert({
+          id: userId,
+          email: 'master@jttelecom.com',
+          name: 'Super Administrador Master',
+          user_level: 'master',
+          tenant_id: null,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
+        });
 
-      if (!existingProfile) {
-        // Se não existe, criar o usuário master
-        await this.createMasterUser();
+      if (error) {
+        console.error('Erro ao criar perfil:', error);
+        throw error;
       }
 
-      return { success: true };
+      console.log('Perfil criado/atualizado com sucesso:', data);
+      return data;
     } catch (error) {
-      console.error('Erro ao verificar usuário master:', error);
-      return { success: false, error };
+      console.error('Erro ao criar/atualizar perfil:', error);
+      throw error;
     }
   }
+
 }

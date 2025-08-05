@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { dealService, pipelineService, stageService } from '@/services/pipelines';
 import { leadsService } from '@/services/leads';
 import { clientsService } from '@/services/clients';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Deal {
   id?: string;
@@ -89,10 +90,15 @@ export const DealModal: React.FC<DealModalProps> = ({
   const loadInitialData = async () => {
     setIsLoadingData(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const [pipelinesData, leadsData, clientsData] = await Promise.all([
         pipelineService.getPipelines(),
-        leadService.getLeads(),
-        clientService.getClients()
+        leadsService.getLeads(user.id),
+        clientsService.getClients(user.id)
       ]);
 
       setPipelines(pipelinesData);

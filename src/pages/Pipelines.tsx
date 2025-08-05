@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { PipelineModal } from '@/components/PipelineModal';
+import { DealModal } from '@/components/DealModal';
+import { pipelineService, stageService, dealService, pipelineRealtimeService } from '@/services/pipelines';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -17,135 +21,158 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Eye
+  Eye,
+  Edit,
+  Trash2,
+  GitBranch
 } from 'lucide-react';
+
+interface Pipeline {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  stages?: PipelineStage[];
+}
 
 interface PipelineStage {
   id: string;
   name: string;
-  description?: string;
-  leads: number;
-  value: number;
-  conversionRate: number;
-  avgDealSize: number;
-  avgTimeInStage: number;
-  color: string;
+  color?: string;
+  position: number;
+  pipeline_id: string;
+  deals?: Deal[];
+  stats?: {
+    count: number;
+    value: number;
+    conversionRate: number;
+    avgDealSize: number;
+  };
 }
 
-interface Lead {
+interface Deal {
   id: string;
-  name: string;
-  company: string;
-  value: number;
-  probability: number;
-  status: 'hot' | 'warm' | 'cold';
-  lastActivity: string;
-  nextAction: string;
-  daysInStage: number;
+  title: string;
+  description?: string;
+  value?: number;
+  probability?: number;
+  position: number;
+  stage_id: string;
+  pipeline_id: string;
+  lead_id?: string;
+  client_id?: string;
+  expected_close_date?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const Pipelines: React.FC = () => {
-  const [stages, setStages] = useState<PipelineStage[]>([
-    { 
-      id: '1', 
-      name: 'Prospecção', 
-      description: 'Identificação de potenciais clientes',
-      leads: 45,
-      value: 2250000,
-      conversionRate: 25,
-      avgDealSize: 50000,
-      avgTimeInStage: 7,
-      color: 'from-blue-500 to-blue-600'
-    },
-    { 
-      id: '2', 
-      name: 'Qualificação', 
-      description: 'Validação de fit e necessidades',
-      leads: 28,
-      value: 1680000,
-      conversionRate: 35,
-      avgDealSize: 60000,
-      avgTimeInStage: 12,
-      color: 'from-indigo-500 to-indigo-600'
-    },
-    { 
-      id: '3', 
-      name: 'Proposta', 
-      description: 'Elaboração de propostas comerciais',
-      leads: 18,
-      value: 1440000,
-      conversionRate: 55,
-      avgDealSize: 80000,
-      avgTimeInStage: 15,
-      color: 'from-purple-500 to-purple-600'
-    },
-    { 
-      id: '4', 
-      name: 'Negociação', 
-      description: 'Ajustes finais e negociação',
-      leads: 12,
-      value: 1200000,
-      conversionRate: 70,
-      avgDealSize: 100000,
-      avgTimeInStage: 18,
-      color: 'from-orange-500 to-orange-600'
-    },
-    { 
-      id: '5', 
-      name: 'Fechamento', 
-      description: 'Contratos e assinatura',
-      leads: 8,
-      value: 960000,
-      conversionRate: 85,
-      avgDealSize: 120000,
-      avgTimeInStage: 8,
-      color: 'from-green-500 to-green-600'
-    }
-  ]);
-
-  const [selectedStage, setSelectedStage] = useState<string>('1');
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | null>(null);
+  const [stages, setStages] = useState<PipelineStage[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [selectedStage, setSelectedStage] = useState<string>('');
   const [activeTab, setActiveTab] = useState('funnel');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPipelineModalOpen, setIsPipelineModalOpen] = useState(false);
+  const [isDealModalOpen, setIsDealModalOpen] = useState(false);
+  const [editingPipeline, setEditingPipeline] = useState<Pipeline | null>(null);
+  const { toast } = useToast();
 
-  // Dados simulados de leads para a fase selecionada
-  const [stageLeads] = useState<Lead[]>([
-    {
-      id: '1',
-      name: 'João Silva',
-      company: 'Tech Solutions Ltda',
-      value: 85000,
-      probability: 75,
-      status: 'hot',
-      lastActivity: '2 horas atrás',
-      nextAction: 'Apresentação da proposta',
-      daysInStage: 3
-    },
-    {
-      id: '2',
-      name: 'Maria Santos',
-      company: 'Digital Corp',
-      value: 120000,
-      probability: 60,
-      status: 'warm',
-      lastActivity: '1 dia atrás',
-      nextAction: 'Reunião de follow-up',
-      daysInStage: 8
-    },
-    {
-      id: '3',
-      name: 'Carlos Oliveira',
-      company: 'Innovation Hub',
-      value: 95000,
-      probability: 45,
-      status: 'cold',
-      lastActivity: '5 dias atrás',
-      nextAction: 'Reativar contato',
-      daysInStage: 15
+  // Carregamento inicial
+  useEffect(() => {
+    loadPipelines();
+  }, []);
+
+  // Carregar pipelines
+  const loadPipelines = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await pipelineService.getPipelines();
+      setPipelines(data);
+      
+      if (data.length > 0 && !selectedPipeline) {
+        const firstPipeline = data[0];
+        setSelectedPipeline(firstPipeline);
+        await loadPipelineDetails(firstPipeline.id);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar pipelines:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao carregar pipelines',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  }, [selectedPipeline, toast]);
 
-  const totalPipelineValue = stages.reduce((sum, stage) => sum + stage.value, 0);
-  const totalLeads = stages.reduce((sum, stage) => sum + stage.leads, 0);
-  const overallConversion = Math.round((stages[stages.length - 1].leads / stages[0].leads) * 100);
+  // Carregar detalhes do pipeline (estágios e deals)
+  const loadPipelineDetails = async (pipelineId: string) => {
+    try {
+      const [stagesData, dealsData] = await Promise.all([
+        stageService.getStages(pipelineId),
+        dealService.getDeals(pipelineId)
+      ]);
+
+      setStages(stagesData);
+      setDeals(dealsData);
+      
+      if (stagesData.length > 0 && !selectedStage) {
+        setSelectedStage(stagesData[0].id);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar detalhes do pipeline:', error);
+    }
+  };
+
+  // Calcular estatísticas
+  const calculateStats = () => {
+    const totalValue = deals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+    const totalDeals = deals.length;
+    const avgDealValue = totalDeals > 0 ? totalValue / totalDeals : 0;
+
+    // Estatísticas por estágio
+    const stageStats = stages.map(stage => {
+      const stageDeals = deals.filter(deal => deal.stage_id === stage.id);
+      const stageValue = stageDeals.reduce((sum, deal) => sum + (deal.value || 0), 0);
+      
+      return {
+        ...stage,
+        stats: {
+          count: stageDeals.length,
+          value: stageValue,
+          conversionRate: 0, // Calcular baseado no funil
+          avgDealSize: stageDeals.length > 0 ? stageValue / stageDeals.length : 0
+        },
+        deals: stageDeals
+      };
+    });
+
+    // Calcular taxa de conversão baseada no funil
+    for (let i = 0; i < stageStats.length; i++) {
+      if (i === 0) {
+        stageStats[i].stats!.conversionRate = 100; // Primeiro estágio = 100%
+      } else {
+        const previousCount = stageStats[i - 1].stats!.count;
+        const currentCount = stageStats[i].stats!.count;
+        stageStats[i].stats!.conversionRate = previousCount > 0 ? Math.round((currentCount / previousCount) * 100) : 0;
+      }
+    }
+
+    return {
+      totalValue,
+      totalDeals,
+      avgDealValue,
+      overallConversion: stageStats.length > 1 ? stageStats[stageStats.length - 1].stats!.conversionRate : 0,
+      stages: stageStats
+    };
+  };
+
+  const stats = calculateStats();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -198,7 +225,7 @@ const Pipelines: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total no Pipeline</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    R$ {(totalPipelineValue / 1000000).toFixed(1)}M
+                    R$ {(stats.totalValue / 1000000).toFixed(1)}M
                   </p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-lg">
@@ -217,7 +244,7 @@ const Pipelines: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total de Leads</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalLeads}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalDeals}</p>
                 </div>
                 <div className="p-3 bg-green-100 rounded-lg">
                   <Users className="w-6 h-6 text-green-600" />
@@ -235,7 +262,7 @@ const Pipelines: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Taxa de Conversão</p>
-                  <p className="text-2xl font-bold text-gray-900">{overallConversion}%</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.overallConversion}%</p>
                 </div>
                 <div className="p-3 bg-purple-100 rounded-lg">
                   <Target className="w-6 h-6 text-purple-600" />
@@ -254,7 +281,7 @@ const Pipelines: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Ticket Médio</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    R$ {Math.round(totalPipelineValue / totalLeads / 1000)}k
+                    R$ {stats.totalDeals > 0 ? Math.round(stats.avgDealValue / 1000) : 0}k
                   </p>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-lg">
@@ -287,29 +314,32 @@ const Pipelines: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {stages.map((stage, index) => {
-                    const width = Math.max(20, (stage.leads / stages[0].leads) * 100);
+                  {stats.stages.map((stage, index) => {
+                    const width = Math.max(20, stats.stages[0]?.stats?.count ? (stage.stats?.count || 0) / stats.stages[0].stats.count * 100 : 100);
                     return (
                       <div key={stage.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <h3 className="font-semibold text-gray-800">{stage.name}</h3>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span>{stage.leads} leads</span>
-                            <span>R$ {(stage.value / 1000000).toFixed(1)}M</span>
+                            <span>{stage.stats?.count || 0} deals</span>
+                            <span>R$ {((stage.stats?.value || 0) / 1000000).toFixed(1)}M</span>
                             <Badge variant="outline" className="text-xs">
-                              {stage.conversionRate}% conversão
+                              {stage.stats?.conversionRate || 0}% conversão
                             </Badge>
                           </div>
                         </div>
                         <div className="relative">
                           <div 
-                            className={`h-12 bg-gradient-to-r ${stage.color} rounded-lg transition-all duration-500 flex items-center justify-center text-white font-medium`}
-                            style={{ width: `${width}%` }}
+                            className="h-12 rounded-lg transition-all duration-500 flex items-center justify-center text-white font-medium"
+                            style={{ 
+                              width: `${width}%`,
+                              backgroundColor: stage.color || '#3B82F6'
+                            }}
                           >
-                            {stage.leads} leads
+                            {stage.stats?.count || 0} deals
                           </div>
                         </div>
-                        {index < stages.length - 1 && (
+                        {index < stats.stages.length - 1 && (
                           <div className="flex justify-center py-2">
                             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                               <TrendingDown className="w-4 h-4 text-gray-500" />
@@ -332,7 +362,7 @@ const Pipelines: React.FC = () => {
                   <CardTitle>Fases do Pipeline</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {stages.map((stage) => (
+                  {stats.stages.map((stage) => (
                     <button
                       key={stage.id}
                       onClick={() => setSelectedStage(stage.id)}
@@ -344,12 +374,11 @@ const Pipelines: React.FC = () => {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium text-gray-900">{stage.name}</h4>
-                        <Badge variant="secondary">{stage.leads}</Badge>
+                        <Badge variant="secondary">{stage.stats?.count || 0}</Badge>
                       </div>
-                      <p className="text-sm text-gray-600">{stage.description}</p>
                       <div className="mt-2">
-                        <Progress value={stage.conversionRate} className="h-2" />
-                        <p className="text-xs text-gray-500 mt-1">{stage.conversionRate}% conversão</p>
+                        <Progress value={stage.stats?.conversionRate || 0} className="h-2" />
+                        <p className="text-xs text-gray-500 mt-1">{stage.stats?.conversionRate || 0}% conversão</p>
                       </div>
                     </button>
                   ))}
@@ -362,32 +391,32 @@ const Pipelines: React.FC = () => {
                 <Card className="bg-white shadow-md border-0">
                   <CardHeader>
                     <CardTitle>
-                      Métricas - {stages.find(s => s.id === selectedStage)?.name}
+                      Métricas - {stats.stages.find(s => s.id === selectedStage)?.name || 'Selecione um estágio'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="text-center p-4 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-gray-900">
-                          {stages.find(s => s.id === selectedStage)?.leads}
+                          {stats.stages.find(s => s.id === selectedStage)?.stats?.count || 0}
                         </p>
-                        <p className="text-sm text-gray-600">Leads Ativos</p>
+                        <p className="text-sm text-gray-600">Deals Ativos</p>
                       </div>
                       <div className="text-center p-4 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-gray-900">
-                          R$ {(stages.find(s => s.id === selectedStage)?.avgDealSize || 0) / 1000}k
+                          R$ {((stats.stages.find(s => s.id === selectedStage)?.stats?.avgDealSize || 0) / 1000).toFixed(0)}k
                         </p>
                         <p className="text-sm text-gray-600">Ticket Médio</p>
                       </div>
                       <div className="text-center p-4 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-gray-900">
-                          {stages.find(s => s.id === selectedStage)?.avgTimeInStage}
+                          -
                         </p>
                         <p className="text-sm text-gray-600">Dias Médios</p>
                       </div>
                       <div className="text-center p-4 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-gray-900">
-                          {stages.find(s => s.id === selectedStage)?.conversionRate}%
+                          {stats.stages.find(s => s.id === selectedStage)?.stats?.conversionRate || 0}%
                         </p>
                         <p className="text-sm text-gray-600">Conversão</p>
                       </div>
@@ -408,42 +437,51 @@ const Pipelines: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {stageLeads.map((lead) => (
-                        <div key={lead.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      {selectedStage && stats.stages.find(s => s.id === selectedStage)?.deals?.map((deal) => (
+                        <div key={deal.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div>
-                                <h4 className="font-medium text-gray-900">{lead.name}</h4>
-                                <p className="text-sm text-gray-600">{lead.company}</p>
+                                <h4 className="font-medium text-gray-900">{deal.title}</h4>
+                                <p className="text-sm text-gray-600">{deal.description || 'Sem descrição'}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Badge className={getStatusColor(lead.status)}>
-                                {getStatusIcon(lead.status)}
-                                <span className="ml-1 capitalize">{lead.status}</span>
-                              </Badge>
                               <div className="text-right">
-                                <p className="font-medium text-gray-900">R$ {lead.value.toLocaleString()}</p>
-                                <p className="text-sm text-gray-600">{lead.probability}% prob.</p>
+                                <p className="font-medium text-gray-900">R$ {(deal.value || 0).toLocaleString()}</p>
+                                <p className="text-sm text-gray-600">{deal.probability || 0}% prob.</p>
                               </div>
                             </div>
                           </div>
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-gray-400" />
-                              <span className="text-gray-600">Última atividade: {lead.lastActivity}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
                               <Calendar className="w-4 h-4 text-gray-400" />
-                              <span className="text-gray-600">Próxima ação: {lead.nextAction}</span>
+                              <span className="text-gray-600">
+                                Criado em: {new Date(deal.created_at).toLocaleDateString('pt-BR')}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <AlertCircle className="w-4 h-4 text-gray-400" />
-                              <span className="text-gray-600">{lead.daysInStage} dias na fase</span>
+                              <Clock className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-600">
+                                Atualizado: {new Date(deal.updated_at).toLocaleDateString('pt-BR')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Target className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-600">
+                                {deal.expected_close_date ? 
+                                  `Fechamento: ${new Date(deal.expected_close_date).toLocaleDateString('pt-BR')}` : 
+                                  'Sem data prevista'
+                                }
+                              </span>
                             </div>
                           </div>
                         </div>
-                      ))}
+                      )) || (
+                        <div className="text-center py-8 text-gray-500">
+                          {selectedStage ? 'Nenhum deal neste estágio' : 'Selecione um estágio para ver os deals'}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

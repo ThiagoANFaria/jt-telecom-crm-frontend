@@ -47,7 +47,7 @@ class MasterPanelService {
       .from('profiles')
       .select('user_level')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profile?.user_level !== 'master') {
       throw new Error('Acesso negado: apenas usuários master podem acessar');
@@ -70,9 +70,9 @@ class MasterPanelService {
       .from('tenants')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
+    if (error) throw error;
     return data;
   }
 
@@ -91,10 +91,21 @@ class MasterPanelService {
       .from('profiles')
       .select('user_level')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profile?.user_level !== 'master') {
       throw new Error('Acesso negado: apenas usuários master podem criar tenants');
+    }
+
+    // Verificar se o email já está em uso
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .eq('email', tenant.admin_email)
+      .maybeSingle();
+
+    if (existingUser) {
+      throw new Error(`O email ${tenant.admin_email} já está em uso por outro usuário`);
     }
 
     // Criar usuário admin do tenant usando signup
@@ -110,7 +121,12 @@ class MasterPanelService {
       }
     });
 
-    if (authError) throw authError;
+    if (authError) {
+      if (authError.message.includes('User already registered') || authError.message.includes('already been registered')) {
+        throw new Error(`O email ${tenant.admin_email} já está registrado no sistema`);
+      }
+      throw new Error(`Erro ao criar usuário administrador: ${authError.message}`);
+    }
     
     const adminUserId = authData.user?.id;
     if (!adminUserId) throw new Error('Falha ao criar usuário administrador');
@@ -129,9 +145,27 @@ class MasterPanelService {
         settings: this.getDefaultSettings(tenant.plan)
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error('Falha ao criar tenant - dados não retornados');
+
+    // Aguardar um pouco para que o perfil seja criado pela trigger
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Atualizar o perfil do admin com o tenant_id e nível correto
+    const { error: profileUpdateError } = await supabase
+      .from('profiles')
+      .update({
+        user_level: 'admin',
+        tenant_id: data.id
+      })
+      .eq('id', adminUserId);
+
+    if (profileUpdateError) {
+      console.error('Erro ao atualizar perfil do admin:', profileUpdateError);
+      // Não falhar a criação por isso, apenas logar
+    }
 
     // Log da criação
     try {

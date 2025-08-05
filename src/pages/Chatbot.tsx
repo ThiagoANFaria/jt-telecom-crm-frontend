@@ -1,182 +1,96 @@
 
-import React, { useState } from 'react';
-import { apiService } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+import React from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Send, Bot, User } from 'lucide-react';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-}
+import { MessageCircle, ExternalLink, Bot } from 'lucide-react';
 
 const Chatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Olá! Sou o assistente virtual da JT Telecom. Como posso ajudá-lo hoje?',
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsLoading(true);
-
-    try {
-      const response = await apiService.sendChatbotMessage(inputMessage);
-      
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response.response,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      toast({
-        title: 'Erro no chatbot',
-        description: 'Não foi possível enviar a mensagem. Tente novamente.',
-        variant: 'destructive',
-      });
-      
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'Desculpe, estou com problemas técnicos. Tente novamente em alguns minutos.',
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSmartbotAccess = () => {
+    const smartbotUrl = user?.email 
+      ? `https://app.smartbot.jttecnologia.com.br/login?email=${encodeURIComponent(user.email)}`
+      : 'https://app.smartbot.jttecnologia.com.br/login';
+    
+    window.open(smartbotUrl, '_blank');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+  if (!user) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <MessageCircle className="w-8 h-8 text-jt-blue" />
+          <h1 className="text-3xl font-bold text-jt-blue">Acesso ao Smartbot</h1>
+        </div>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Faça login para acessar o Smartbot.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <MessageCircle className="w-8 h-8 text-jt-blue" />
-        <h1 className="text-3xl font-bold text-jt-blue">Chatbot JT Telecom</h1>
+        <h1 className="text-3xl font-bold text-jt-blue">Acesso ao Smartbot</h1>
       </div>
 
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="w-5 h-5" />
-            Assistente Virtual
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+            <Bot className="w-8 h-8 text-jt-blue" />
+            Smartbot JT Tecnologia
           </CardTitle>
-          <CardDescription>
-            Converse com nosso assistente para obter ajuda e informações
+          <CardDescription className="text-base">
+            Acesse a plataforma Smartbot para gerenciar seus chatbots e automações
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="flex-1 flex flex-col">
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 rounded-lg mb-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-3 ${
-                  message.sender === 'user' ? 'flex-row-reverse' : ''
-                }`}
-              >
-                <div
-                  className={`p-2 rounded-full ${
-                    message.sender === 'user'
-                      ? 'bg-jt-blue text-white'
-                      : 'bg-white border border-gray-200'
-                  }`}
-                >
-                  {message.sender === 'user' ? (
-                    <User className="w-4 h-4" />
-                  ) : (
-                    <Bot className="w-4 h-4" />
-                  )}
-                </div>
-                
-                <div className={`max-w-xs lg:max-w-md ${
-                  message.sender === 'user' ? 'text-right' : ''
-                }`}>
-                  <div
-                    className={`p-3 rounded-lg ${
-                      message.sender === 'user'
-                        ? 'bg-jt-blue text-white'
-                        : 'bg-white border border-gray-200'
-                    }`}
-                  >
-                    <p className="text-sm">{message.text}</p>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {message.timestamp.toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full bg-white border border-gray-200">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div className="bg-white border border-gray-200 p-3 rounded-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
+        <CardContent className="space-y-6 p-8">
+          {/* Informações sobre credenciais */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-900 mb-2">
+              Suas credenciais são as mesmas!
+            </h3>
+            <p className="text-blue-800 text-sm">
+              Para acessar o Smartbot, utilize o mesmo e-mail e senha cadastrados no JT Vox CRM. 
+              Suas credenciais são as mesmas para ambas as plataformas.
+            </p>
+            {user?.email && (
+              <p className="text-blue-700 text-sm mt-2">
+                <strong>E-mail:</strong> {user.email}
+              </p>
             )}
           </div>
 
-          {/* Input Area */}
-          <div className="flex gap-2">
-            <Input
-              placeholder="Digite sua mensagem..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-              className="flex-1"
-            />
+          {/* Botão de acesso */}
+          <div className="text-center">
             <Button
-              onClick={sendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="bg-jt-blue hover:bg-blue-700"
+              onClick={handleSmartbotAccess}
+              size="lg"
+              className="bg-jt-blue hover:bg-blue-700 text-white px-8 py-3 text-lg"
             >
-              <Send className="w-4 h-4" />
+              <ExternalLink className="w-5 h-5 mr-2" />
+              Acessar Smartbot
             </Button>
+          </div>
+
+          {/* Logo do Smartbot */}
+          <div className="flex justify-center">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                <Bot className="w-12 h-12 text-white" />
+              </div>
+            </div>
+          </div>
+
+          {/* Informações adicionais */}
+          <div className="text-center text-sm text-muted-foreground">
+            <p>A plataforma Smartbot será aberta em uma nova aba do navegador.</p>
           </div>
         </CardContent>
       </Card>

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, FileText, FileCheck, DollarSign, Target, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 const DashboardSimple: React.FC = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [loading, setLoading] = useState(true);
 
   // Simular carregamento
@@ -17,7 +19,7 @@ const DashboardSimple: React.FC = () => {
 
   // Dados mockados realistas baseados no nível do usuário
   const getMockData = () => {
-    if (user?.user_level === 'master') {
+    if (profile?.user_level === 'master') {
       return {
         totalLeads: 156,
         totalClients: 89,
@@ -28,7 +30,7 @@ const DashboardSimple: React.FC = () => {
         tenants: 12,
         totalUsers: 45
       };
-    } else if (user?.user_level === 'admin') {
+    } else if (profile?.user_level === 'admin') {
       return {
         totalLeads: 45,
         totalClients: 28,
@@ -78,7 +80,7 @@ const DashboardSimple: React.FC = () => {
   }
 
   const getUserLevelTitle = () => {
-    switch (user?.user_level) {
+    switch (profile?.user_level) {
       case 'master': return 'Painel Master - Visão Global';
       case 'admin': return 'Painel Admin - Gestão da Empresa';
       default: return 'Dashboard - Meu Desempenho';
@@ -86,7 +88,7 @@ const DashboardSimple: React.FC = () => {
   };
 
   const getUserLevelDescription = () => {
-    switch (user?.user_level) {
+    switch (profile?.user_level) {
       case 'master': return 'Monitoramento de todas as empresas do sistema';
       case 'admin': return 'Gestão completa da sua empresa';
       default: return 'Acompanhe seu desempenho e metas';
@@ -102,7 +104,7 @@ const DashboardSimple: React.FC = () => {
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Bem-vindo,</p>
-          <p className="font-medium text-gray-900">{user?.name || 'Usuário'}</p>
+          <p className="font-medium text-gray-900">{profile?.name || user?.email?.split('@')[0] || 'Usuário'}</p>
         </div>
       </div>
 
@@ -117,7 +119,7 @@ const DashboardSimple: React.FC = () => {
 
       {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {user?.user_level === 'master' && (
+        {profile?.user_level === 'master' && (
           <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -151,7 +153,7 @@ const DashboardSimple: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold">{mockData.totalLeads}</div>
             <p className="text-xs text-muted-foreground">
-              {user?.user_level === 'master' ? 'Leads em todo o sistema' : 'Leads ativos'}
+              {profile?.user_level === 'master' ? 'Leads em todo o sistema' : 'Leads ativos'}
             </p>
           </CardContent>
         </Card>
@@ -225,9 +227,9 @@ const DashboardSimple: React.FC = () => {
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-medium text-blue-900">📊 Performance Atual</h3>
               <p className="text-blue-700 mt-1">
-                {user?.user_level === 'master' 
+                {profile?.user_level === 'master' 
                   ? 'Sistema global funcionando perfeitamente! Todas as empresas estão ativas e produtivas.'
-                  : user?.user_level === 'admin'
+                  : profile?.user_level === 'admin'
                   ? 'Sua empresa está com ótimo desempenho! Continue acompanhando os indicadores.'
                   : 'Seu desempenho está excelente! Continue assim para alcançar suas metas.'
                 }
@@ -238,13 +240,13 @@ const DashboardSimple: React.FC = () => {
               <div className="border border-gray-200 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900">🎯 Próximas Ações</h4>
                 <ul className="text-sm text-gray-600 mt-2 space-y-1">
-                  {user?.user_level === 'master' ? (
+                  {profile?.user_level === 'master' ? (
                     <>
                       <li>• Monitorar crescimento das empresas</li>
                       <li>• Analisar métricas globais</li>
                       <li>• Suporte às empresas com baixo desempenho</li>
                     </>
-                  ) : user?.user_level === 'admin' ? (
+                  ) : profile?.user_level === 'admin' ? (
                     <>
                       <li>• Gerenciar equipe de vendas</li>
                       <li>• Acompanhar pipeline de vendas</li>
@@ -263,13 +265,13 @@ const DashboardSimple: React.FC = () => {
               <div className="border border-gray-200 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900">📈 Metas</h4>
                 <ul className="text-sm text-gray-600 mt-2 space-y-1">
-                  {user?.user_level === 'master' ? (
+                  {profile?.user_level === 'master' ? (
                     <>
                       <li>• Alcançar 20 empresas ativas</li>
                       <li>• 100+ usuários no sistema</li>
                       <li>• R$ 500.000/mês em faturamento total</li>
                     </>
-                  ) : user?.user_level === 'admin' ? (
+                  ) : profile?.user_level === 'admin' ? (
                     <>
                       <li>• Aumentar conversão para 70%</li>
                       <li>• 60 leads/mês</li>

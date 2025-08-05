@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 export interface Permission {
   resource: string;
@@ -57,11 +58,12 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
 
 export const usePermissions = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   const hasPermission = (resource: string, action: Exclude<Permission['action'], '*'>): boolean => {
-    if (!user) return false;
+    if (!user || !profile) return false;
 
-    const userPermissions = ROLE_PERMISSIONS[user.user_level] || [];
+    const userPermissions = ROLE_PERMISSIONS[profile.user_level] || [];
     
     // Check for exact match
     const exactMatch = userPermissions.some(

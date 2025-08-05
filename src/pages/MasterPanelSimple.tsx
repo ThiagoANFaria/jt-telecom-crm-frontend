@@ -20,6 +20,7 @@ import {
   Package
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 interface Tenant {
   id: string;
@@ -51,6 +52,7 @@ interface Plan {
 
 const MasterPanelSimple: React.FC = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCreatePlanForm, setShowCreatePlanForm] = useState(false);
@@ -329,7 +331,7 @@ const MasterPanelSimple: React.FC = () => {
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Admin Master</p>
-          <p className="font-medium text-gray-900">{user?.name || 'JT Telecom'}</p>
+          <p className="font-medium text-gray-900">{profile?.name || user?.email?.split('@')[0] || 'JT Telecom'}</p>
         </div>
       </div>
 

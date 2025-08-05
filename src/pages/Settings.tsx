@@ -54,7 +54,7 @@ const Settings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Verificar se o usuário tem permissão de administrador para acessar Configurações
-  const hasAccess = isAdmin() || isMaster();
+  const hasAccess = isAdmin || isMaster;
 
   // Se não for admin, mostrar tela de acesso negado
   if (!hasAccess) {

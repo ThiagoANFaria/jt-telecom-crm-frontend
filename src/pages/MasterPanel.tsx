@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { apiService } from '@/services/api';
 import { 
   Shield, 
@@ -75,11 +76,12 @@ const MasterPanel: React.FC = () => {
   });
   
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { toast } = useToast();
 
   // Verificar se o usuário é Master
   useEffect(() => {
-    if (!user || user.user_level !== 'master') {
+    if (!user || !profile || profile.user_level !== 'master') {
       toast({
         title: 'Acesso negado',
         description: 'Apenas usuários Master podem acessar este módulo.',
@@ -284,7 +286,7 @@ const MasterPanel: React.FC = () => {
     }
   };
 
-  if (!user || user.user_level !== 'master') {
+  if (!user || !profile || profile.user_level !== 'master') {
     return (
       <div className="container mx-auto p-6">
         <Card>

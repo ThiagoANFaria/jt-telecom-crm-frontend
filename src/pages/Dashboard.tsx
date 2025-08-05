@@ -1,20 +1,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DashboardSummary } from '@/types';
-import { apiService } from '@/services/api';
+import { DashboardMetrics, dashboardService } from '@/services/dashboard';
 import { useToast } from '@/hooks/use-toast';
 import { TrendingUp, Users, FileText, FileCheck, DollarSign, Target } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [summary, setSummary] = useState<DashboardMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchSummary = async () => {
       try {
-        const data = await apiService.getDashboardSummary();
+        const data = await dashboardService.getDashboardSummary();
         setSummary(data);
       } catch (error) {
         console.error('Failed to fetch dashboard summary:', error);

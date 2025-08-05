@@ -8,6 +8,8 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   login: (credentials: { email: string; password: string }) => Promise<any>;
+  isAdmin: boolean;
+  isMaster: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,6 +34,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Buscar perfil do usuário
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          setProfile(profileData);
+        }
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -44,6 +57,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Buscar perfil do usuário
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          setProfile(profileData);
+        } else {
+          setProfile(null);
+        }
+        
         setLoading(false);
         
         if (event === 'SIGNED_OUT') {
@@ -86,11 +112,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
+  const isAdmin = profile?.user_level === 'admin';
+  const isMaster = profile?.user_level === 'master';
+
   const value = {
     user,
     loading,
     signOut,
     login,
+    isAdmin,
+    isMaster,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

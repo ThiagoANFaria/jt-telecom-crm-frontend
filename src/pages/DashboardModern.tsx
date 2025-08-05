@@ -34,6 +34,7 @@ import {
   Send
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { apiService } from '@/services/api';
 import { secureLog } from '@/utils/security';
 
@@ -58,6 +59,7 @@ interface QuickAction {
 
 const DashboardModern: React.FC = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
   const [selectedResponsible, setSelectedResponsible] = useState('all');
@@ -113,7 +115,7 @@ const DashboardModern: React.FC = () => {
   }, []);
 
   const getMockData = () => {
-    if (user?.user_level === 'master') {
+    if (profile?.user_level === 'master') {
       return {
         totalLeads: 2847,
         totalClients: 891,
@@ -137,7 +139,7 @@ const DashboardModern: React.FC = () => {
         activeContractsThisMonth: 42,
         meetingsHeld: 67
       };
-    } else if (user?.user_level === 'admin') {
+    } else if (profile?.user_level === 'admin') {
       return {
         totalLeads: 145,
         totalClients: 78,
@@ -411,11 +413,11 @@ const DashboardModern: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0057B8] to-[#00C853] bg-clip-text text-transparent font-montserrat">
-              {user?.user_level === 'master' ? 'Painel Master JT' : 
-               user?.user_level === 'admin' ? 'Dashboard Executivo' : 'Meu Dashboard'}
+              {profile?.user_level === 'master' ? 'Painel Master JT' : 
+               profile?.user_level === 'admin' ? 'Dashboard Executivo' : 'Meu Dashboard'}
             </h1>
             <p className="text-gray-600 font-opensans text-lg">
-              Bem-vindo de volta, <span className="font-semibold text-[#0057B8]">{user?.name}</span>! 
+              Bem-vindo de volta, <span className="font-semibold text-[#0057B8]">{profile?.name || user?.email?.split('@')[0] || 'Usuário'}</span>! 
               Aqui está seu resumo em tempo real.
             </p>
           </div>

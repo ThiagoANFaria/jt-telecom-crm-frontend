@@ -131,7 +131,9 @@ class MasterPanelService {
     const adminUserId = authData.user?.id;
     if (!adminUserId) throw new Error('Falha ao criar usuário administrador');
 
-    // Criar tenant
+    console.log('Admin user created:', adminUserId, tenant.admin_email);
+
+    // Criar tenant primeiro
     const { data, error } = await supabase
       .from('tenants')
       .insert({
@@ -147,11 +149,16 @@ class MasterPanelService {
       .select()
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating tenant:', error);
+      throw new Error(`Erro ao criar tenant: ${error.message}`);
+    }
     if (!data) throw new Error('Falha ao criar tenant - dados não retornados');
 
+    console.log('Tenant created:', data.id, data.name);
+
     // Aguardar um pouco para que o perfil seja criado pela trigger
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Atualizar o perfil do admin com o tenant_id e nível correto
     const { error: profileUpdateError } = await supabase
@@ -164,7 +171,24 @@ class MasterPanelService {
 
     if (profileUpdateError) {
       console.error('Erro ao atualizar perfil do admin:', profileUpdateError);
-      // Não falhar a criação por isso, apenas logar
+      throw new Error(`Erro ao configurar perfil do administrador: ${profileUpdateError.message}`);
+    }
+
+    console.log('Admin profile updated with tenant_id:', data.id);
+
+    // Criar role de admin na tabela user_roles
+    const { error: roleError } = await supabase
+      .from('user_roles')
+      .insert({
+        user_id: adminUserId,
+        role: 'admin',
+        tenant_id: data.id,
+        granted_by: user.id
+      });
+
+    if (roleError) {
+      console.error('Erro ao criar role do admin:', roleError);
+      // Não falhar por isso, apenas logar
     }
 
     // Log da criação

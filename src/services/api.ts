@@ -4,6 +4,7 @@ import { leadsService } from './leads';
 import { clientsService } from './clients';
 import { proposalService } from './proposals';
 import { contractService } from './contracts';
+import { userService } from './users';
 
 // Validate environment variables on module load
 validateEnvironment();

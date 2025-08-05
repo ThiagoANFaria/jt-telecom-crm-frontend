@@ -171,8 +171,8 @@ const MasterPanel: React.FC = () => {
       });
 
       toast({
-        title: 'Tenant criado',
-        description: `${newTenant.name} foi criado com sucesso! O administrador pode fazer login em /auth`,
+        title: 'Tenant criado com sucesso!',
+        description: `${newTenant.name} foi criado. Redirecionando para a página de login...`,
       });
 
       // Resetar formulário
@@ -189,18 +189,21 @@ const MasterPanel: React.FC = () => {
 
       setIsCreateModalOpen(false);
       
-      // Aguardar um pouco antes de recarregar para que o tenant seja criado completamente
-      setTimeout(() => {
-        fetchData(); // Recarregar dados
-      }, 1000);
-
-      // Informar sobre o redirecionamento para login
+      // Recarregar dados imediatamente
+      await fetchData();
+      
+      // Mostrar notificação final e redirecionar
       setTimeout(() => {
         toast({
-          title: 'Próximo passo',
+          title: 'Redirecionando...',
           description: `O administrador ${newTenant.admin_email} pode fazer login em /auth`,
         });
-      }, 2000);
+        
+        // Redirecionar para /auth após 2 segundos
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 2000);
+      }, 1000);
 
     } catch (error: any) {
       console.error('Error creating tenant:', error);

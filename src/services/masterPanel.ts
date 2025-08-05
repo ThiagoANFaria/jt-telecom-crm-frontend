@@ -86,16 +86,34 @@ class MasterPanelService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuário não autenticado');
 
-    // Criar usuário admin do tenant
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // Verificar se o usuário é master
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_level')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.user_level !== 'master') {
+      throw new Error('Acesso negado: apenas usuários master podem criar tenants');
+    }
+
+    // Criar usuário admin do tenant usando signup
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: tenant.admin_email,
       password: tenant.admin_password,
-      email_confirm: true
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+        data: {
+          name: 'Administrador',
+          user_level: 'admin'
+        }
+      }
     });
 
     if (authError) throw authError;
-
-    const adminUserId = authData.user.id;
+    
+    const adminUserId = authData.user?.id;
+    if (!adminUserId) throw new Error('Falha ao criar usuário administrador');
 
     // Criar tenant
     const { data, error } = await supabase
@@ -116,11 +134,16 @@ class MasterPanelService {
     if (error) throw error;
 
     // Log da criação
-    await systemLogsService.logCreate('tenant', data.id, {
-      name: tenant.name,
-      plan: tenant.plan,
-      admin_email: tenant.admin_email
-    });
+    try {
+      await systemLogsService.logCreate('tenant', data.id, {
+        name: tenant.name,
+        plan: tenant.plan,
+        admin_email: tenant.admin_email
+      });
+    } catch (logError) {
+      console.error('Erro ao registrar log:', logError);
+      // Não falhar a criação do tenant por causa do log
+    }
 
     return data;
   }

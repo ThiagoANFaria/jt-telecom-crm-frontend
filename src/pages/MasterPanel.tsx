@@ -52,6 +52,7 @@ interface NewTenant {
   domain: string;
   admin_email: string;
   admin_name: string;
+  admin_password: string;
   phone: string;
   plan: 'basic' | 'professional' | 'enterprise';
   description?: string;
@@ -70,6 +71,7 @@ const MasterPanel: React.FC = () => {
     domain: '',
     admin_email: '',
     admin_name: '',
+    admin_password: '',
     phone: '',
     plan: 'basic',
     description: ''
@@ -138,10 +140,10 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleCreateTenant = async () => {
-    if (!newTenant.name.trim() || !newTenant.admin_email.trim()) {
+    if (!newTenant.name.trim() || !newTenant.admin_email.trim() || !newTenant.admin_password.trim()) {
       toast({
         title: 'Campos obrigatórios',
-        description: 'Preencha nome e email de contato.',
+        description: 'Preencha nome, email e senha do administrador.',
         variant: 'destructive',
       });
       return;
@@ -160,20 +162,17 @@ const MasterPanel: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Gerar senha temporária para o admin
-      const tempPassword = 'Admin123!'; // Em produção, gerar uma senha aleatória
-
       const newTenantData = await masterPanelService.createTenant({
         name: newTenant.name,
         domain: newTenant.domain,
         plan: newTenant.plan,
         admin_email: newTenant.admin_email,
-        admin_password: tempPassword
+        admin_password: newTenant.admin_password
       });
 
       toast({
         title: 'Tenant criado',
-        description: `${newTenant.name} foi criado com sucesso. Senha temporária: ${tempPassword}`,
+        description: `${newTenant.name} foi criado com sucesso!`,
       });
 
       // Resetar formulário
@@ -182,6 +181,7 @@ const MasterPanel: React.FC = () => {
         domain: '',
         admin_name: '',
         admin_email: '',
+        admin_password: '',
         phone: '',
         plan: 'basic',
         description: ''
@@ -401,18 +401,29 @@ const MasterPanel: React.FC = () => {
                        />
                      </div>
                      <div className="space-y-2">
-                       <Label htmlFor="plan">Plano *</Label>
-                       <Select value={newTenant.plan} onValueChange={(value) => setNewTenant(prev => ({ ...prev, plan: value as any }))}>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Selecione o plano" />
-                         </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="basic">Básico</SelectItem>
-                           <SelectItem value="professional">Profissional</SelectItem>
-                           <SelectItem value="enterprise">Enterprise</SelectItem>
-                         </SelectContent>
-                       </Select>
+                       <Label htmlFor="admin_password">Senha do Admin *</Label>
+                       <Input
+                         id="admin_password"
+                         type="password"
+                         value={newTenant.admin_password}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, admin_password: e.target.value }))}
+                         placeholder="Senha do administrador"
+                       />
                      </div>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="plan">Plano *</Label>
+                     <Select value={newTenant.plan} onValueChange={(value) => setNewTenant(prev => ({ ...prev, plan: value as any }))}>
+                       <SelectTrigger>
+                         <SelectValue placeholder="Selecione o plano" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="basic">Básico</SelectItem>
+                         <SelectItem value="professional">Profissional</SelectItem>
+                         <SelectItem value="enterprise">Enterprise</SelectItem>
+                       </SelectContent>
+                     </Select>
                    </div>
 
                    <div className="space-y-2">

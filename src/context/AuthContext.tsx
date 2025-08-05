@@ -79,23 +79,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Configurar listener de mudanças de autenticação PRIMEIRO
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Buscar perfil do usuário
-          const profileData = await fetchProfile(session.user.id);
-          setProfile(profileData as UserProfile);
-          
-          if (event === 'SIGNED_IN') {
-            toast({
-              title: 'Login realizado com sucesso',
-              description: `Bem-vindo, ${profileData?.name || session.user.email}!`,
+          // Buscar perfil de forma não bloqueante usando setTimeout para evitar deadlock
+          setTimeout(() => {
+            fetchProfile(session.user.id).then(profileData => {
+              setProfile(profileData as UserProfile);
+              
+              if (event === 'SIGNED_IN') {
+                toast({
+                  title: 'Login realizado com sucesso',
+                  description: `Bem-vindo, ${profileData?.name || session.user.email}!`,
+                });
+              }
             });
-          }
+          }, 0);
         } else {
           setProfile(null);
           
@@ -118,7 +121,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session.user);
         
         // Buscar perfil de forma não bloqueante
-        fetchProfile(session.user.id).then(data => setProfile(data as UserProfile));
+        setTimeout(() => {
+          fetchProfile(session.user.id).then(data => setProfile(data as UserProfile));
+        }, 0);
       }
       setIsLoading(false);
     });

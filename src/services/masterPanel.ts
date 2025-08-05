@@ -316,7 +316,7 @@ class MasterPanelService {
       { name: 'Webhooks', status: 'degraded' as const, response_time: 300 }
     ];
 
-    const hasOffline = services.some(s => s.status === 'offline');
+    const hasOffline = services.some(s => s.status === 'offline' as any);
     const hasDegraded = services.some(s => s.status === 'degraded');
 
     let status: 'healthy' | 'warning' | 'critical' = 'healthy';

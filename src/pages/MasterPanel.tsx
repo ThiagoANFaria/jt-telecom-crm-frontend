@@ -77,7 +77,7 @@ const MasterPanel: React.FC = () => {
     description: ''
   });
   
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
 
@@ -189,21 +189,43 @@ const MasterPanel: React.FC = () => {
 
       setIsCreateModalOpen(false);
       
-      // Recarregar dados imediatamente
-      await fetchData();
+      // Mostrar toast de sucesso com instruções
+      toast({
+        title: 'Tenant criado com sucesso!',
+        description: `Administrador: ${newTenant.admin_email}. Aguarde...`,
+      });
       
-      // Mostrar notificação final e redirecionar
-      setTimeout(() => {
-        toast({
-          title: 'Redirecionando...',
-          description: `O administrador ${newTenant.admin_email} pode fazer login em /auth`,
-        });
-        
-        // Redirecionar para /auth após 2 segundos
-        setTimeout(() => {
-          window.location.href = '/auth';
-        }, 2000);
-      }, 1000);
+      // Aguardar um pouco e então atualizar a lista
+      setTimeout(async () => {
+        try {
+          // Recarregar a lista de tenants
+          await fetchData();
+          
+          // Mostrar toast com instrução final
+          toast({
+            title: 'Redirecionando para o login',
+            description: `O administrador ${newTenant.admin_email} pode fazer login agora.`,
+          });
+          
+          // Aguardar mais um pouco e redirecionar
+          setTimeout(async () => {
+            try {
+              await logout(); // Logout do master
+              window.location.href = '/auth';
+            } catch (error) {
+              // Mesmo com erro, redirecionar
+              window.location.href = '/auth';
+            }
+          }, 2000);
+          
+        } catch (error) {
+          console.error('Erro ao atualizar lista:', error);
+          // Mesmo com erro, tentar redirecionar
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 1000);
+        }
+      }, 1500);
 
     } catch (error: any) {
       console.error('Error creating tenant:', error);

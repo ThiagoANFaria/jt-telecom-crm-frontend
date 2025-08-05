@@ -3,6 +3,7 @@ import { validateEnvironment, secureLog, isValidToken } from '@/utils/security';
 import { leadsService } from './leads';
 import { clientsService } from './clients';
 import { proposalService } from './proposals';
+import { contractService } from './contracts';
 
 // Validate environment variables on module load
 validateEnvironment();

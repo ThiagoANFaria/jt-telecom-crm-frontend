@@ -104,11 +104,16 @@ class MasterPanelService {
       .eq('email', tenant.admin_email)
       .maybeSingle();
 
+    console.log('Verificação de email existente:', existingUser);
+
     if (existingUser) {
       throw new Error(`O email ${tenant.admin_email} já está em uso por outro usuário`);
     }
 
+    console.log('Email disponível, prosseguindo com criação do usuário...');
+
     // Criar usuário admin do tenant usando signup
+    console.log('Criando usuário admin via signup...');
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: tenant.admin_email,
       password: tenant.admin_password,
@@ -121,7 +126,10 @@ class MasterPanelService {
       }
     });
 
+    console.log('Resultado do signup:', { authData, authError });
+
     if (authError) {
+      console.error('Erro no signup:', authError);
       if (authError.message.includes('User already registered') || authError.message.includes('already been registered')) {
         throw new Error(`O email ${tenant.admin_email} já está registrado no sistema`);
       }
@@ -134,6 +142,7 @@ class MasterPanelService {
     console.log('Admin user created:', adminUserId, tenant.admin_email);
 
     // Criar tenant primeiro
+    console.log('Criando tenant no banco de dados...');
     const { data, error } = await supabase
       .from('tenants')
       .insert({
@@ -149,6 +158,8 @@ class MasterPanelService {
       .select()
       .maybeSingle();
 
+    console.log('Resultado da criação do tenant:', { data, error });
+
     if (error) {
       console.error('Error creating tenant:', error);
       throw new Error(`Erro ao criar tenant: ${error.message}`);
@@ -158,9 +169,11 @@ class MasterPanelService {
     console.log('Tenant created:', data.id, data.name);
 
     // Aguardar um pouco para que o perfil seja criado pela trigger
+    console.log('Aguardando criação do perfil...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Atualizar o perfil do admin com o tenant_id e nível correto
+    console.log('Atualizando perfil do admin...');
     const { error: profileUpdateError } = await supabase
       .from('profiles')
       .update({
@@ -168,6 +181,8 @@ class MasterPanelService {
         tenant_id: data.id
       })
       .eq('id', adminUserId);
+
+    console.log('Resultado da atualização do perfil:', profileUpdateError);
 
     if (profileUpdateError) {
       console.error('Erro ao atualizar perfil do admin:', profileUpdateError);
@@ -177,6 +192,7 @@ class MasterPanelService {
     console.log('Admin profile updated with tenant_id:', data.id);
 
     // Criar role de admin na tabela user_roles
+    console.log('Criando role de admin...');
     const { error: roleError } = await supabase
       .from('user_roles')
       .insert({
@@ -186,23 +202,28 @@ class MasterPanelService {
         granted_by: user.id
       });
 
+    console.log('Resultado da criação da role:', roleError);
+
     if (roleError) {
       console.error('Erro ao criar role do admin:', roleError);
       // Não falhar por isso, apenas logar
     }
 
     // Log da criação
+    console.log('Registrando log de criação...');
     try {
       await systemLogsService.logCreate('tenant', data.id, {
         name: tenant.name,
         plan: tenant.plan,
         admin_email: tenant.admin_email
       });
+      console.log('Log criado com sucesso');
     } catch (logError) {
       console.error('Erro ao registrar log:', logError);
       // Não falhar a criação do tenant por causa do log
     }
 
+    console.log('Tenant criado com sucesso! ID:', data.id);
     return data;
   }
 

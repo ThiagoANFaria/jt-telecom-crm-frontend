@@ -170,9 +170,10 @@ const MasterPanel: React.FC = () => {
         admin_password: newTenant.admin_password
       });
 
+      // Mostrar toast de sucesso
       toast({
         title: 'Tenant criado com sucesso!',
-        description: `${newTenant.name} foi criado. Redirecionando para a página de login...`,
+        description: `Administrador: ${newTenant.admin_email}`,
       });
 
       // Resetar formulário
@@ -189,43 +190,22 @@ const MasterPanel: React.FC = () => {
 
       setIsCreateModalOpen(false);
       
-      // Mostrar toast de sucesso com instruções
-      toast({
-        title: 'Tenant criado com sucesso!',
-        description: `Administrador: ${newTenant.admin_email}. Aguarde...`,
-      });
-      
-      // Aguardar um pouco e então atualizar a lista
+      // Recarregar dados após a criação
       setTimeout(async () => {
-        try {
-          // Recarregar a lista de tenants
-          await fetchData();
-          
-          // Mostrar toast com instrução final
-          toast({
-            title: 'Redirecionando para o login',
-            description: `O administrador ${newTenant.admin_email} pode fazer login agora.`,
-          });
-          
-          // Aguardar mais um pouco e redirecionar
-          setTimeout(async () => {
-            try {
-              await logout(); // Logout do master
-              window.location.href = '/auth';
-            } catch (error) {
-              // Mesmo com erro, redirecionar
-              window.location.href = '/auth';
-            }
-          }, 2000);
-          
-        } catch (error) {
-          console.error('Erro ao atualizar lista:', error);
-          // Mesmo com erro, tentar redirecionar
-          setTimeout(() => {
-            window.location.href = '/auth';
-          }, 1000);
-        }
-      }, 1500);
+        await fetchData();
+        
+        // Mostrar toast com instrução de login
+        toast({
+          title: 'Redirecionando para o login',
+          description: `O administrador pode fazer login em /auth`,
+        });
+        
+        // Fazer logout do master e redirecionar
+        setTimeout(async () => {
+          await logout();
+          window.location.href = '/auth';
+        }, 2000);
+      }, 1000);
 
     } catch (error: any) {
       console.error('Error creating tenant:', error);

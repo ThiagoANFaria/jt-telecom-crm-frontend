@@ -604,7 +604,7 @@ export type Database = {
           avatar_url: string | null
           company_name: string | null
           created_at: string | null
-          email: string | null
+          email: string
           id: string
           is_active: boolean | null
           last_login: string | null
@@ -612,27 +612,13 @@ export type Database = {
           permissions: Json | null
           tenant_id: string | null
           updated_at: string | null
-          user_level: string | null
+          user_level: string
         }
         Insert: {
           avatar_url?: string | null
           company_name?: string | null
           created_at?: string | null
-          email?: string | null
-          id: string
-          is_active?: boolean | null
-          last_login?: string | null
-          name?: string | null
-          permissions?: Json | null
-          tenant_id?: string | null
-          updated_at?: string | null
-          user_level?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          company_name?: string | null
-          created_at?: string | null
-          email?: string | null
+          email: string
           id?: string
           is_active?: boolean | null
           last_login?: string | null
@@ -640,7 +626,21 @@ export type Database = {
           permissions?: Json | null
           tenant_id?: string | null
           updated_at?: string | null
-          user_level?: string | null
+          user_level?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          name?: string | null
+          permissions?: Json | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          user_level?: string
         }
         Relationships: [
           {
@@ -947,9 +947,9 @@ export type Database = {
           id: string
           max_users: number
           name: string
-          plan: Database["public"]["Enums"]["tenant_plan"]
+          plan: Database["public"]["Enums"]["tenant_plan"] | null
           settings: Json | null
-          status: Database["public"]["Enums"]["tenant_status"]
+          status: Database["public"]["Enums"]["tenant_status"] | null
           updated_at: string | null
         }
         Insert: {
@@ -961,9 +961,9 @@ export type Database = {
           id?: string
           max_users?: number
           name: string
-          plan?: Database["public"]["Enums"]["tenant_plan"]
+          plan?: Database["public"]["Enums"]["tenant_plan"] | null
           settings?: Json | null
-          status?: Database["public"]["Enums"]["tenant_status"]
+          status?: Database["public"]["Enums"]["tenant_status"] | null
           updated_at?: string | null
         }
         Update: {
@@ -975,9 +975,9 @@ export type Database = {
           id?: string
           max_users?: number
           name?: string
-          plan?: Database["public"]["Enums"]["tenant_plan"]
+          plan?: Database["public"]["Enums"]["tenant_plan"] | null
           settings?: Json | null
-          status?: Database["public"]["Enums"]["tenant_status"]
+          status?: Database["public"]["Enums"]["tenant_status"] | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1007,15 +1007,7 @@ export type Database = {
           tenant_id?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -1023,7 +1015,7 @@ export type Database = {
     }
     Functions: {
       get_user_tenant: {
-        Args: { _user_id: string }
+        Args: { _user_id?: string }
         Returns: string
       }
       has_role: {
@@ -1034,11 +1026,11 @@ export type Database = {
         Returns: boolean
       }
       is_master: {
-        Args: { _user_id: string }
+        Args: { _user_id?: string }
         Returns: boolean
       }
       is_tenant_admin: {
-        Args: { _tenant_id: string; _user_id: string }
+        Args: { _tenant_id?: string; _user_id: string }
         Returns: boolean
       }
     }

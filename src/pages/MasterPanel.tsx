@@ -237,12 +237,26 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleEditTenant = (tenant: Tenant) => {
+    console.log('=== CLIQUE NO BOTÃO EDITAR ===');
+    console.log('Tenant recebido:', JSON.stringify(tenant, null, 2));
+    alert(`Editando tenant: ${tenant.name}`);
+    
     try {
-      console.log('Editando tenant:', tenant);
+      console.log('Dentro do try - antes de setSelectedTenant');
       setSelectedTenant(tenant);
+      console.log('Depois de setSelectedTenant - selectedTenant:', tenant);
+      
+      console.log('Antes de setIsEditModalOpen');
       setIsEditModalOpen(true);
+      console.log('Depois de setIsEditModalOpen - isEditModalOpen: true');
+      
+      toast({
+        title: 'Modal aberto',
+        description: `Editando ${tenant.name}`,
+      });
     } catch (error) {
-      console.error('Erro ao abrir modal de edição:', error);
+      console.error('ERRO CAPTURADO:', error);
+      alert(`ERRO: ${error}`);
       toast({
         title: 'Erro',
         description: 'Não foi possível abrir o editor.',
@@ -252,15 +266,22 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleViewTenant = (tenant: Tenant) => {
+    console.log('=== CLIQUE NO BOTÃO VISUALIZAR ===');
+    console.log('Tenant recebido:', JSON.stringify(tenant, null, 2));
+    alert(`Visualizando tenant: ${tenant.name}`);
+    
     try {
-      console.log('Visualizando tenant:', tenant);
+      console.log('Dentro do try - antes de setSelectedTenant');
       setSelectedTenant(tenant);
+      console.log('Depois de setSelectedTenant');
+      
       toast({
         title: 'Detalhes do Tenant',
         description: `Nome: ${tenant.name} | Domínio: ${tenant.domain || 'Não configurado'} | Plano: ${getPlanLabel(tenant.plan || 'basic')} | Status: ${getStatusLabel(tenant.status)} | Usuários: ${tenant.users_count || 0}`,
       });
     } catch (error) {
-      console.error('Erro ao visualizar tenant:', error);
+      console.error('ERRO CAPTURADO:', error);
+      alert(`ERRO: ${error}`);
       toast({
         title: 'Erro',
         description: 'Não foi possível visualizar o tenant.',
@@ -671,35 +692,46 @@ const MasterPanel: React.FC = () => {
                          <TableCell>
                            {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
                          </TableCell>
-                           <TableCell>
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => handleEditTenant(tenant)}
-                                title="Editar tenant"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleViewTenant(tenant)}
-                                title="Visualizar tenant"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => handleDeleteTenant(tenant.id)}
-                                className="text-red-600 hover:text-red-700"
-                                title="Excluir tenant"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                            <TableCell>
+                             <div className="flex gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   console.log('Click capturado no botão Editar');
+                                   handleEditTenant(tenant);
+                                 }}
+                                 title="Editar tenant"
+                               >
+                                 <Edit className="w-4 h-4" />
+                               </Button>
+                               <Button 
+                                 variant="outline" 
+                                 size="sm"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   console.log('Click capturado no botão Visualizar');
+                                   handleViewTenant(tenant);
+                                 }}
+                                 title="Visualizar tenant"
+                               >
+                                 <Eye className="w-4 h-4" />
+                               </Button>
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleDeleteTenant(tenant.id);
+                                 }}
+                                 className="text-red-600 hover:text-red-700"
+                                 title="Excluir tenant"
+                               >
+                                 <Trash2 className="w-4 h-4" />
+                               </Button>
+                             </div>
+                           </TableCell>
                        </TableRow>
                      ))
                    )}

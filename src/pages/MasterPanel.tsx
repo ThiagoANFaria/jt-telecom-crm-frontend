@@ -237,57 +237,15 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleEditTenant = (tenant: Tenant) => {
-    console.log('=== CLIQUE NO BOTÃO EDITAR ===');
-    console.log('Tenant recebido:', JSON.stringify(tenant, null, 2));
-    alert(`Editando tenant: ${tenant.name}`);
-    
-    try {
-      console.log('Dentro do try - antes de setSelectedTenant');
-      setSelectedTenant(tenant);
-      console.log('Depois de setSelectedTenant - selectedTenant:', tenant);
-      
-      console.log('Antes de setIsEditModalOpen');
-      setIsEditModalOpen(true);
-      console.log('Depois de setIsEditModalOpen - isEditModalOpen: true');
-      
-      toast({
-        title: 'Modal aberto',
-        description: `Editando ${tenant.name}`,
-      });
-    } catch (error) {
-      console.error('ERRO CAPTURADO:', error);
-      alert(`ERRO: ${error}`);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível abrir o editor.',
-        variant: 'destructive'
-      });
-    }
+    // HANDLER SIMPLIFICADO PARA DIAGNÓSTICO
+    alert(`✏️ EDITAR CLICOU: ${tenant.name}`);
+    console.log('✏️ handleEditTenant chamado para:', tenant.name);
   };
 
   const handleViewTenant = (tenant: Tenant) => {
-    console.log('=== CLIQUE NO BOTÃO VISUALIZAR ===');
-    console.log('Tenant recebido:', JSON.stringify(tenant, null, 2));
-    alert(`Visualizando tenant: ${tenant.name}`);
-    
-    try {
-      console.log('Dentro do try - antes de setSelectedTenant');
-      setSelectedTenant(tenant);
-      console.log('Depois de setSelectedTenant');
-      
-      toast({
-        title: 'Detalhes do Tenant',
-        description: `Nome: ${tenant.name} | Domínio: ${tenant.domain || 'Não configurado'} | Plano: ${getPlanLabel(tenant.plan || 'basic')} | Status: ${getStatusLabel(tenant.status)} | Usuários: ${tenant.users_count || 0}`,
-      });
-    } catch (error) {
-      console.error('ERRO CAPTURADO:', error);
-      alert(`ERRO: ${error}`);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível visualizar o tenant.',
-        variant: 'destructive'
-      });
-    }
+    // HANDLER SIMPLIFICADO PARA DIAGNÓSTICO
+    alert(`👁️ VISUALIZAR CLICOU: ${tenant.name}`);
+    console.log('👁️ handleViewTenant chamado para:', tenant.name);
   };
 
   const handleSaveEdit = async () => {
@@ -485,17 +443,30 @@ const MasterPanel: React.FC = () => {
         <TabsContent value="tenants" className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Gestão de Tenants</h2>
-            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-[#0057B8] hover:bg-[#003d82]">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Tenant
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Criar Novo Tenant</DialogTitle>
-                </DialogHeader>
+            <div className="flex gap-2">
+              {/* BOTÃO DE TESTE - DIAGNÓSTICO */}
+              <Button 
+                onClick={() => {
+                  alert('🟢 BOTÃO DE TESTE FUNCIONOU!');
+                  console.log('🟢 TESTE: Botão de teste clicado com sucesso');
+                }}
+                variant="destructive"
+                title="Botão de teste para diagnóstico"
+              >
+                🔴 TESTE CLIQUE
+              </Button>
+              
+              <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-[#0057B8] hover:bg-[#003d82]">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Tenant
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Criar Novo Tenant</DialogTitle>
+                  </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-2">
@@ -583,6 +554,7 @@ const MasterPanel: React.FC = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {/* Modal de Edição */}
@@ -692,46 +664,58 @@ const MasterPanel: React.FC = () => {
                          <TableCell>
                            {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
                          </TableCell>
-                            <TableCell>
-                             <div className="flex gap-2">
-                               <Button 
-                                 variant="outline" 
-                                 size="sm" 
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   console.log('Click capturado no botão Editar');
-                                   handleEditTenant(tenant);
-                                 }}
-                                 title="Editar tenant"
-                               >
-                                 <Edit className="w-4 h-4" />
-                               </Button>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm"
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   console.log('Click capturado no botão Visualizar');
-                                   handleViewTenant(tenant);
-                                 }}
-                                 title="Visualizar tenant"
-                               >
-                                 <Eye className="w-4 h-4" />
-                               </Button>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm" 
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   handleDeleteTenant(tenant.id);
-                                 }}
-                                 className="text-red-600 hover:text-red-700"
-                                 title="Excluir tenant"
-                               >
-                                 <Trash2 className="w-4 h-4" />
-                               </Button>
-                             </div>
-                           </TableCell>
+                             <TableCell>
+                              <div className="flex gap-2">
+                                {/* BOTÕES SIMPLIFICADOS PARA DIAGNÓSTICO */}
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => alert(`✏️ EDITAR: ${tenant.name}`)}
+                                  title="Editar tenant"
+                                  data-testid="btn-editar"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => alert(`👁️ VER: ${tenant.name}`)}
+                                  title="Visualizar tenant"
+                                  data-testid="btn-visualizar"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                
+                                {/* TESTE COM BOTÃO HTML PURO */}
+                                <button
+                                  onClick={() => alert(`🔵 HTML PURO: ${tenant.name}`)}
+                                  style={{ 
+                                    padding: '8px', 
+                                    border: '2px solid #0057B8',
+                                    borderRadius: '4px',
+                                    background: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '12px'
+                                  }}
+                                  title="Teste com botão HTML puro"
+                                >
+                                  HTML
+                                </button>
+                                
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTenant(tenant.id);
+                                  }}
+                                  className="text-red-600 hover:text-red-700"
+                                  title="Excluir tenant"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
                        </TableRow>
                      ))
                    )}

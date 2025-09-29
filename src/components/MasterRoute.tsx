@@ -14,7 +14,8 @@ const MasterRoute: React.FC<MasterRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
 
-  if (isLoading || profileLoading) {
+  // Wait for both auth and profile to load
+  if (isLoading || profileLoading || (user && !profile)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />

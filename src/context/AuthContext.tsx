@@ -77,28 +77,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     // Configurar listener de mudanças de autenticação PRIMEIRO
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (!isMounted) return;
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Buscar perfil de forma não bloqueante usando setTimeout para evitar deadlock
-          setTimeout(() => {
-            fetchProfile(session.user.id).then(profileData => {
-              setProfile(profileData as UserProfile);
-              
-              if (event === 'SIGNED_IN') {
-                toast({
-                  title: 'Login realizado com sucesso',
-                  description: `Bem-vindo, ${profileData?.name || session.user.email}!`,
-                });
-              }
-            });
-          }, 0);
+          const profileData = await fetchProfile(session.user.id);
+          if (isMounted) {
+            setProfile(profileData as UserProfile);
+            
+            if (event === 'SIGNED_IN') {
+              toast({
+                title: 'Login realizado com sucesso',
+                description: `Bem-vindo, ${profileData?.name || session.user.email}!`,
+              });
+            }
+          }
         } else {
           setProfile(null);
           
@@ -109,26 +111,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
           }
         }
-        
-        setIsLoading(false);
       }
     );
 
-    // DEPOIS verificar sessão existente
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setSession(session);
-        setUser(session.user);
+    // DEPOIS verificar sessão existente e aguardar perfil
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
         
-        // Buscar perfil de forma não bloqueante
-        setTimeout(() => {
-          fetchProfile(session.user.id).then(data => setProfile(data as UserProfile));
-        }, 0);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const profileData = await fetchProfile(session.user.id);
+          if (isMounted) {
+            setProfile(profileData as UserProfile);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   // Login

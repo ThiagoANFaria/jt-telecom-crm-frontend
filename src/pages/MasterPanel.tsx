@@ -101,10 +101,17 @@ const MasterPanel: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      console.log('[MasterPanel] Iniciando fetchData...');
+      const startTime = performance.now();
+      
       setIsLoading(true);
       
       // Buscar tenants do Supabase usando o serviço Master Panel
+      console.log('[MasterPanel] Buscando tenants...');
+      const tenantsStartTime = performance.now();
       const tenantsData = await masterPanelService.getTenants();
+      console.log(`[MasterPanel] Tenants carregados em ${performance.now() - tenantsStartTime}ms`);
+      
       setTenants(tenantsData.map((tenant: any) => ({
         id: tenant.id,
         name: tenant.name,
@@ -120,12 +127,18 @@ const MasterPanel: React.FC = () => {
       
       // Buscar usuários do Supabase
       try {
+        console.log('[MasterPanel] Buscando usuários...');
+        const usersStartTime = performance.now();
         const usersData = await masterPanelService.getUsers();
+        console.log(`[MasterPanel] Usuários carregados em ${performance.now() - usersStartTime}ms`);
         setUsers(usersData);
       } catch (error) {
         console.error('Failed to fetch users:', error);
         setUsers([]);
       }
+
+      const totalTime = performance.now() - startTime;
+      console.log(`[MasterPanel] fetchData completado em ${totalTime}ms`);
 
       toast({
         title: 'Dados carregados',
@@ -227,6 +240,43 @@ const MasterPanel: React.FC = () => {
   const handleEditTenant = (tenant: Tenant) => {
     setSelectedTenant(tenant);
     setIsEditModalOpen(true);
+  };
+
+  const handleViewTenant = (tenant: Tenant) => {
+    setSelectedTenant(tenant);
+    toast({
+      title: 'Visualizar Tenant',
+      description: `Tenant: ${tenant.name} | Plano: ${getPlanLabel(tenant.plan)} | Status: ${tenant.active ? 'Ativo' : 'Inativo'}`,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedTenant) return;
+    
+    try {
+      setIsLoading(true);
+      await masterPanelService.updateTenant(selectedTenant.id, {
+        name: selectedTenant.name,
+        domain: selectedTenant.domain,
+        plan: selectedTenant.plan,
+      });
+      
+      toast({
+        title: 'Tenant atualizado',
+        description: 'As alterações foram salvas com sucesso.',
+      });
+      
+      setIsEditModalOpen(false);
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao atualizar',
+        description: error.message || 'Não foi possível salvar as alterações.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteTenant = async (tenantId: string) => {
@@ -475,6 +525,67 @@ const MasterPanel: React.FC = () => {
             </Dialog>
           </div>
 
+          {/* Modal de Edição */}
+          <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Editar Tenant</DialogTitle>
+              </DialogHeader>
+              {selectedTenant && (
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-name">Nome da Empresa</Label>
+                      <Input
+                        id="edit-name"
+                        value={selectedTenant.name}
+                        onChange={(e) => setSelectedTenant({ ...selectedTenant, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-domain">Domínio</Label>
+                      <Input
+                        id="edit-domain"
+                        value={selectedTenant.domain || ''}
+                        onChange={(e) => setSelectedTenant({ ...selectedTenant, domain: e.target.value })}
+                        placeholder="empresa.com.br"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-plan">Plano</Label>
+                    <Select 
+                      value={selectedTenant.plan} 
+                      onValueChange={(value) => setSelectedTenant({ ...selectedTenant, plan: value as any })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="basic">Básico</SelectItem>
+                        <SelectItem value="professional">Profissional</SelectItem>
+                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSaveEdit}
+                  disabled={isLoading}
+                  className="bg-[#0057B8] hover:bg-[#003d82]"
+                >
+                  {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Card>
             <CardContent>
               <Table>
@@ -521,24 +632,35 @@ const MasterPanel: React.FC = () => {
                          <TableCell>
                            {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
                          </TableCell>
-                          <TableCell>
-                           <div className="flex gap-2">
-                             <Button variant="outline" size="sm" onClick={() => handleEditTenant(tenant)}>
-                               <Edit className="w-4 h-4" />
-                             </Button>
-                             <Button variant="outline" size="sm">
-                               <Eye className="w-4 h-4" />
-                             </Button>
-                             <Button 
-                               variant="outline" 
-                               size="sm" 
-                               onClick={() => handleDeleteTenant(tenant.id)}
-                               className="text-red-600 hover:text-red-700"
-                             >
-                               <Trash2 className="w-4 h-4" />
-                             </Button>
-                           </div>
-                         </TableCell>
+                           <TableCell>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleEditTenant(tenant)}
+                                title="Editar tenant"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewTenant(tenant)}
+                                title="Visualizar tenant"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleDeleteTenant(tenant.id)}
+                                className="text-red-600 hover:text-red-700"
+                                title="Excluir tenant"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                        </TableRow>
                      ))
                    )}

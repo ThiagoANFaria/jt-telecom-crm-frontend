@@ -39,24 +39,34 @@ export interface UserData {
 
 class MasterPanelService {
   async getTenants(): Promise<TenantData[]> {
+    console.log('[MasterPanelService] getTenants iniciado');
+    const startTime = performance.now();
+    
     const { data: { user } } = await supabase.auth.getUser();
+    console.log(`[MasterPanelService] getUser completado em ${performance.now() - startTime}ms`);
+    
     if (!user) throw new Error('Usuário não autenticado');
 
     // Verificar se o usuário é master
+    const profileStartTime = performance.now();
     const { data: profile } = await supabase
       .from('profiles')
       .select('user_level')
       .eq('id', user.id)
       .maybeSingle();
+    console.log(`[MasterPanelService] Verificação de perfil em ${performance.now() - profileStartTime}ms`);
 
     if (profile?.user_level !== 'master') {
       throw new Error('Acesso negado: apenas usuários master podem acessar');
     }
 
+    const tenantsStartTime = performance.now();
     const { data, error } = await supabase
       .from('tenants')
       .select('*')
       .order('created_at', { ascending: false });
+    console.log(`[MasterPanelService] Query de tenants em ${performance.now() - tenantsStartTime}ms`);
+    console.log(`[MasterPanelService] getTenants TOTAL: ${performance.now() - startTime}ms`);
 
     if (error) throw error;
     return data || [];
@@ -275,13 +285,21 @@ class MasterPanelService {
   }
 
   async getUsers(): Promise<UserData[]> {
+    console.log('[MasterPanelService] getUsers iniciado');
+    const startTime = performance.now();
+    
     const { data: { user } } = await supabase.auth.getUser();
+    console.log(`[MasterPanelService] getUser em getUsers: ${performance.now() - startTime}ms`);
+    
     if (!user) throw new Error('Usuário não autenticado');
 
+    const queryStartTime = performance.now();
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
+    console.log(`[MasterPanelService] Query de profiles em ${performance.now() - queryStartTime}ms`);
+    console.log(`[MasterPanelService] getUsers TOTAL: ${performance.now() - startTime}ms`);
 
     if (error) throw error;
     return data || [];

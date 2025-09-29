@@ -37,7 +37,7 @@ interface Tenant {
   name: string;
   domain: string;
   created_at: string;
-  active: boolean;
+  status: 'active' | 'inactive' | 'suspended' | 'trial';
   admin_email?: string;
   admin_name?: string;
   phone?: string;
@@ -118,11 +118,10 @@ const MasterPanel: React.FC = () => {
         domain: tenant.domain,
         plan: tenant.plan,
         users_count: tenant.current_users,
-        active: tenant.status === 'active' || tenant.status === 'trial',
+        status: tenant.status,
         created_at: tenant.created_at,
         admin_email: '', // Será buscado separadamente se necessário
-        phone: '',
-        status: tenant.status
+        phone: ''
       })));
       
       // Buscar usuários do Supabase
@@ -238,16 +237,36 @@ const MasterPanel: React.FC = () => {
   };
 
   const handleEditTenant = (tenant: Tenant) => {
-    setSelectedTenant(tenant);
-    setIsEditModalOpen(true);
+    try {
+      console.log('Editando tenant:', tenant);
+      setSelectedTenant(tenant);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error('Erro ao abrir modal de edição:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível abrir o editor.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleViewTenant = (tenant: Tenant) => {
-    setSelectedTenant(tenant);
-    toast({
-      title: 'Visualizar Tenant',
-      description: `Tenant: ${tenant.name} | Plano: ${getPlanLabel(tenant.plan)} | Status: ${tenant.active ? 'Ativo' : 'Inativo'}`,
-    });
+    try {
+      console.log('Visualizando tenant:', tenant);
+      setSelectedTenant(tenant);
+      toast({
+        title: 'Detalhes do Tenant',
+        description: `Nome: ${tenant.name} | Domínio: ${tenant.domain || 'Não configurado'} | Plano: ${getPlanLabel(tenant.plan || 'basic')} | Status: ${getStatusLabel(tenant.status)} | Usuários: ${tenant.users_count || 0}`,
+      });
+    } catch (error) {
+      console.error('Erro ao visualizar tenant:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível visualizar o tenant.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -321,6 +340,26 @@ const MasterPanel: React.FC = () => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Ativo';
+      case 'inactive': return 'Inativo';
+      case 'suspended': return 'Suspenso';
+      case 'trial': return 'Trial';
+      default: return 'Desconhecido';
+    }
+  };
+
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+      case 'active': return 'default';
+      case 'trial': return 'outline';
+      case 'suspended': return 'destructive';
+      case 'inactive': return 'secondary';
+      default: return 'secondary';
+    }
+  };
+
   if (!user || !profile || profile.user_level !== 'master') {
     return (
       <div className="container mx-auto p-6">
@@ -365,7 +404,7 @@ const MasterPanel: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold text-[#0057B8]">{tenants.length}</div>
             <p className="text-xs text-muted-foreground">
-              {tenants.filter(t => t.active).length} ativos
+              {tenants.filter(t => t.status === 'active' || t.status === 'trial').length} ativos
             </p>
           </CardContent>
         </Card>
@@ -621,11 +660,11 @@ const MasterPanel: React.FC = () => {
                              {getPlanLabel(tenant.plan)}
                            </Badge>
                          </TableCell>
-                         <TableCell>
-                           <Badge variant={tenant.active ? 'default' : 'secondary'}>
-                             {tenant.active ? 'Ativo' : 'Inativo'}
-                           </Badge>
-                         </TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusVariant(tenant.status)}>
+                              {getStatusLabel(tenant.status)}
+                            </Badge>
+                          </TableCell>
                          <TableCell>
                            {tenant.users_count || 0}
                          </TableCell>

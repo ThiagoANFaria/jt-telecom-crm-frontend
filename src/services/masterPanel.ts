@@ -40,6 +40,8 @@ export interface UserData {
 class MasterPanelService {
   async getTenants(): Promise<TenantData[]> {
     const { data: { user } } = await supabase.auth.getUser();
+    console.log('getTenants - user:', user?.id, user?.email);
+    
     if (!user) throw new Error('Usuário não autenticado');
 
     // Verificar se o usuário é master
@@ -49,6 +51,8 @@ class MasterPanelService {
       .eq('id', user.id)
       .maybeSingle();
 
+    console.log('getTenants - profile:', profile);
+
     if (profile?.user_level !== 'master') {
       throw new Error('Acesso negado: apenas usuários master podem acessar');
     }
@@ -57,6 +61,8 @@ class MasterPanelService {
       .from('tenants')
       .select('*')
       .order('created_at', { ascending: false });
+
+    console.log('getTenants - data:', data, 'error:', error);
 
     if (error) throw error;
     return data || [];

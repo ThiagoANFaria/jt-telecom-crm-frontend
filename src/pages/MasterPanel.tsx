@@ -81,9 +81,14 @@ const MasterPanel: React.FC = () => {
   const { profile } = useProfile();
   const { toast } = useToast();
 
-  // Verificar se o usuário é Master
+  // Verificar se o usuário é Master e carregar dados
   useEffect(() => {
-    if (!user || !profile || profile.user_level !== 'master') {
+    // Aguardar tanto user quanto profile estarem carregados
+    if (!user || !profile) {
+      return; // Ainda carregando, não fazer nada
+    }
+    
+    if (profile.user_level !== 'master') {
       toast({
         title: 'Acesso negado',
         description: 'Apenas usuários Master podem acessar este módulo.',
@@ -92,7 +97,7 @@ const MasterPanel: React.FC = () => {
     } else {
       fetchData();
     }
-  }, [user]);
+  }, [user, profile]);
 
   const fetchData = async () => {
     try {

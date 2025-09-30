@@ -65,7 +65,9 @@ const App = () => (
               {/* Rota Master - Admin Master JT Telecom */}
               <Route path="/master" element={
                 <MasterRoute>
-                  <MasterPanel />
+                  <Layout>
+                    <MasterPanel />
+                  </Layout>
                 </MasterRoute>
               } />
               

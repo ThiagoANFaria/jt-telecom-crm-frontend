@@ -394,16 +394,6 @@ const MasterPanel: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Botão de Logout Fixo - Backup */}
-      <Button
-        onClick={handleLogout}
-        className="fixed top-4 right-4 z-[10000] flex items-center gap-2 px-4 py-2 border border-[#0057B8]/20 rounded-lg bg-white text-[#0057B8] hover:bg-[#0057B8] hover:text-white transition-all duration-200 shadow-lg"
-        style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 10000 }}
-      >
-        <LogOut className="w-4 h-4" />
-        Sair
-      </Button>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Crown className="w-8 h-8 text-yellow-600" />
@@ -416,6 +406,14 @@ const MasterPanel: React.FC = () => {
           <Button variant="outline" onClick={fetchData} disabled={isLoading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Atualizar
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-100 ml-2"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
           </Button>
         </div>
       </div>

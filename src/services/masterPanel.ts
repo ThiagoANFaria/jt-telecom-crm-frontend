@@ -39,37 +39,83 @@ export interface UserData {
 
 class MasterPanelService {
   async getTenants(): Promise<TenantData[]> {
-    console.log('[MasterPanelService] getTenants iniciado');
+    console.log('🔍 [MasterPanelService] getTenants iniciado');
     const startTime = performance.now();
     
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log(`[MasterPanelService] getUser completado em ${performance.now() - startTime}ms`);
-    
-    if (!user) throw new Error('Usuário não autenticado');
+    try {
+      // Passo 1: Verificar autenticação
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log(`✅ [MasterPanelService] Autenticação verificada em ${performance.now() - startTime}ms`);
+      console.log(`👤 [MasterPanelService] User ID: ${user?.id ? user.id.substring(0, 8) + '...' : 'NENHUM'}`);
+      
+      if (authError) {
+        console.error('❌ [MasterPanelService] Erro de autenticação:', authError);
+        throw new Error(`Erro de autenticação: ${authError.message}`);
+      }
+      
+      if (!user) {
+        console.error('❌ [MasterPanelService] Usuário não autenticado');
+        throw new Error('Usuário não autenticado');
+      }
 
-    // Verificar se o usuário é master
-    const profileStartTime = performance.now();
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('user_level')
-      .eq('id', user.id)
-      .maybeSingle();
-    console.log(`[MasterPanelService] Verificação de perfil em ${performance.now() - profileStartTime}ms`);
+      // Passo 2: Verificar se o usuário é master
+      const profileStartTime = performance.now();
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_level, email, name')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      console.log(`✅ [MasterPanelService] Perfil verificado em ${performance.now() - profileStartTime}ms`);
+      console.log(`👤 [MasterPanelService] User Level: ${profile?.user_level || 'NENHUM'}`);
+      console.log(`📧 [MasterPanelService] Email: ${profile?.email || 'NENHUM'}`);
 
-    if (profile?.user_level !== 'master') {
-      throw new Error('Acesso negado: apenas usuários master podem acessar');
+      if (profileError) {
+        console.error('❌ [MasterPanelService] Erro ao buscar perfil:', profileError);
+        throw new Error(`Erro ao verificar perfil: ${profileError.message}`);
+      }
+
+      if (!profile || profile.user_level !== 'master') {
+        console.error('❌ [MasterPanelService] Acesso negado - não é master');
+        throw new Error('Acesso negado: apenas usuários master podem acessar');
+      }
+
+      // Passo 3: Buscar tenants
+      console.log('🔎 [MasterPanelService] Buscando tenants...');
+      const tenantsStartTime = performance.now();
+      const { data, error, count } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false });
+      
+      console.log(`✅ [MasterPanelService] Query de tenants em ${performance.now() - tenantsStartTime}ms`);
+      console.log(`📊 [MasterPanelService] Tenants encontrados: ${data?.length || 0} (count: ${count})`);
+      
+      if (error) {
+        console.error('❌ [MasterPanelService] Erro RLS ao buscar tenants:', error);
+        console.error('❌ [MasterPanelService] Detalhes do erro:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw new Error(`Erro ao buscar tenants: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('⚠️ [MasterPanelService] Nenhum tenant encontrado - possível problema de RLS');
+      } else {
+        console.log('✅ [MasterPanelService] Primeiros tenants:', data.slice(0, 2).map(t => ({ id: t.id, name: t.name })));
+      }
+      
+      const totalTime = performance.now() - startTime;
+      console.log(`🎯 [MasterPanelService] getTenants TOTAL: ${totalTime}ms`);
+
+      return data || [];
+    } catch (error: any) {
+      console.error('💥 [MasterPanelService] ERRO FATAL em getTenants:', error);
+      throw error;
     }
-
-    const tenantsStartTime = performance.now();
-    const { data, error } = await supabase
-      .from('tenants')
-      .select('*')
-      .order('created_at', { ascending: false });
-    console.log(`[MasterPanelService] Query de tenants em ${performance.now() - tenantsStartTime}ms`);
-    console.log(`[MasterPanelService] getTenants TOTAL: ${performance.now() - startTime}ms`);
-
-    if (error) throw error;
-    return data || [];
   }
 
   async getTenant(id: string): Promise<TenantData | null> {

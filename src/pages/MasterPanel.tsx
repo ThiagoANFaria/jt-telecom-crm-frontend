@@ -101,18 +101,29 @@ const MasterPanel: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      console.log('[MasterPanel] Iniciando fetchData...');
+      console.log('🚀 [MasterPanel] Iniciando fetchData...');
       const startTime = performance.now();
       
       setIsLoading(true);
       
       // Buscar tenants do Supabase usando o serviço Master Panel
-      console.log('[MasterPanel] Buscando tenants...');
+      console.log('🔍 [MasterPanel] Chamando masterPanelService.getTenants()...');
       const tenantsStartTime = performance.now();
       const tenantsData = await masterPanelService.getTenants();
-      console.log(`[MasterPanel] Tenants carregados em ${performance.now() - tenantsStartTime}ms`);
+      console.log(`✅ [MasterPanel] Tenants recebidos em ${performance.now() - tenantsStartTime}ms`);
+      console.log(`📊 [MasterPanel] Quantidade de tenants: ${tenantsData.length}`);
       
-      setTenants(tenantsData.map((tenant: any) => ({
+      if (tenantsData.length > 0) {
+        console.log('📝 [MasterPanel] Primeiros tenants:', tenantsData.slice(0, 2).map(t => ({ 
+          name: t.name, 
+          plan: t.plan, 
+          status: t.status 
+        })));
+      } else {
+        console.warn('⚠️ [MasterPanel] ALERTA: Nenhum tenant retornado!');
+      }
+      
+      const mappedTenants = tenantsData.map((tenant: any) => ({
         id: tenant.id,
         name: tenant.name,
         domain: tenant.domain,
@@ -120,35 +131,55 @@ const MasterPanel: React.FC = () => {
         users_count: tenant.current_users,
         status: tenant.status,
         created_at: tenant.created_at,
-        admin_email: '', // Será buscado separadamente se necessário
+        admin_email: '',
         phone: ''
-      })));
+      }));
+      
+      console.log('🗂️ [MasterPanel] Tenants mapeados:', mappedTenants.length);
+      setTenants(mappedTenants);
       
       // Buscar usuários do Supabase
       try {
-        console.log('[MasterPanel] Buscando usuários...');
+        console.log('👥 [MasterPanel] Buscando usuários...');
         const usersStartTime = performance.now();
         const usersData = await masterPanelService.getUsers();
-        console.log(`[MasterPanel] Usuários carregados em ${performance.now() - usersStartTime}ms`);
+        console.log(`✅ [MasterPanel] ${usersData.length} usuários carregados em ${performance.now() - usersStartTime}ms`);
         setUsers(usersData);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
+      } catch (error: any) {
+        console.error('❌ [MasterPanel] Erro ao buscar usuários:', error);
         setUsers([]);
       }
 
       const totalTime = performance.now() - startTime;
-      console.log(`[MasterPanel] fetchData completado em ${totalTime}ms`);
+      console.log(`🎯 [MasterPanel] fetchData COMPLETO em ${totalTime}ms`);
 
       toast({
-        title: 'Dados carregados',
-        description: `${tenantsData.length} tenants carregados com sucesso.`,
+        title: '✅ Dados carregados com sucesso',
+        description: `${tenantsData.length} tenant(s) encontrado(s)`,
       });
 
     } catch (error: any) {
-      console.error('Error fetching data:', error);
+      console.error('💥 [MasterPanel] ERRO FATAL em fetchData:', error);
+      console.error('💥 [MasterPanel] Stack trace:', error.stack);
+      
+      let errorMessage = 'Não foi possível carregar os dados.';
+      let errorDetails = error.message;
+      
+      // Identificar tipo de erro
+      if (error.message.includes('RLS')) {
+        errorMessage = 'Erro de permissão (RLS)';
+        errorDetails = 'Verifique as políticas de segurança da tabela tenants';
+      } else if (error.message.includes('autenticação') || error.message.includes('authenticated')) {
+        errorMessage = 'Erro de autenticação';
+        errorDetails = 'Faça login novamente';
+      } else if (error.message.includes('master')) {
+        errorMessage = 'Acesso negado';
+        errorDetails = 'Apenas usuários Master podem acessar';
+      }
+      
       toast({
-        title: 'Erro ao carregar dados',
-        description: error.message || 'Não foi possível carregar os dados.',
+        title: `❌ ${errorMessage}`,
+        description: errorDetails,
         variant: 'destructive',
       });
     } finally {

@@ -208,21 +208,7 @@ const MasterPanel: React.FC = () => {
       setIsCreateModalOpen(false);
       
       // Recarregar dados após a criação
-      setTimeout(async () => {
-        await fetchData();
-        
-        // Mostrar toast com instrução de login
-        toast({
-          title: 'Redirecionando para o login',
-          description: `O administrador pode fazer login em /auth`,
-        });
-        
-        // Fazer logout do master e redirecionar
-        setTimeout(async () => {
-          await logout();
-          window.location.href = '/auth';
-        }, 2000);
-      }, 1000);
+      await fetchData();
 
     } catch (error: any) {
       console.error('Error creating tenant:', error);

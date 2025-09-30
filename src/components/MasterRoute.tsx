@@ -14,8 +14,15 @@ const MasterRoute: React.FC<MasterRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
 
+  // 🔍 DEBUG: Logs de renderização
+  console.log('🔐 [MasterRoute] Renderizando...');
+  console.log('👤 [MasterRoute] User:', user?.email);
+  console.log('📋 [MasterRoute] Profile:', { name: profile?.name, level: profile?.user_level });
+  console.log('⏳ [MasterRoute] Loading states:', { isLoading, profileLoading });
+
   // Wait for both auth and profile to load
   if (isLoading || profileLoading || (user && !profile)) {
+    console.log('⏳ [MasterRoute] Aguardando carregamento...');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />

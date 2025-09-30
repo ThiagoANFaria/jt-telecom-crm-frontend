@@ -27,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="sticky top-0 h-16 bg-card/80 backdrop-blur-sm shadow-sm border-b border-border/50 flex items-center justify-between px-6 z-50">
+          <header className="!sticky !top-0 h-16 !bg-card backdrop-blur-sm shadow-lg border-b border-border flex items-center justify-between px-6 !z-[9999]" style={{ position: 'sticky', top: 0, zIndex: 9999 }}>
             <div className="flex items-center gap-4">
               <SidebarTrigger className="text-[#0057B8] hover:bg-[#0057B8]/10 p-2 rounded-lg transition-all" />
             </div>

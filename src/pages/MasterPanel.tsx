@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { masterPanelService } from '@/services/masterPanel';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Shield, 
   Users, 
@@ -29,7 +31,8 @@ import {
   RefreshCw,
   UserCheck,
   Crown,
-  Database
+  Database,
+  LogOut
 } from 'lucide-react';
 
 interface Tenant {
@@ -80,6 +83,17 @@ const MasterPanel: React.FC = () => {
   const { user, logout } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    console.log('🚪 [MasterPanel] Botão Sair clicado!');
+    try {
+      await supabase.auth.signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('❌ Erro ao fazer logout:', error);
+    }
+  };
 
   // Verificar se o usuário é Master e carregar dados
   useEffect(() => {
@@ -380,6 +394,16 @@ const MasterPanel: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Botão de Logout Fixo - Backup */}
+      <Button
+        onClick={handleLogout}
+        className="fixed top-4 right-4 z-[10000] flex items-center gap-2 px-4 py-2 border border-[#0057B8]/20 rounded-lg bg-white text-[#0057B8] hover:bg-[#0057B8] hover:text-white transition-all duration-200 shadow-lg"
+        style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 10000 }}
+      >
+        <LogOut className="w-4 h-4" />
+        Sair
+      </Button>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Crown className="w-8 h-8 text-yellow-600" />

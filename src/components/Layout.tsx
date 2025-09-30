@@ -15,6 +15,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const { profile } = useProfile();
 
+  // 🔍 DEBUG: Logs temporários
+  console.log('🎨 [Layout] Renderizando Layout');
+  console.log('👤 [Layout] User:', user?.email);
+  console.log('📋 [Layout] Profile:', { name: profile?.name, level: profile?.user_level });
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -56,7 +61,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={logout}
+                onClick={() => {
+                  console.log('🚪 [Layout] Botão Sair clicado!');
+                  logout();
+                }}
                 className="flex items-center gap-2 border-[#0057B8]/20 text-[#0057B8] hover:bg-[#0057B8] hover:text-white transition-all duration-200 hover:shadow-lg"
               >
                 <LogOut className="w-4 h-4" />

@@ -38,6 +38,7 @@ import {
 interface Tenant {
   id: string;
   name: string;
+  slug?: string;
   domain: string;
   created_at: string;
   status: 'active' | 'inactive' | 'suspended' | 'trial';
@@ -52,6 +53,7 @@ interface Tenant {
 
 interface NewTenant {
   name: string;
+  slug?: string;
   domain: string;
   admin_email: string;
   admin_name: string;
@@ -71,6 +73,7 @@ const MasterPanel: React.FC = () => {
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [newTenant, setNewTenant] = useState<NewTenant>({
     name: '',
+    slug: '',
     domain: '',
     admin_email: '',
     admin_name: '',
@@ -232,6 +235,7 @@ const MasterPanel: React.FC = () => {
     try {
       const newTenantData = await masterPanelService.createTenant({
         name: newTenant.name,
+        slug: newTenant.slug || undefined,
         domain: newTenant.domain,
         plan: newTenant.plan,
         admin_email: newTenant.admin_email,
@@ -247,6 +251,7 @@ const MasterPanel: React.FC = () => {
       // Resetar formulário
       setNewTenant({
         name: '',
+        slug: '',
         domain: '',
         admin_name: '',
         admin_email: '',
@@ -523,18 +528,46 @@ const MasterPanel: React.FC = () => {
                          placeholder="JT Tecnologia Ltda"
                        />
                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="domain">Domínio</Label>
-                        <Input
-                          id="domain"
-                          value={newTenant.domain}
-                          onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value }))}
-                          placeholder="empresa.com.br"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Domínio personalizado (opcional)
-                        </p>
-                      </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="slug">Slug (identificador único)</Label>
+                       <Input
+                         id="slug"
+                         value={newTenant.slug || ''}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, slug: e.target.value }))}
+                         placeholder="teste-qa"
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         Deixe vazio para gerar automaticamente
+                       </p>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label htmlFor="domain">Domínio</Label>
+                       <Input
+                         id="domain"
+                         value={newTenant.domain}
+                         onChange={(e) => setNewTenant(prev => ({ ...prev, domain: e.target.value }))}
+                         placeholder="empresa.com.br"
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         Domínio personalizado (opcional)
+                       </p>
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="plan">Plano *</Label>
+                       <Select value={newTenant.plan} onValueChange={(value) => setNewTenant(prev => ({ ...prev, plan: value as any }))}>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Selecione o plano" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="basic">Básico</SelectItem>
+                           <SelectItem value="professional">Profissional</SelectItem>
+                           <SelectItem value="enterprise">Enterprise</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
                   </div>
 
                    <div className="grid grid-cols-2 gap-4">
@@ -558,20 +591,6 @@ const MasterPanel: React.FC = () => {
                          placeholder="Senha do administrador"
                        />
                      </div>
-                   </div>
-
-                   <div className="space-y-2">
-                     <Label htmlFor="plan">Plano *</Label>
-                     <Select value={newTenant.plan} onValueChange={(value) => setNewTenant(prev => ({ ...prev, plan: value as any }))}>
-                       <SelectTrigger>
-                         <SelectValue placeholder="Selecione o plano" />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="basic">Básico</SelectItem>
-                         <SelectItem value="professional">Profissional</SelectItem>
-                         <SelectItem value="enterprise">Enterprise</SelectItem>
-                       </SelectContent>
-                     </Select>
                    </div>
 
                    <div className="space-y-2">
@@ -712,41 +731,23 @@ const MasterPanel: React.FC = () => {
                              <TableCell>
                               <div className="flex gap-2">
                                 {/* BOTÕES SIMPLIFICADOS PARA DIAGNÓSTICO */}
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => alert(`✏️ EDITAR: ${tenant.name}`)}
-                                  title="Editar tenant"
-                                  data-testid="btn-editar"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => alert(`👁️ VER: ${tenant.name}`)}
-                                  title="Visualizar tenant"
-                                  data-testid="btn-visualizar"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                
-                                {/* TESTE COM BOTÃO HTML PURO */}
-                                <button
-                                  onClick={() => alert(`🔵 HTML PURO: ${tenant.name}`)}
-                                  style={{ 
-                                    padding: '8px', 
-                                    border: '2px solid #0057B8',
-                                    borderRadius: '4px',
-                                    background: 'white',
-                                    cursor: 'pointer',
-                                    fontSize: '12px'
-                                  }}
-                                  title="Teste com botão HTML puro"
-                                >
-                                  HTML
-                                </button>
-                                
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm" 
+                                   onClick={() => handleEditTenant(tenant)}
+                                   title="Editar tenant"
+                                 >
+                                   <Edit className="w-4 h-4" />
+                                 </Button>
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm"
+                                   onClick={() => tenant.slug && navigate(`/t/${tenant.slug}`)}
+                                   title="Visualizar tenant"
+                                   disabled={!tenant.slug}
+                                 >
+                                   <Eye className="w-4 h-4" />
+                                 </Button>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 

@@ -780,7 +780,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_data: Json | null
           old_data: Json | null
           resource_id: string | null
@@ -792,7 +792,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           resource_id?: string | null
@@ -804,7 +804,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           resource_id?: string | null
@@ -937,6 +937,41 @@ export type Database = {
           },
         ]
       }
+      tenant_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           admin_user_id: string | null
@@ -949,6 +984,7 @@ export type Database = {
           name: string
           plan: Database["public"]["Enums"]["tenant_plan"] | null
           settings: Json | null
+          slug: string | null
           status: Database["public"]["Enums"]["tenant_status"] | null
           updated_at: string | null
         }
@@ -963,6 +999,7 @@ export type Database = {
           name: string
           plan?: Database["public"]["Enums"]["tenant_plan"] | null
           settings?: Json | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["tenant_status"] | null
           updated_at?: string | null
         }
@@ -977,6 +1014,7 @@ export type Database = {
           name?: string
           plan?: Database["public"]["Enums"]["tenant_plan"] | null
           settings?: Json | null
+          slug?: string | null
           status?: Database["public"]["Enums"]["tenant_status"] | null
           updated_at?: string | null
         }
@@ -1014,10 +1052,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_tenant: {
-        Args: { _user_id?: string }
-        Returns: string
-      }
+      generate_unique_slug: { Args: { tenant_name: string }; Returns: string }
+      get_user_tenant: { Args: { _user_id?: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_level"]
@@ -1025,10 +1061,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_master: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
+      is_master: { Args: { _user_id?: string }; Returns: boolean }
       is_tenant_admin: {
         Args: { _tenant_id?: string; _user_id: string }
         Returns: boolean

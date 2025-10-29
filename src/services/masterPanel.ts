@@ -134,6 +134,7 @@ class MasterPanelService {
 
   async createTenant(tenant: {
     name: string;
+    slug?: string;
     domain?: string;
     plan: 'basic' | 'professional' | 'enterprise';
     admin_email: string;
@@ -243,6 +244,7 @@ class MasterPanelService {
       console.log('🏢 [createTenant] PASSO 6: Inserindo tenant no banco...');
       const tenantData = {
         name: tenant.name,
+        slug: tenant.slug || null,
         domain: tenant.domain,
         plan: tenant.plan,
         admin_user_id: adminUserId,

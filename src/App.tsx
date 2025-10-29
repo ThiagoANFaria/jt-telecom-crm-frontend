@@ -31,6 +31,7 @@ import NotFound from "@/pages/NotFound";
 import JTVoxAnalytics from "@/pages/JTVoxAnalytics";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
+import TenantView from "@/pages/TenantView";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,24 @@ const App = () => (
                     <MasterPanel />
                   </Layout>
                 </MasterRoute>
+              } />
+              
+              {/* Alias para /master */}
+              <Route path="/master-panel" element={
+                <MasterRoute>
+                  <Layout>
+                    <MasterPanel />
+                  </Layout>
+                </MasterRoute>
+              } />
+              
+              {/* Visualizar Tenant por slug */}
+              <Route path="/t/:slug" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TenantView />
+                  </Layout>
+                </ProtectedRoute>
               } />
               
               {/* Rota Admin - Admin da Tenant */}

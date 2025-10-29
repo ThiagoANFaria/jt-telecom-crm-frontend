@@ -1,165 +1,118 @@
 import React from 'react';
 
-const JTVoxLogo: React.FC = () => {
-  const logoStyles: React.CSSProperties = {
-    background: 'linear-gradient(135deg, #0033A0 0%, #002875 100%)',
-    width: '320px',
-    height: '220px',
-    borderRadius: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#FFFFFF',
-    position: 'relative',
-    overflow: 'hidden',
-    boxShadow: '0 15px 35px rgba(0,51,160,0.3)',
-    margin: '20px auto',
-  };
+interface JTVoxLogoProps {
+  width?: string | number;
+  height?: string | number;
+  className?: string;
+}
 
-  const brandContainerStyles: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '18px',
-    marginBottom: '22px',
-    zIndex: 2,
-    position: 'relative',
-  };
-
-  const jtBubbleStyles: React.CSSProperties = {
-    background: '#FFFFFF',
-    color: '#0033A0',
-    padding: '14px 20px',
-    borderRadius: '18px',
-    fontFamily: 'Montserrat, sans-serif',
-    fontWeight: 900,
-    fontSize: '28px',
-    boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
-    position: 'relative',
-  };
-
-  const soundWavesStyles: React.CSSProperties = {
-    display: 'flex',
-    gap: '4px',
-    alignItems: 'center',
-  };
-
-  const waveBaseStyles: React.CSSProperties = {
-    width: '5px',
-    background: '#00A651',
-    borderRadius: '3px',
-    boxShadow: '0 2px 8px rgba(0,166,81,0.3)',
-  };
-
-  const voxTextStyles: React.CSSProperties = {
-    fontFamily: 'Montserrat, sans-serif',
-    fontSize: '40px',
-    fontWeight: 700,
-    letterSpacing: '3px',
-    marginBottom: '10px',
-    zIndex: 2,
-    position: 'relative',
-    textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  };
-
-  const byTextStyles: React.CSSProperties = {
-    fontFamily: 'Open Sans, sans-serif',
-    fontSize: '16px',
-    opacity: 0.85,
-    fontWeight: 300,
-    zIndex: 2,
-    position: 'relative',
-    letterSpacing: '0.5px',
-  };
-
+const JTVoxLogo: React.FC<JTVoxLogoProps> = ({ 
+  width = '100%', 
+  height = 'auto',
+  className = '' 
+}) => {
   return (
-    <>
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@300;400;600&display=swap');
-          
-          @keyframes wave {
-            0%, 100% { 
-              transform: scaleY(1); 
-              opacity: 0.7; 
-            }
-            50% { 
-              transform: scaleY(1.5); 
-              opacity: 1; 
-            }
-          }
-          
-          .wave-1 { 
-            height: 18px; 
-            animation: wave 1.5s ease-in-out infinite 0s; 
-          }
-          .wave-2 { 
-            height: 28px; 
-            animation: wave 1.5s ease-in-out infinite 0.2s; 
-          }
-          .wave-3 { 
-            height: 22px; 
-            animation: wave 1.5s ease-in-out infinite 0.4s; 
-          }
-          .wave-4 { 
-            height: 34px; 
-            animation: wave 1.5s ease-in-out infinite 0.6s; 
-          }
-          .wave-5 { 
-            height: 16px; 
-            animation: wave 1.5s ease-in-out infinite 0.8s; 
-          }
-          
-          @media (max-width: 768px) {
-            .jt-vox-responsive {
-              width: 280px !important;
-              height: 200px !important;
-            }
-            .vox-text-responsive {
-              font-size: 32px !important;
-            }
-            .jt-bubble-responsive {
-              font-size: 24px !important;
-              padding: 12px 16px !important;
-            }
-          }
-          
-          @media (max-width: 480px) {
-            .jt-vox-responsive {
-              width: 260px !important;
-              height: 180px !important;
-            }
-            .vox-text-responsive {
-              font-size: 28px !important;
-            }
-            .jt-bubble-responsive {
-              font-size: 20px !important;
-              padding: 10px 14px !important;
-            }
-            .wave-responsive {
-              width: 4px !important;
-            }
-          }
-        `}
-      </style>
-      
-      <div style={logoStyles} className="jt-vox-responsive">
-        <div style={brandContainerStyles}>
-          <div style={jtBubbleStyles} className="jt-bubble-responsive">JT</div>
-          <div style={soundWavesStyles}>
-            <div style={{...waveBaseStyles}} className="wave-1 wave-responsive"></div>
-            <div style={{...waveBaseStyles}} className="wave-2 wave-responsive"></div>
-            <div style={{...waveBaseStyles}} className="wave-3 wave-responsive"></div>
-            <div style={{...waveBaseStyles}} className="wave-4 wave-responsive"></div>
-            <div style={{...waveBaseStyles}} className="wave-5 wave-responsive"></div>
-          </div>
-        </div>
-        <div style={voxTextStyles} className="vox-text-responsive">VOX CRM</div>
-        <div style={byTextStyles}>by JT Telecom</div>
-      </div>
-    </>
+    <svg 
+      viewBox="0 0 800 400" 
+      xmlns="http://www.w3.org/2000/svg" 
+      preserveAspectRatio="xMidYMid meet" 
+      role="img"
+      width={width}
+      height={height}
+      className={className}
+      aria-label="Hubvox by JT Logo"
+    >
+      <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#001A47"/>
+          <stop offset="100%" stopColor="#000D24"/>
+        </linearGradient>
+        <linearGradient id="waveBlue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#003D99"/>
+          <stop offset="100%" stopColor="#0074FF"/>
+        </linearGradient>
+        <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <style>
+          {`
+            @keyframes wave1{0%,100%{opacity:.55;stroke-width:7}50%{opacity:.85;stroke-width:8}}
+            @keyframes wave2{0%,100%{opacity:.5;stroke-width:6}50%{opacity:.8;stroke-width:7}}
+            @keyframes wave3{0%,100%{opacity:.5;stroke-width:5}50%{opacity:.8;stroke-width:6}}
+            @keyframes pulse{0%,100%{opacity:.95;r:16}50%{opacity:1;r:19}}
+            @keyframes bars{0%,100%{opacity:.7}50%{opacity:1}}
+            .w1{animation:wave1 2.6s ease-in-out infinite}
+            .w2{animation:wave2 2.6s ease-in-out .25s infinite}
+            .w3{animation:wave3 2.6s ease-in-out .5s infinite}
+            .p{animation:pulse 2s ease-in-out infinite}
+            .b{animation:bars 1.8s ease-in-out infinite}
+          `}
+        </style>
+      </defs>
+
+      <rect width="800" height="400" fill="url(#bgGradient)"/>
+
+      <g transform="translate(400,200)">
+        {/* Ícone (H + ondas) */}
+        <g transform="translate(-230,0)">
+          <path d="M-55-10Q-48-42-32-55" stroke="url(#waveBlue)" strokeWidth="7" fill="none" strokeLinecap="round" className="w1"/>
+          <path d="M-55 10Q-48 42-32 55"  stroke="url(#waveBlue)" strokeWidth="7" fill="none" strokeLinecap="round" className="w1"/>
+          <path d="M-40-8Q-35-30-22-40"   stroke="url(#waveBlue)" strokeWidth="6" fill="none" strokeLinecap="round" className="w2"/>
+          <path d="M-40 8Q-35 30-22 40"   stroke="url(#waveBlue)" strokeWidth="6" fill="none" strokeLinecap="round" className="w2"/>
+          <path d="M-28-6Q-24-20-15-28"   stroke="url(#waveBlue)" strokeWidth="5" fill="none" strokeLinecap="round" className="w3"/>
+          <path d="M-28 6Q-24 20-15 28"   stroke="url(#waveBlue)" strokeWidth="5" fill="none" strokeLinecap="round" className="w3"/>
+
+          <circle cx="0" cy="0" r="28" fill="#9EFF00" opacity=".12"/>
+          <circle cx="0" cy="0" r="22" fill="#9EFF00" opacity=".2"/>
+          <circle cx="0" cy="0" r="18" fill="#9EFF00" opacity=".3"/>
+          <circle cx="0" cy="0" r="16" fill="#9EFF00" className="p" filter="url(#neonGlow)"/>
+
+          <g filter="url(#neonGlow)">
+            <rect x="10" y="-10" width="4.5" height="20" fill="#9EFF00" rx="2.25" className="b">
+              <animate attributeName="height" values="20;32;20" dur="1.8s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="-10;-16;-10" dur="1.8s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="17" y="-13" width="4.5" height="26" fill="#9EFF00" rx="2.25" className="b">
+              <animate attributeName="height" values="26;36;26" dur="1.8s" begin=".25s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="-13;-18;-13" dur="1.8s" begin=".25s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="24" y="-9" width="4.5" height="18" fill="#9EFF00" rx="2.25" className="b">
+              <animate attributeName="height" values="18;30;18" dur="1.8s" begin=".5s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="-9;-15;-9" dur="1.8s" begin=".5s" repeatCount="indefinite"/>
+            </rect>
+          </g>
+        </g>
+
+        {/* Logotipo levemente afastado das ondas */}
+        <text 
+          x="-190" 
+          y="12" 
+          fontFamily="'Inter','Poppins','Arial',sans-serif"
+          fontSize="64" 
+          fontWeight="800" 
+          fill="#FFFFFF" 
+          letterSpacing="2"
+        >
+          Hubvox
+        </text>
+
+        {/* By JT alinhado abaixo do 'X' */}
+        <text 
+          x="35" 
+          y="52" 
+          fontFamily="'Inter','Poppins','Arial',sans-serif"
+          fontSize="10" 
+          fontWeight="600" 
+          fill="#FFFFFF" 
+          letterSpacing="0.5" 
+          opacity="0.6"
+        >
+          By JT
+        </text>
+      </g>
+    </svg>
   );
 };
 
 export default JTVoxLogo;
-

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import JTVoxLogo from '../components/JTVoxLogo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -42,29 +43,7 @@ export default function Login() {
         <div className="text-white space-y-8 text-center">
           {/* Logo JT Vox Institucional Centralizado */}
           <div className="flex justify-center mb-8">
-            <div className="jt-vox-logo bg-gradient-to-br from-blue-600 to-blue-900 w-80 h-56 rounded-2xl flex flex-col items-center justify-center text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent animate-pulse"></div>
-              
-              <div className="brand-container flex items-center gap-4 mb-6 z-10 relative">
-                <div className="jt-bubble bg-white text-blue-600 px-5 py-3 rounded-2xl font-montserrat font-black text-2xl shadow-lg">
-                  JT
-                </div>
-                <div className="sound-waves flex gap-1 items-center">
-                  <div className="w-1 h-4 bg-green-400 rounded-full animate-wave"></div>
-                  <div className="w-1 h-7 bg-green-400 rounded-full animate-wave" style={{animationDelay: '0.2s'}}></div>
-                  <div className="w-1 h-5 bg-green-400 rounded-full animate-wave" style={{animationDelay: '0.4s'}}></div>
-                  <div className="w-1 h-8 bg-green-400 rounded-full animate-wave" style={{animationDelay: '0.6s'}}></div>
-                  <div className="w-1 h-4 bg-green-400 rounded-full animate-wave" style={{animationDelay: '0.8s'}}></div>
-                </div>
-              </div>
-              
-              <div className="vox-text font-montserrat text-4xl font-bold letter-spacing-wide mb-2 z-10 relative">
-                VOX
-              </div>
-              <div className="by-text font-opensans text-sm opacity-85 z-10 relative">
-                by JT Telecom
-              </div>
-            </div>
+            <JTVoxLogo width="320" height="160" />
           </div>
 
           <div>

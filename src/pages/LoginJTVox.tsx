@@ -32,7 +32,7 @@ const LoginJTVox: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-jt-blue flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{background: 'linear-gradient(to bottom, #001A47 0%, #000D24 100%)'}}>
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       

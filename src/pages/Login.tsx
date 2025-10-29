@@ -37,7 +37,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-jt-blue flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'linear-gradient(to bottom, #001A47 0%, #000D24 100%)'}}>
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Lado esquerdo - Informações */}
         <div className="text-white space-y-8 text-center">

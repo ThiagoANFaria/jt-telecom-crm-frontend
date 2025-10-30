@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
@@ -92,12 +92,30 @@ export const useProfile = () => {
     }
   };
 
+  // Helper assíncrono para verificação segura de roles
+  const checkRole = useCallback(async (roleCheck: 'master' | 'admin'): Promise<boolean> => {
+    if (!profile?.id) return false;
+    try {
+      const funcName = roleCheck === 'master' ? 'is_master' : 'is_tenant_admin';
+      const { data, error } = await supabase.rpc(funcName, { _user_id: profile.id });
+      if (error) throw error;
+      return data === true;
+    } catch (error) {
+      console.error(`Erro ao verificar role ${roleCheck}:`, error);
+      return false;
+    }
+  }, [profile?.id]);
+
   return {
     profile,
     loading,
     updateProfile,
-    isAdmin: profile?.user_level === 'admin',
+    // Mantém verificações síncronas para compatibilidade, mas não são seguras para autorização
+    isAdmin: profile?.user_level === 'admin' || profile?.user_level === 'master',
     isMaster: profile?.user_level === 'master',
-    isUser: profile?.user_level === 'user'
+    isUser: profile?.user_level === 'user',
+    // Novas funções assíncronas seguras
+    checkIsMaster: () => checkRole('master'),
+    checkIsAdmin: () => checkRole('admin')
   };
-};
+}

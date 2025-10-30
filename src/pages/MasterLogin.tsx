@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,22 +33,29 @@ const MasterLogin: React.FC = () => {
     }
   }, [user, isMaster, profileLoading, navigate]);
 
-  // Verify master level after login
+  // Verify master level after login usando verificação segura
   useEffect(() => {
     const verifyMasterAccess = async () => {
-      if (!profileLoading && user && profile && !isMaster) {
-        setError('Acesso restrito ao Master');
-        toast({
-          title: 'Acesso negado',
-          description: 'Apenas usuários Master podem acessar este painel',
-          variant: 'destructive'
+      if (!profileLoading && user && profile) {
+        // Usa verificação RPC segura
+        const { data: isMasterSecure, error } = await supabase.rpc('is_master', { 
+          _user_id: user.id 
         });
-        await logout();
+        
+        if (error || !isMasterSecure) {
+          setError('Acesso restrito ao Master');
+          toast({
+            title: 'Acesso negado',
+            description: 'Apenas usuários Master podem acessar este painel',
+            variant: 'destructive'
+          });
+          await logout();
+        }
       }
     };
     
     verifyMasterAccess();
-  }, [user, profile, isMaster, profileLoading, logout, toast]);
+  }, [user, profile, profileLoading, logout, toast]);
 
   const handleLogout = async () => {
     try {

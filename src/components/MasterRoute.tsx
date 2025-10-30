@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
+import { roleVerificationService } from '@/services/roleVerification';
 
 interface MasterRouteProps {
   children: React.ReactNode;
@@ -12,17 +12,32 @@ interface MasterRouteProps {
 
 const MasterRoute: React.FC<MasterRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const [isMasterVerified, setIsMasterVerified] = useState<boolean | null>(null);
+  const [verifying, setVerifying] = useState(true);
 
-  // 🔍 DEBUG: Logs de renderização
-  console.log('🔐 [MasterRoute] Renderizando...');
-  console.log('👤 [MasterRoute] User:', user?.email);
-  console.log('📋 [MasterRoute] Profile:', { name: profile?.name, level: profile?.user_level });
-  console.log('⏳ [MasterRoute] Loading states:', { isLoading, profileLoading });
+  // Verificação segura usando RPC
+  useEffect(() => {
+    const verifyAccess = async () => {
+      if (!user) {
+        setVerifying(false);
+        return;
+      }
 
-  // Wait for both auth and profile to load
-  if (isLoading || profileLoading || (user && !profile)) {
-    console.log('⏳ [MasterRoute] Aguardando carregamento...');
+      try {
+        const isMaster = await roleVerificationService.isMaster(user.id);
+        setIsMasterVerified(isMaster);
+      } catch (error) {
+        console.error('Erro ao verificar acesso master:', error);
+        setIsMasterVerified(false);
+      } finally {
+        setVerifying(false);
+      }
+    };
+
+    verifyAccess();
+  }, [user]);
+
+  if (isLoading || verifying) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
@@ -34,8 +49,8 @@ const MasterRoute: React.FC<MasterRouteProps> = ({ children }) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Verificar se é Master e sem tenant_id
-  if (!profile || profile.user_level !== 'master') {
+  // Verificação de nível Master usando validação segura do servidor
+  if (isMasterVerified === false) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card className="max-w-md w-full">

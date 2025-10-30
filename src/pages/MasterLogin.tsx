@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +21,33 @@ const MasterLogin: React.FC = () => {
   const [error, setError] = useState('');
   
   const { login, logout, user } = useAuth();
+  const { profile, loading: profileLoading, isMaster } = useProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect if already logged in as master
+  useEffect(() => {
+    if (!profileLoading && user && isMaster) {
+      navigate('/master-panel', { replace: true });
+    }
+  }, [user, isMaster, profileLoading, navigate]);
+
+  // Verify master level after login
+  useEffect(() => {
+    const verifyMasterAccess = async () => {
+      if (!profileLoading && user && profile && !isMaster) {
+        setError('Acesso restrito ao Master');
+        toast({
+          title: 'Acesso negado',
+          description: 'Apenas usuários Master podem acessar este painel',
+          variant: 'destructive'
+        });
+        await logout();
+      }
+    };
+    
+    verifyMasterAccess();
+  }, [user, profile, isMaster, profileLoading, logout, toast]);
 
   const handleLogout = async () => {
     try {
@@ -50,11 +76,16 @@ const MasterLogin: React.FC = () => {
         description: 'Bem-vindo ao Painel Master!',
       });
 
-      navigate('/master');
+      // Navigation will be handled by useEffect after profile loads
       
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'Erro ao fazer login');
+      toast({
+        title: 'Erro no login',
+        description: error.message || 'Falha ao autenticar',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -220,14 +251,6 @@ const MasterLogin: React.FC = () => {
                   </Button>
                 </div>
               </div>
-
-              <Alert>
-                <AlertDescription className="text-sm">
-                  <strong>Credenciais Master:</strong><br />
-                  Email: master@jttelecom.com<br />
-                  Senha: JTMaster2024!
-                </AlertDescription>
-              </Alert>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
